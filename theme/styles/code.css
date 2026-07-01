@@ -1,0 +1,34 @@
+.shiki-dark {
+  background: var(--slidev-theme-code-background) !important;
+}
+
+:not(pre) > code {
+  background: var(--slidev-theme-code-background) !important;
+}
+
+.shiki-container {
+  @apply mb-4;
+
+  .slidev-code {
+    border: 1px solid var(--slidev-code-border);
+  }
+
+  code, pre {
+    font-size: 1em;
+  }
+}
+
+:not(pre) > code:before,
+:not(pre) > code:after {
+  content: '`';
+  opacity: 0.50;
+}
+
+:not(pre) > code {
+  &:before {
+    margin-right: -0.08em;
+  }
+
+  outline: 1px solid var(--slidev-code-border);
+  @apply rounded-sm;
+}
