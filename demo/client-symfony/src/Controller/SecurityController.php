@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use Drenso\OidcBundle\OidcClientInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 class SecurityController extends AbstractController
@@ -26,6 +28,22 @@ class SecurityController extends AbstractController
         // dès qu'elle contient les paramètres 'code' et 'state', et gère tout le flow
         // (échange du code contre un token, création de la session, redirection).
         throw new \LogicException('app_login_check doit être interceptée par l\'authentificateur OIDC.');
+    }
+
+    /**
+     * Oublie la session locale, sans passer par le endpoint de fin de session du Provider.
+     *
+     * La déconnexion normale envoie un id_token_hint. Si Keycloak a redémarré, ce token
+     * a été signé par l'instance précédente : le Provider répond 400 et l'orateur se
+     * retrouve devant une page d'erreur. Ici on jette simplement la session.
+     */
+    #[Route('/session/oublier', name: 'app_session_forget')]
+    public function forgetSession(Request $request, TokenStorageInterface $tokenStorage): Response
+    {
+        $tokenStorage->setToken(null);
+        $request->getSession()->invalidate();
+
+        return $this->redirectToRoute('app_home');
     }
 
     #[Route('/logout', name: 'app_logout')]

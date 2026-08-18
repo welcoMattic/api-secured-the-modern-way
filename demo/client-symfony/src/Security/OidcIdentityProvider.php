@@ -7,16 +7,20 @@ use Drenso\OidcBundle\Model\OidcUserData;
 use Drenso\OidcBundle\Security\UserProvider\OidcUserProviderInterface;
 use Symfony\Component\Security\Core\User\OidcUser;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 
 /**
- * User provider pour le flow authorization_code côté serveur.
+ * Fournisseur d'identité pour le flow authorization_code côté serveur.
+ *
+ * Volontairement nommé autrement que le OidcUserProvider de l'API : celui de l'API
+ * mappe des rôles, celui-ci n'en mappe aucun. Deux classes homonymes aux rôles
+ * opposés, projetées l'une après l'autre, sèmeraient la confusion.
  *
  * Symfony sait VÉRIFIER les access tokens (via le token handler "oidc" dans l'API),
  * mais ne sait pas encore INITIER le flow authorization_code (cf PR symfony/symfony#64954).
  * On utilise donc drenso/symfony-oidc-bundle pour gérer le flow côté client.
  */
-class OidcUserProvider implements OidcUserProviderInterface
+class OidcIdentityProvider implements OidcUserProviderInterface
 {
     private ?OidcUserData $userData = null;
 
@@ -64,11 +68,12 @@ class OidcUserProvider implements OidcUserProviderInterface
     }
 
     /**
-     * Méthode requise par UserProviderInterface mais non utilisée par le flow OIDC.
-     * On délègue à loadOidcUser pour la cohérence.
+     * Exigée par UserProviderInterface, mais jamais appelée : l'authentificateur OIDC
+     * passe par loadOidcUser(), et refreshUser() rend l'utilisateur tel quel. Y déléguer
+     * produirait un utilisateur sans identité, puisque $userData ne serait pas renseigné.
      */
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
-        return $this->loadOidcUser($identifier);
+        throw new UnsupportedUserException(sprintf('%s ne charge un utilisateur que via loadOidcUser().', self::class));
     }
 }

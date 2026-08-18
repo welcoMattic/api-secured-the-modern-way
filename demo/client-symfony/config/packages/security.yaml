@@ -2,7 +2,7 @@ security:
     # Pas de mots de passe locaux : toute l'authentification passe par Keycloak
     providers:
         oidc:
-            id: App\Security\OidcUserProvider
+            id: App\Security\OidcIdentityProvider
 
     firewalls:
         dev:
@@ -24,5 +24,6 @@ security:
 
     access_control:
         - { path: ^/(login|logout)$, roles: PUBLIC_ACCESS }
+        - { path: ^/session/oublier$, roles: PUBLIC_ACCESS }
         - { path: ^/$, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: ROLE_USER }

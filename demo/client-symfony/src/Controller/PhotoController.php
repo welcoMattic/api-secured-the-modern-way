@@ -24,6 +24,7 @@ class PhotoController extends AbstractController
         $request->getSession()->getFlashBag()->add('api_result', [
             'status' => $result['status'],
             'body' => $result['body'],
+            'challenge' => $result['challenge'],
         ]);
 
         return $this->redirectToRoute('app_home');
@@ -32,11 +33,12 @@ class PhotoController extends AbstractController
     #[Route('/photos/create', name: 'app_photos_create', methods: ['POST'])]
     public function create(PhotoApiClient $photoApiClient, Request $request): Response
     {
-        $result = $photoApiClient->create('Demo Photo', 'https://example.com/demo.jpg');
+        $result = $photoApiClient->create('Photo créée depuis le client Symfony', 'https://example.com/symfony.jpg');
 
         $request->getSession()->getFlashBag()->add('api_result', [
             'status' => $result['status'],
             'body' => $result['body'],
+            'challenge' => $result['challenge'],
         ]);
 
         return $this->redirectToRoute('app_home');

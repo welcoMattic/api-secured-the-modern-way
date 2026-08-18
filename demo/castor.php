@@ -73,16 +73,43 @@ function start(): void
     // 6. Vite dev server pour le client SPA, en arrière-plan
     io()->text('Démarrage du serveur Vite du client SPA sur le port 5173...');
     fs()->mkdir(__DIR__.'/var');
-    // La sortie est redirigee vers un fichier : sinon le processus detache garde le tuyau
-    // ouvert et run() attend indefiniment. Le PID est celui du shell de bun.
+    // La sortie est redirigée vers un fichier : sinon le processus détaché garde le tuyau
+    // ouvert et run() attend indéfiniment. Le PID est celui du shell de bun.
     if ('000' === trim(capture('curl -s -o /dev/null --max-time 2 -w "%{http_code}" http://localhost:5173/', onFailure: '000'))) {
         run('nohup bun run dev > ../var/spa.log 2>&1 & echo $! > ../var/spa.pid', context: client_spa_context());
         sleep(3);
     } else {
-        io()->text('Vite ecoute deja sur 5173, on le laisse tranquille.');
+        io()->text('Vite écoute déjà sur 5173, on le laisse tranquille.');
     }
 
-    // 7. Affichage final avec les URLs et les comptes
+    // 7. Ne jamais annoncer le succès sans l'avoir vérifié : les server:start tolèrent
+    //    l'échec (relance sur une stack déjà lancée), donc leur code de retour ne prouve rien.
+    $services = [
+        'Keycloak' => 'http://localhost:8080/realms/photos/.well-known/openid-configuration',
+        'API' => 'http://localhost:8100/api/docs',
+        'Client Symfony' => 'http://localhost:8101/',
+        'Client SPA' => 'http://localhost:5173/',
+    ];
+    $morts = [];
+    foreach ($services as $nom => $url) {
+        $code = trim(capture('curl -s -o /dev/null --max-time 5 -w "%{http_code}" '.escapeshellarg($url), onFailure: '000'));
+        if (!str_starts_with($code, '2')) {
+            $morts[] = sprintf('%s (%s a répondu %s)', $nom, $url, $code);
+        }
+    }
+
+    if ($morts) {
+        io()->error("Ces services ne répondent pas :\n  - ".implode("\n  - ", $morts));
+        io()->note('Regardez demo/var/spa.log pour le SPA, et "castor logs:keycloak" pour Keycloak.');
+
+        throw new RuntimeException('La démo n\'est pas complètement démarrée.');
+    }
+
+    // 8. Vérifier que l'horloge du conteneur colle à celle de l'hôte : le token handler
+    //    de Symfony ne tolère AUCUNE dérive (allowedTimeDrift: 0 sur iat, nbf et exp).
+    //    Après une veille du portable, la VM Docker peut décaler et tout tomber en 401.
+    verifier_horloge();
+
     io()->success('Toute la démo est démarrée !');
     
     io()->table(
@@ -95,6 +122,29 @@ function start(): void
         ]
     );
     io()->note('Alice: PHOTOS_READ + PHOTOS_WRITE (GET/POST OK). Bob: PHOTOS_READ seul (GET OK, POST 403).');
+}
+
+/**
+ * Le token handler oidc de Symfony vérifie iat, nbf et exp avec allowedTimeDrift: 0,
+ * une valeur codée en dur dans le composant. Une seconde de décalage entre l'horloge de
+ * l'hôte et celle du conteneur Keycloak suffit donc à faire rejeter tous les tokens.
+ */
+function verifier_horloge(): void
+{
+    $conteneur = trim(capture('docker compose exec -T keycloak date +%s', context: compose_context()->withAllowFailure(), onFailure: ''));
+    if ('' === $conteneur || !ctype_digit($conteneur)) {
+        return;
+    }
+
+    $derive = abs((int) $conteneur - time());
+    if ($derive > 2) {
+        io()->warning(sprintf(
+            "L'horloge du conteneur Keycloak est décalée de %d s par rapport à l'hôte.\n".
+            "Le token handler de Symfony ne tolère aucune dérive : tous les tokens seront rejetés.\n".
+            'Relancez Docker Desktop, puis "castor restart".',
+            $derive
+        ));
+    }
 }
 
 #[AsTask(name: 'stop', description: 'Arrête toute la démo : SPA, serveurs Symfony et conteneurs Docker')]
@@ -186,10 +236,12 @@ function smoke(): void
 
     $allPassed = true;
 
-    // Pre-vol : sans Keycloak ni API, tous les tests echouent pour la meme raison.
+    verifier_horloge();
+
+    // Pré-vol : sans Keycloak ni API, tous les tests échouent pour la même raison.
     foreach (['Keycloak' => $keycloakUrl.'/realms/'.$realm.'/.well-known/openid-configuration', 'API' => $apiUrl.'/api/docs'] as $name => $url) {
         if ('000' === trim(capture('curl -s -o /dev/null --max-time 5 -w "%{http_code}" '.escapeshellarg($url), onFailure: '000'))) {
-            io()->error(sprintf('%s ne repond pas sur %s. Lancez "castor start".', $name, $url));
+            io()->error(sprintf('%s ne répond pas sur %s. Lancez "castor start".', $name, $url));
             exit(1);
         }
     }
@@ -210,7 +262,7 @@ function smoke(): void
     };
 
     // Fonction helper pour tester une URL.
-    // Un POST doit porter un corps JSON-LD, sinon l'API repond 400/415 et jamais 201/403.
+    // Un POST doit porter un corps JSON-LD, sinon l'API répond 400/415 et jamais 201/403.
     $testUrl = function ($url, $token = null, $method = 'GET') {
         $cmd = sprintf('curl -s -o /dev/null -w "%%{http_code}" -X %s %s', $method, escapeshellarg($url));
         if ('POST' === $method) {
@@ -221,8 +273,8 @@ function smoke(): void
             $cmd .= ' -H '.escapeshellarg('Authorization: Bearer '.$token);
         }
 
-        // onFailure : curl sort en erreur si rien n'ecoute. On veut un FAIL lisible,
-        // pas une stack trace de castor au milieu d'une demo.
+        // onFailure : curl sort en erreur si rien n'écoute. On veut un FAIL lisible,
+        // pas une stack trace de castor au milieu d'une démo.
         return trim(capture($cmd.' --max-time 5', onFailure: '000'));
     };
 
@@ -243,7 +295,7 @@ function smoke(): void
     $bobToken = $getToken('bob', 'bob');
 
     if (!isset($aliceToken['access_token'], $bobToken['access_token'])) {
-        io()->error('Keycloak n\'a pas delivre de token. Le realm "photos" est-il bien importe ?');
+        io()->error('Keycloak n\'a pas délivré de token. Le realm "photos" est-il bien importé ?');
         exit(1);
     }
 

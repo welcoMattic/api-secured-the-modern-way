@@ -174,5 +174,9 @@
         }
       ]
     }
-  ]
+  ],
+  "accessTokenLifespan": 3600,
+  "ssoSessionIdleTimeout": 7200,
+  "ssoSessionMaxLifespan": 36000,
+  "loginTheme": "photos"
 }
