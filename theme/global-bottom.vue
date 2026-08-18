@@ -12,7 +12,7 @@
     >
       {{ $slidev.nav.currentPage }}
     </div>
-    <div class="flex items-center">
+    <div class="flex items-center" v-if="$slidev.nav.currentPage !== 1">
       <img src="/apipcon.svg" alt="API Platform Con 2026" class="h-8 opacity-80" />
     </div>
   </footer>

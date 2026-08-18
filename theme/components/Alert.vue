@@ -93,34 +93,34 @@ const props = withDefaults(defineProps<{
 
 /* Info Alert */
 .alert--info {
-  background-color: rgba(14, 165, 233, 0.1);
-  border-left: 4px solid var(--slidev-theme-accents-blue);
-  color: var(--slidev-theme-accents-blue);
+  background-color: #e8f2fc;
+  border-left: 4px solid #2b8ad9;
+  color: #0b3a63;
 }
 
 .alert--info .alert__icon {
-  color: var(--slidev-theme-accents-blue);
+  color: #2b8ad9;
 }
 
 /* Warning Alert */
 .alert--warning {
-  background-color: rgba(234, 179, 8, 0.1);
-  border-left: 4px solid var(--slidev-theme-accents-yellow);
-  color: var(--slidev-theme-accents-yellow);
+  background-color: #fbf3da;
+  border-left: 4px solid #c98a00;
+  color: #684900;
 }
 
 .alert--warning .alert__icon {
-  color: var(--slidev-theme-accents-yellow);
+  color: #c98a00;
 }
 
 /* Error Alert */
 .alert--error {
-  background-color: rgba(239, 68, 68, 0.1);
-  border-left: 4px solid var(--slidev-theme-accents-red);
-  color: var(--slidev-theme-accents-red);
+  background-color: #fce9e8;
+  border-left: 4px solid #d83533;
+  color: #7a1e1c;
 }
 
 .alert--error .alert__icon {
-  color: var(--slidev-theme-accents-red);
+  color: #d83533;
 }
 </style>

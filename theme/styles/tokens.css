@@ -1,0 +1,61 @@
+/* =====================================================================
+   Design tokens - reusable, brand-agnostic foundation (LIGHT theme).
+   Re-theming a future talk = override these vars + swap the logo.
+   Brand-specific colors stay in slides.md themeConfig / brand layer.
+   ===================================================================== */
+:root {
+  /* ----- Surfaces & text (light base) ----- */
+  --c-bg: #ffffff;          /* slide background */
+  --c-surface: #f6f8fb;     /* subtle raised surface (code, panels) */
+  --c-fg: #0e131f;          /* primary text */
+  --c-muted: #57637a;       /* secondary text */
+  --c-border: #dce3ec;      /* hairline border */
+  --c-border-strong: #c2ccda;
+
+  /* ----- Harmonious accent ramp: teal -> magenta -----
+     -a-N     : solid hue (text / icon on light, ~600 weight)
+     -a-N-rgb : the same as "r,g,b" for rgba() tints        */
+  --a-1: #0d9488;  --a-1-rgb: 13,148,136;   /* teal    */
+  --a-2: #0891b2;  --a-2-rgb: 8,145,178;    /* cyan    */
+  --a-3: #0284c7;  --a-3-rgb: 2,132,199;    /* sky     */
+  --a-4: #4f46e5;  --a-4-rgb: 79,70,229;    /* indigo  */
+  --a-5: #7c3aed;  --a-5-rgb: 124,58,237;   /* violet  */
+  --a-6: #a21caf;  --a-6-rgb: 162,28,175;   /* fuchsia */
+  --a-7: #c32186;  --a-7-rgb: 195,33,134;   /* magenta (brand) */
+
+  /* semantic accents */
+  --c-accent: var(--a-7);      /* primary brand accent */
+  --c-accent-2: var(--a-1);    /* secondary accent */
+
+  /* ----- Emoji fallback -----
+     Pinned explicitly in every font stack. Without it the browser paints an
+     emoji with a substitute font first, then re-resolves to the color emoji
+     font, which shows up as a visible size jump on slide entry. */
+  --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla";
+
+  /* ----- Type scale ----- */
+  --fs-eyebrow: 0.8rem;
+  --fs-caption: 0.9rem;
+  --fs-lead: 1.35rem;
+
+  /* ----- Spacing scale ----- */
+  --sp-2: .5rem; --sp-3: .75rem; --sp-4: 1rem; --sp-6: 1.5rem; --sp-8: 2rem; --sp-12: 3rem;
+
+  /* ----- Radius / elevation ----- */
+  --radius: .85rem;
+  --radius-lg: 1.25rem;
+  --radius-pill: 999px;
+  --shadow-card: 0 1px 2px rgba(14,19,31,.05), 0 8px 24px rgba(14,19,31,.06);
+}
+
+/* ----- per-section accent (color-coded wayfinding) -----
+   Set as a slide `class:` in frontmatter. Drives the title tick,
+   section index and single-accent elements of that section.        */
+.sec-authz { --sec: var(--a-1); }   /* Autorisation    -> teal    */
+.sec-authn { --sec: var(--a-4); }   /* Authentification-> indigo  */
+.sec-rate  { --sec: var(--a-7); }   /* Rate Limiting   -> magenta */
+.sec-gw    { --sec: var(--a-5); }   /* API Gateway     -> violet  */
+
+/* ----- shared utilities ----- */
+.ds-lead { font-size: var(--fs-lead); font-weight: 600; margin-top: var(--sp-6); }
+.ds-note { font-size: var(--fs-caption); color: var(--c-muted); }

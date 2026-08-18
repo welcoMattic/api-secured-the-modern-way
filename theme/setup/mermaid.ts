@@ -5,7 +5,18 @@ export default defineMermaidSetup(() => {
   // eslint-disable-next-line prefer-const
   let injection_return: MermaidOptions = {
     theme: 'base',
+    // Mermaid measures text to size its boxes. It must measure with the same
+    // font the slide actually renders, otherwise labels drift out of the boxes.
+    fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+    sequence: {
+      mirrorActors: false,
+      useMaxWidth: true,
+      diagramMarginY: 4,
+      boxMargin: 6,
+      messageMargin: 28,
+    },
     themeVariables: {
+      fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
       // General theme variables - light background friendly
       noteBkgColor: "#FEF3C7",
       noteTextColor: "#92400E",

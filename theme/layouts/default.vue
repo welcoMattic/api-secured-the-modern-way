@@ -12,7 +12,7 @@ const style = computed(() => handleBackground(props.background, true));
 
 <template>
   <div class="slidev-layout default" :style="style">
-    <div class="my-auto h-full">
+    <div class="h-full flex flex-col justify-center">
       <slot />
     </div>
   </div>
