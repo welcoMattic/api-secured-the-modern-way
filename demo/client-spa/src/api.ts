@@ -1,6 +1,13 @@
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
 
-export async function callApi(method: 'GET' | 'POST', token: string): Promise<{ status: number; body: string }> {
+export interface ApiResult {
+  status: number
+  body: string
+  /** Sur un 401, l'API n'a pas de corps : elle explique le refus dans cet en-tête. */
+  challenge: string | null
+}
+
+export async function callApi(method: 'GET' | 'POST', token: string): Promise<ApiResult> {
   const url = `${apiBaseUrl}/api/photos`
   const headers: Record<string, string> = { Authorization: `Bearer ${token}` }
 
@@ -8,16 +15,27 @@ export async function callApi(method: 'GET' | 'POST', token: string): Promise<{ 
     headers['Content-Type'] = 'application/ld+json'
   }
 
-  const response = await fetch(url, {
-    method,
-    headers,
-    body: method === 'POST' ? JSON.stringify({ title: 'Nouvelle photo', url: 'https://example.com/photo.jpg' }) : undefined,
-  })
+  let response: Response
+  try {
+    response = await fetch(url, {
+      method,
+      headers,
+      body: method === 'POST' ? JSON.stringify({ title: 'Nouvelle photo', url: 'https://example.com/photo.jpg' }) : undefined,
+    })
+  } catch {
+    // API injoignable : fetch rejette, il n'y a pas de statut HTTP. Sans ce filet,
+    // l'interface resterait figée sur "Appel en cours..." devant la salle.
+    return { status: 0, body: `Aucune réponse de ${apiBaseUrl}. L'API est-elle démarrée ?`, challenge: null }
+  }
 
-  return { status: response.status, body: await response.text() }
+  return {
+    status: response.status,
+    body: await response.text(),
+    challenge: response.headers.get('www-authenticate'),
+  }
 }
 
-// Decode le payload d'un JWT pour l'afficher. Aucune verification : c'est l'API qui verifie.
+// Décode le payload d'un JWT pour l'afficher. Aucune vérification ici : c'est l'API qui vérifie.
 export function decodeJwt(token: string): unknown {
   const [, payload] = token.split('.')
   const base64 = payload.replace(/-/g, '+').replace(/_/g, '/').padEnd(payload.length + ((4 - (payload.length % 4)) % 4), '=')

@@ -1,6 +1,8 @@
-/* Design tokens from the deck's design system */
+/* =====================================================================
+   Tokens repris tels quels de theme/styles/tokens.css (deck Slidev).
+   Règle du design system : fond clair, jamais sombre.
+   ===================================================================== */
 :root {
-  /* Surfaces & text (light base) */
   --c-bg: #ffffff;
   --c-surface: #f6f8fb;
   --c-fg: #0e131f;
@@ -8,432 +10,450 @@
   --c-border: #dce3ec;
   --c-border-strong: #c2ccda;
 
-  /* Accent ramp */
   --a-1: #0d9488;  /* teal    */
   --a-4: #4f46e5;  /* indigo  */
   --a-7: #c32186;  /* magenta */
 
-  /* Semantic */
-  --sec: var(--a-4);   /* authentication section: indigo */
-  --ok:  var(--a-1);   /* 2xx: teal */
-  --ko:  var(--a-7);   /* 4xx: magenta */
+  /* La démo illustre l'AUTHENTIFICATION : indigo, comme la section du deck. */
+  --sec: var(--a-4);
+  --ok: var(--a-1);
+  --ko: var(--a-7);
 
-  /* Radius */
   --radius: .85rem;
   --radius-lg: 1.25rem;
   --radius-pill: 999px;
+  --shadow-card: 0 1px 2px rgba(14, 19, 31, .05), 0 8px 24px rgba(14, 19, 31, .06);
 
-  /* Shadow */
-  --shadow-card: 0 1px 2px rgba(14,19,31,.05), 0 8px 24px rgba(14,19,31,.06);
+  --font-sans: "Inter Variable", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Sora Variable", Sora, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Fira Code", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-* {
-  box-sizing: border-box;
-}
+*, *::before, *::after { box-sizing: border-box; }
 
-/* THE hard constraint: the page never scrolls */
-html, body {
-  height: 100%;
-}
+/* `.hero` et `.workbench` reçoivent un display en grille ou en flex ; sans ce
+   garde-fou, cette déclaration l'emporterait sur le display:none de [hidden]
+   et les deux états s'afficheraient en même temps. */
+[hidden] { display: none !important; }
+
+/* =====================================================================
+   LA loi de la page : elle ne défile jamais.
+   La chaîne min-height:0 doit rester complète de body jusqu'aux zones
+   scrollables, sinon overflow:hidden coupe le contenu au lieu de le borner.
+   ===================================================================== */
+html, body { height: 100%; }
 
 body {
   margin: 0;
-  padding: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 1fr;
   background: var(--c-bg);
   color: var(--c-fg);
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: clamp(14px, 1.2vw, 16px);
-  line-height: 1.6;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  overflow: hidden;
+  font-family: var(--font-sans);
+  font-size: clamp(15px, 1.05vw, 18px);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
 }
 
 #app {
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-  padding: clamp(1.5rem, 3vw, 2.5rem);
+  min-height: 0;
   display: grid;
-  grid-template-rows: auto 1fr;
-  gap: clamp(1rem, 1.5vw, 1.5rem);
+  grid-template-rows: 1fr;
+  width: 100%;
+  max-width: 1760px;
+  margin: 0 auto;
+  padding: clamp(1.25rem, 2.2vw, 2.25rem);
 }
 
-/* ==============================================================
-   LOGGED OUT: centred hero
-   ============================================================== */
-.logged-out {
+code { font-family: var(--font-mono); font-size: .95em; }
+
+/* Le tick d'accent du deck, repris sous les titres. */
+.tick::after {
+  content: "";
+  display: block;
+  width: 2.75rem;
+  height: 4px;
+  margin: .6rem 0 0;
+  border-radius: var(--radius-pill);
+  background: var(--sec);
+}
+
+.hero .tick::after { margin-inline: auto; }
+
+/* =====================================================================
+   État déconnecté
+   ===================================================================== */
+.hero {
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  place-self: center;
-  max-width: 600px;
+  gap: .35rem;
 }
 
-.logged-out h1 {
-  font-family: Sora, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: clamp(2rem, 4vw, 2.75rem);
-  font-weight: 600;
-  color: var(--c-fg);
-  margin: 0 0 .5rem;
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 4.2vw, 3.4rem);
+  font-weight: 700;
+  letter-spacing: -.02em;
+  margin: 0;
 }
 
-.logged-out .eyebrow {
-  font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: clamp(0.9rem, 1.4vw, 1.1rem);
+.hero .eyebrow {
+  font-family: var(--font-mono);
+  font-size: clamp(.95rem, 1.4vw, 1.2rem);
+  color: var(--sec);
+  margin: .35rem 0 2rem;
+}
+
+.hero .note {
+  margin: 2rem 0 0;
   color: var(--c-muted);
-  margin: 0 0 1.5rem;
+  font-size: clamp(1rem, 1.25vw, 1.15rem);
 }
 
-.logged-out .note {
-  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
-  color: var(--c-muted);
-  margin: 1.5rem 0 0 0;
-}
-
-/* Primary button */
 .btn-primary {
-  font-family: Sora, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: clamp(1rem, 1.8vw, 1.25rem);
-  font-weight: 500;
-  padding: clamp(0.75rem, 1.2vw, 1rem) clamp(1.5rem, 2.5vw, 2rem);
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  font-weight: 600;
+  padding: clamp(.8rem, 1.2vw, 1.05rem) clamp(1.6rem, 2.4vw, 2.2rem);
   background: var(--sec);
   color: #fff;
   border: none;
   border-radius: var(--radius);
   cursor: pointer;
-  transition: opacity 0.2s;
+  box-shadow: var(--shadow-card);
+  transition: filter .15s, transform .15s;
 }
 
-.btn-primary:hover {
-  opacity: 0.9;
+.btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+.btn-secondary {
+  font-family: var(--font-sans);
+  font-size: clamp(.85rem, 1.1vw, .95rem);
+  padding: .45rem .9rem;
+  background: transparent;
+  color: var(--c-muted);
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
 }
 
-/* ==============================================================
-   LOGGED IN: topbar + main area
-   ============================================================== */
-.logged-in {
+.btn-secondary:hover { color: var(--c-fg); border-color: var(--sec); }
+
+/* =====================================================================
+   État connecté : barre du haut + trois cartes
+   ===================================================================== */
+.workbench {
+  min-height: 0;
   display: grid;
   grid-template-rows: auto 1fr;
-  gap: clamp(1rem, 1.5vw, 1.5rem);
-  width: 100%;
+  gap: clamp(1rem, 1.6vw, 1.6rem);
 }
 
-/* Topbar */
 .topbar {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
   gap: 1rem;
 }
 
-.topbar-left h1 {
-  font-family: Sora, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: clamp(1.5rem, 2.5vw, 1.85rem);
-  font-weight: 600;
-  color: var(--c-fg);
+.topbar h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.1vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: -.015em;
   margin: 0;
 }
 
-.topbar-left .eyebrow {
-  font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: clamp(0.85rem, 1.2vw, 1rem);
-  color: var(--c-muted);
+.topbar .eyebrow {
+  font-family: var(--font-mono);
+  font-size: clamp(.8rem, 1.05vw, .95rem);
+  color: var(--sec);
+  margin: .2rem 0 0;
 }
 
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: .75rem;
 }
 
 .user-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.75rem;
-  background: var(--c-surface);
+  padding: .4rem 1rem;
   border-radius: var(--radius-pill);
-  font-size: clamp(0.9rem, 1.2vw, 1rem);
-}
-
-.user-pill strong {
+  background: rgba(79, 70, 229, .1);
+  color: var(--sec);
   font-weight: 600;
-  color: var(--c-fg);
+  font-size: clamp(.95rem, 1.25vw, 1.1rem);
 }
 
-.btn-secondary {
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: clamp(0.85rem, 1.1vw, 0.95rem);
-  padding: 0.4rem 0.75rem;
-  background: transparent;
-  color: var(--c-muted);
-  border: 1px solid var(--c-border);
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-secondary:hover {
-  background: var(--c-surface);
-  color: var(--c-fg);
-}
-
-/* Main area - three column grid */
 .main-area {
+  min-height: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr 0.9fr;
-  gap: clamp(1rem, 1.5vw, 1.25rem);
-  width: 100%;
+  grid-template-columns: 1fr 1fr .95fr;
+  gap: clamp(.9rem, 1.4vw, 1.4rem);
 }
 
-/* ==============================================================
-   CARDS
-   ============================================================== */
+/* =====================================================================
+   Cartes
+   ===================================================================== */
 .card {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
   background: var(--c-surface);
+  border: 1px solid var(--c-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--c-border);
+  overflow: hidden;
 }
 
-.card-header {
-  padding: clamp(1rem, 1.5vw, 1.25rem);
+.card-head {
+  padding: clamp(.85rem, 1.2vw, 1.15rem) clamp(1rem, 1.4vw, 1.35rem);
   border-bottom: 1px solid var(--c-border);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  column-gap: .75rem;
 }
 
-.card-header h2 {
-  font-family: Sora, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: clamp(1.1rem, 1.5vw, 1.25rem);
-  font-weight: 600;
-  color: var(--c-fg);
-  margin: 0 0 0.25rem;
-}
-
-.card-header .subtitle {
-  font-size: clamp(0.8rem, 1.1vw, 0.9rem);
-  color: var(--c-muted);
+.card-head h2 {
+  grid-column: 1;
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 1.4vw, 1.35rem);
+  font-weight: 700;
   margin: 0;
+}
+
+.card-head .subtitle {
+  grid-column: 1;
+  margin: .15rem 0 0;
+  color: var(--c-muted);
+  font-size: clamp(.8rem, 1.02vw, .92rem);
 }
 
 .card-body {
-  flex: 1;
-  padding: clamp(1rem, 1.5vw, 1.25rem);
+  min-height: 0;
   display: grid;
   grid-template-rows: auto 1fr;
-  gap: clamp(0.75rem, 1vw, 1rem);
+  gap: clamp(.7rem, 1vw, 1rem);
+  padding: clamp(.85rem, 1.2vw, 1.15rem) clamp(1rem, 1.4vw, 1.35rem) clamp(1rem, 1.4vw, 1.35rem);
+}
+
+/* Claims saillants : ce que l'orateur montre du doigt. */
+.claims {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: .85rem;
+  row-gap: .3rem;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: clamp(.88rem, 1.08vw, 1rem);
+}
+
+.claims dt {
+  color: var(--c-muted);
+  white-space: nowrap;
+}
+
+.claims dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.claims dd.is-emphasised {
+  color: var(--sec);
+  font-weight: 700;
+}
+
+/* Le JSON complet défile DANS la carte, jamais la page. */
+.json {
   min-height: 0;
-}
-
-/* Key-claims block */
-.key-claims {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.key-claims .row {
-  display: flex;
-  gap: 0.75rem;
-  font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: clamp(0.85rem, 1.1vw, 0.95rem);
-}
-
-.key-claims .row .key {
+  overflow: auto;
+  margin: 0;
+  padding: .7rem .85rem;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: clamp(.72rem, .84vw, .88rem);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   color: var(--c-muted);
 }
 
-.key-claims .row .value {
-  color: var(--c-fg);
-}
-
-.key-claims .row .value.sec-emph {
-  color: var(--sec);
-  font-weight: 600;
-}
-
-/* Scrollable JSON region */
-.json-scroll {
-  min-height: 0;
-  overflow: auto;
+/* Durée de vie restante de l'access token. */
+.ttl {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  padding: .25rem .7rem;
+  border-radius: var(--radius-pill);
   background: var(--c-bg);
-  border-radius: var(--radius);
-  padding: 0.75rem;
-  font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: clamp(0.75rem, 0.95vw, 0.85rem);
-  line-height: 1.5;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  color: var(--c-fg);
+  border: 1px solid var(--c-border);
+  font-family: var(--font-mono);
+  font-size: clamp(.72rem, .88vw, .82rem);
+  color: var(--c-muted);
+  white-space: nowrap;
 }
 
-/* ==============================================================
-   ACTION CARD (Card 3)
-   ============================================================== */
-.action-buttons {
+.ttl.is-warning { color: var(--ko); border-color: var(--ko); }
+.ttl.is-expired { color: #fff; background: var(--ko); border-color: var(--ko); }
+
+/* =====================================================================
+   Carte d'appel à l'API
+   ===================================================================== */
+.actions {
   display: flex;
   flex-direction: column;
-  gap: clamp(0.5rem, 0.8vw, 0.75rem);
+  gap: clamp(.5rem, .75vw, .7rem);
 }
 
 .api-btn {
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: clamp(0.9rem, 1.2vw, 1rem);
-  padding: clamp(0.8rem, 1.2vw, 1rem) 1rem;
-  background: var(--c-surface);
+  font-family: var(--font-sans);
+  font-size: clamp(.92rem, 1.15vw, 1.05rem);
+  text-align: left;
+  padding: clamp(.6rem, .9vw, .8rem) clamp(.8rem, 1.1vw, 1rem);
+  background: var(--c-bg);
   color: var(--c-fg);
-  border: 2px solid var(--c-border);
+  border: 1.5px solid var(--c-border-strong);
   border-radius: var(--radius);
   cursor: pointer;
-  transition: all 0.2s;
-  text-align: left;
+  transition: border-color .15s, background .15s, transform .15s;
 }
 
 .api-btn:hover {
-  background: var(--c-bg);
-  border-color: var(--c-border-strong);
+  border-color: var(--sec);
+  transform: translateY(-1px);
 }
 
-/* Counter-example button: visually marked as deliberate refusal */
-.api-btn.ko-btn {
+.api-btn small {
+  display: block;
+  margin-top: .15rem;
+  font-size: .78em;
+  color: var(--c-muted);
+}
+
+/* Le contre-exemple : un refus attendu, pas une panne. */
+.api-btn.is-counter {
   border-color: var(--ko);
   color: var(--ko);
-  background: rgba(195, 33, 134, 0.05);
+  background: rgba(195, 33, 134, .05);
 }
 
-.api-btn.ko-btn:hover {
-  background: rgba(195, 33, 134, 0.1);
-  border-color: var(--ko);
-}
+.api-btn.is-counter small { color: var(--ko); opacity: .8; }
+.api-btn.is-counter:hover { background: rgba(195, 33, 134, .1); border-color: var(--ko); }
 
-#clear-btn {
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: clamp(0.8rem, 1.05vw, 0.9rem);
-  padding: 0.5rem 0.75rem;
-  background: transparent;
-  color: var(--c-muted);
-  border: none;
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: color 0.2s;
-  text-align: left;
-}
-
-#clear-btn:hover {
-  color: var(--c-fg);
-  background: var(--c-surface);
-}
-
-/* Response area */
-.response-header {
+/* Le nombre d'enfants varie (statut, challenge, indice, corps). Le flex les
+   dimensionne tous automatiquement, et seul le corps absorbe la place restante
+   puis défile : la carte ne grandit jamais. */
+.response {
+  min-height: 0;
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: clamp(2rem, 3vw, 2.75rem);
-  font-weight: 600;
-  margin: 0 0 0.75rem;
+  flex-direction: column;
+  gap: .6rem;
 }
 
-.response-header .status-label {
-  font-size: clamp(1rem, 1.5vw, 1.15rem);
-  font-weight: 400;
+.response > .response-body { flex: 1; min-height: 0; }
+
+.response-hint {
+  margin: 0;
+  padding: .5rem .7rem;
+  border-radius: var(--radius);
+  background: rgba(79, 70, 229, .08);
+  border-left: 3px solid var(--sec);
   color: var(--c-fg);
+  font-size: clamp(.8rem, .98vw, .92rem);
+}
+
+.link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sec);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.response-challenge {
+  margin: 0;
+  padding: .5rem .7rem;
+  border-radius: var(--radius);
+  background: rgba(195, 33, 134, .07);
+  color: var(--ko);
+  font-family: var(--font-mono);
+  font-size: clamp(.72rem, .84vw, .84rem);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.response-idle {
+  margin: 0;
+  align-self: start;
+  color: var(--c-muted);
+  font-size: clamp(.85rem, 1.05vw, .95rem);
+  font-style: italic;
+}
+
+.response-head {
+  display: flex;
+  align-items: baseline;
+  gap: .7rem;
+}
+
+.status-chip {
+  font-family: var(--font-mono);
+  font-size: clamp(2.2rem, 3.2vw, 3.2rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.02em;
+}
+
+.status-chip.is-ok { color: var(--ok); }
+.status-chip.is-ko { color: var(--ko); }
+
+.status-label {
+  font-size: clamp(.9rem, 1.15vw, 1.05rem);
+  color: var(--c-muted);
 }
 
 .response-body {
-  margin: 0;
   min-height: 0;
   overflow: auto;
-  font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: clamp(0.75rem, 0.95vw, 0.85rem);
+  margin: 0;
+  padding: .7rem .85rem;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: clamp(.72rem, .84vw, .88rem);
   line-height: 1.5;
   white-space: pre-wrap;
-  word-wrap: break-word;
-  color: var(--c-fg);
+  overflow-wrap: anywhere;
 }
 
-/* ==============================================================
-   HIDE EMPTY PANELS
-   ============================================================== */
-#auth:empty,
-#user:empty,
-#actions:empty,
-#id-token:empty,
-#access-token:empty,
-#response:empty {
-  display: none;
+/* =====================================================================
+   Repli pour une fenêtre étroite (poste de travail, pas la projection).
+   Le seuil est bas exprès : à 1280 de large, on veut les trois colonnes.
+   ===================================================================== */
+@media (max-width: 1100px) {
+  .main-area { grid-template-columns: 1fr 1fr; }
+  .main-area .card:last-child { grid-column: span 2; }
 }
 
-/* ==============================================================
-   RESPONSIVE
-   ============================================================== */
-@media (max-width: 1280px) {
-  .main-area {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .main-area .card:last-child {
-    grid-column: span 2;
-  }
+@media (max-width: 760px) {
+  .main-area { grid-template-columns: 1fr; }
+  .main-area .card:last-child { grid-column: auto; }
 }
-
-@media (max-width: 1024px) {
-  .main-area {
-    grid-template-columns: 1fr;
-  }
-
-  .main-area .card:last-child {
-    grid-column: auto;
-  }
-
-  .action-buttons {
-    gap: 0.75rem;
-  }
-
-  .api-btn {
-    padding: 1rem;
-  }
-
-  .topbar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .topbar-right {
-    width: 100%;
-    justify-content: space-between;
-  }
-}
-
-@media (max-width: 768px) {
-  body {
-    padding: 1rem;
-  }
-
-  #app {
-    padding: 1rem;
-  }
-
-  .logged-out h1 {
-    font-size: 1.75rem;
-  }
-
-  .main-area {
-    gap: 1rem;
-  }
-
-  .card-body {
-    gap: 0.75rem;
-  }
-
-  .api-btn {
-    font-size: 0.95rem;
-  }
-}
-

@@ -1,3 +1,7 @@
+// Polices du deck, auto-hébergées : la démo doit rester identique hors ligne,
+// le wifi d'une salle de conférence n'est pas une dépendance acceptable.
+import '@fontsource-variable/inter'
+import '@fontsource-variable/sora'
 import './style.css'
 import type { User } from 'oidc-client-ts'
 import { userManager } from './oidc'
@@ -13,7 +17,7 @@ const accessJson = document.getElementById('access-json') as HTMLElement
 const accessTtl = document.getElementById('access-ttl') as HTMLElement
 const responseBox = document.getElementById('response') as HTMLElement
 
-// Les écouteurs sont posés UNE fois, sur des noeuds qui vivent dans index.html.
+// Les écouteurs sont posés UNE fois, sur des nœuds qui vivent dans index.html.
 // Les rattacher à chaque rendu déclencherait deux redirections par clic.
 document.getElementById('login-btn')!.addEventListener('click', () => {
   void userManager.signinRedirect()
@@ -82,8 +86,8 @@ function render(user: User | null): void {
       const method = button.dataset.method as 'GET' | 'POST'
       const token = button.dataset.token === 'id' ? idToken : accessToken
       renderPending()
-      const { status, body } = await callApi(method, token)
-      renderResponse(status, body)
+      const { status, body, challenge } = await callApi(method, token)
+      renderResponse(status, body, challenge, button.dataset.token === 'id')
     }
   }
 }
@@ -139,17 +143,42 @@ function renderPending(): void {
   responseBox.replaceChildren(element('p', 'response-idle', 'Appel en cours...'))
 }
 
-function renderResponse(status: number, body: string): void {
+function renderResponse(status: number, body: string, challenge: string | null, usedIdToken: boolean): void {
   const ok = status >= 200 && status < 300
+  const injoignable = 0 === status
 
-  const chip = element('span', 'status-chip', String(status))
+  const chip = element('span', 'status-chip', injoignable ? '!' : String(status))
   chip.classList.add(ok ? 'is-ok' : 'is-ko')
 
   const header = document.createElement('div')
   header.className = 'response-head'
-  header.append(chip, element('span', 'status-label', ok ? 'OK' : "refusé par l'API"))
+  const label = injoignable ? 'API injoignable' : ok ? 'OK' : "refusé par l'API"
+  header.append(chip, element('span', 'status-label', label))
 
-  responseBox.replaceChildren(header, element('pre', 'response-body', readable(body)))
+  const nodes: HTMLElement[] = [header]
+  // Un 401 n'a pas de corps : tout est dans l'en-tête WWW-Authenticate.
+  if (challenge) {
+    nodes.push(element('p', 'response-challenge', `WWW-Authenticate: ${challenge}`))
+  }
+  // Un 401 sur l'access token, alors qu'on se croit connecté : le token n'est plus
+  // vérifiable. Cas classique en démo, quand Keycloak a redémarré et régénéré ses clés.
+  // On ne dit rien pour le bouton ID token : là, le 401 est justement la démonstration.
+  if (401 === status && !usedIdToken) {
+    const hint = element('p', 'response-hint', "Ce token n'est plus accepté : le Provider a sans doute redémarré. ")
+    const reset = document.createElement('button')
+    reset.type = 'button'
+    reset.className = 'link-btn'
+    reset.textContent = 'Oublier la session'
+    // Surtout pas signoutRedirect() ici : elle enverrait un id_token_hint que le
+    // Provider redémarré ne sait plus vérifier, et répondrait 400.
+    reset.addEventListener('click', () => {
+      void userManager.removeUser().then(() => render(null))
+    })
+    hint.append(reset, document.createTextNode(', puis se reconnecter.'))
+    nodes.push(hint)
+  }
+  nodes.push(element('pre', 'response-body', readable(body)))
+  responseBox.replaceChildren(...nodes)
 }
 
 /**
