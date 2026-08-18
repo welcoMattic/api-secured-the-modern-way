@@ -182,6 +182,14 @@ function smoke(): void
 
     $allPassed = true;
 
+    // Pre-vol : sans Keycloak ni API, tous les tests echouent pour la meme raison.
+    foreach (['Keycloak' => $keycloakUrl.'/realms/'.$realm.'/.well-known/openid-configuration', 'API' => $apiUrl.'/api/docs'] as $name => $url) {
+        if ('000' === trim(capture('curl -s -o /dev/null --max-time 5 -w "%{http_code}" '.escapeshellarg($url), onFailure: '000'))) {
+            io()->error(sprintf('%s ne repond pas sur %s. Lancez "castor start".', $name, $url));
+            exit(1);
+        }
+    }
+
     // Fonction helper pour obtenir un token
     $getToken = function ($username, $password) use ($clientId, $realm, $keycloakUrl) {
         $cmd = sprintf(
@@ -209,7 +217,9 @@ function smoke(): void
             $cmd .= ' -H '.escapeshellarg('Authorization: Bearer '.$token);
         }
 
-        return trim(capture($cmd));
+        // onFailure : curl sort en erreur si rien n'ecoute. On veut un FAIL lisible,
+        // pas une stack trace de castor au milieu d'une demo.
+        return trim(capture($cmd.' --max-time 5', onFailure: '000'));
     };
 
     // 1. no token -> 401
@@ -227,6 +237,11 @@ function smoke(): void
     // Obtenir les tokens
     $aliceToken = $getToken('alice', 'alice');
     $bobToken = $getToken('bob', 'bob');
+
+    if (!isset($aliceToken['access_token'], $bobToken['access_token'])) {
+        io()->error('Keycloak n\'a pas delivre de token. Le realm "photos" est-il bien importe ?');
+        exit(1);
+    }
 
     // 3. alice GET /api/photos -> 200
     $response = $testUrl($apiUrl . '/api/photos', $aliceToken['access_token'], 'GET');
