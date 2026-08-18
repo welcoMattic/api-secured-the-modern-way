@@ -1,0 +1,56 @@
+name: Déployer les slides sur GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Permissions requises par l'action de déploiement Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un seul déploiement à la fois, sans annuler celui en cours.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Installer les dépendances
+        run: bun install --frozen-lockfile
+
+      # `download: true` dans slides.md déclenche un export PDF pendant le build,
+      # qui a besoin d'un vrai navigateur. Sans ça, le build échoue.
+      - name: Installer Chromium pour l'export PDF
+        run: bunx playwright install --with-deps chromium
+
+      # Le site est servi depuis https://<user>.github.io/<repo>/, donc il faut
+      # un base path. Il est dérivé du nom du dépôt, rien à coder en dur.
+      - name: Construire le site
+        run: bun run slidev build --base /${{ github.event.repository.name }}/
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    name: Déployer
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
