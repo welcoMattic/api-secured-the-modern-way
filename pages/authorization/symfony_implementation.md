@@ -193,7 +193,7 @@ layout: statement
 class: sec-authz
 ---
 
-## Vous maintenez un serveur d'autorisation
+# Vous maintenez un serveur d'autorisation
 
 C'est un **produit à part entière**. <br>
 Et il tombe en même temps que votre API.
