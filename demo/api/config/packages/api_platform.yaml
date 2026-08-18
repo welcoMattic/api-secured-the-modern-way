@@ -1,5 +1,6 @@
 api_platform:
-    title: 'Hello API Platform'
+    title: 'API Photos'
+    description: "Resource server de démonstration. Il ne connaît aucun compte : il vérifie les access tokens émis par Keycloak."
     version: 1.0.0
     formats:
         jsonld:

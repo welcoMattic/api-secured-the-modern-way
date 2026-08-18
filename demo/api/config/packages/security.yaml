@@ -1,6 +1,6 @@
 security:
     providers:
-        # OIDC n'a aucune notion de role : ce provider fait le mapping des claims vers des ROLE_*
+        # OIDC n'a aucune notion de rôle : ce provider mappe les claims vers des ROLE_*
         oidc:
             id: App\Security\OidcUserProvider
 
@@ -14,7 +14,7 @@ security:
             provider: oidc
             access_token:
                 token_handler:
-                    # Verification OFFLINE : la signature suffit, aucun appel reseau par requete
+                    # Vérification OFFLINE : la signature suffit, aucun appel réseau par requête
                     oidc:
                         algorithms: ['RS256']
                         audience: '%env(OIDC_AUDIENCE)%'
@@ -23,7 +23,7 @@ security:
                             base_uri: '%env(OIDC_DISCOVERY_BASE_URI)%'
                             cache:
                                 id: cache.app
-                    # Verification ONLINE : un appel HTTP par requete vers le Provider
+                    # Vérification ONLINE : un appel HTTP au Provider à chaque requête entrante
                     # oidc_user_info:
                     #     base_uri: '%env(OIDC_DISCOVERY_BASE_URI)%'
                     #     claim: sub

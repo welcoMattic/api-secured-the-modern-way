@@ -9,7 +9,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * Provider OIDC : mappe les claims du token vers un objet utilisateur Symfony.
- * OIDC n'a aucune notion de role : ce mapping est à notre charge.
+ * OIDC n'a aucune notion de rôle : ce mapping est à notre charge.
  */
 final class OidcUserProvider implements AttributesBasedUserProviderInterface
 {

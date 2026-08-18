@@ -69,8 +69,10 @@ Console d'admin Keycloak : http://localhost:8080 (`admin` / `admin`).
 
 ## Le realm `photos`
 
-Importé au démarrage depuis `keycloak/import/photos-realm.json`. Keycloak tourne en `start-dev`
-(base H2 en mémoire) : **chaque redémarrage repart d'un realm propre**.
+Importé au démarrage depuis `keycloak/import/photos-realm.json`. Keycloak tourne en `start-dev`, sur
+une base H2 interne au conteneur, et aucun volume n'est monté. Comme `castor stop` fait un
+`docker compose down -v`, **chaque cycle repart d'un realm propre** : les comptes, les données et
+surtout les **clés de signature** sont neufs.
 
 | Client | Type | Flow | Redirect URI |
 |---|---|---|---|
@@ -83,11 +85,38 @@ Importé au démarrage depuis `keycloak/import/photos-realm.json`. Keycloak tour
 
 ### Le piège de l'audience
 
-Par défaut, un access token Keycloak porte `aud: ["account"]`. Le token handler `oidc` de Symfony
-**valide l'audience** : sans mapper, chaque requête tombe en `401`.
+Par défaut, l'audience d'un access token Keycloak est le **client qui l'a demandé** (plus `account`
+si ce client a des rôles sur le client `account`). Jamais votre API. Or le token handler `oidc` de
+Symfony **valide l'audience** : sans mapper, chaque requête tombe en `401`.
 
 Le realm ajoute donc un protocol mapper `oidc-audience-mapper` sur chaque client, qui injecte
 `api-photos` dans le claim `aud`. C'est la valeur attendue par `OIDC_AUDIENCE` dans l'API.
+
+## Les deux apps clientes sont faites pour être projetées
+
+Elles reprennent le design system du deck (`theme/styles/tokens.css`) : mêmes couleurs, même
+typographie, fond clair. L'accent est l'indigo `--a-4`, celui de la section « Authentification ».
+Un `2xx` s'affiche en teal, un `4xx` en magenta de marque : le `403` de bob est un **refus voulu**,
+pas une panne, et la couleur doit le dire.
+
+Deux règles tenues par construction :
+
+- **La page ne défile jamais**, de 1280x720 à 1920x1080. Ce qui déborde (le JSON d'un token, le corps
+  d'une réponse) défile *dans* sa carte. Vérifié aux deux extrémités de la plage.
+- **Aucune requête réseau** pour l'affichage : pas de webfont distante, rien que le wifi de la salle
+  puisse casser.
+
+Trois détails qui servent le propos :
+
+| Détail | Pourquoi |
+|---|---|
+| Le claim `aud` est colorié dans les deux cartes de tokens | C'est le seul endroit que vous montrez du doigt : `photos-spa` d'un côté, `api-photos` de l'autre. |
+| L'access token affiche son temps restant | Ça illustre « les access tokens sont courts », et ça vous prévient avant que la démo ne réponde `401`. |
+| Le `401` affiche l'en-tête `WWW-Authenticate` | L'API n'a pas de corps à renvoyer sur un `401` : elle dit `error="invalid_token"` dans l'en-tête. |
+
+Les apps retirent la `trace` PHP des corps d'erreur avant de les afficher. En dev, un `403` d'API
+Platform pèse 2,5 ko de chemins de vendor : projeté, ça noie la seule ligne qui compte,
+`"detail": "Access Denied."`. Exactement ce que ferait un vrai client.
 
 ## Ce qu'il faut regarder dans le code
 
@@ -108,6 +137,11 @@ le second commenté :
 - `oidc` : vérifie la **signature** localement, avec les clés publiques du `.well-known`. Zéro appel réseau par requête.
 - `oidc_user_info` : appelle le Provider **à chaque requête**. Révocation immédiate, mais l'API tombe si le Provider tombe.
 
+Une différence que le tableau du deck ne montre pas : le handler `oidc_user_info` **ne valide pas
+l'audience**. Il présente l'access token au `userinfo` du Provider et lit les claims de la réponse.
+Passer en online, c'est donc aussi renoncer au contrôle de `aud` : n'importe quel token valide du realm,
+même émis pour une autre API, est accepté. C'est un argument de plus pour l'offline.
+
 Commentez l'un, décommentez l'autre, `castor cc`, et rejouez `castor smoke`.
 
 `castor cc` purge aussi le pool `cache.app`, et ce n'est pas cosmétique : les deux handlers y écrivent
@@ -115,12 +149,28 @@ sous **la même clé** de discovery, mais pas le même contenu (le handler `oidc
 `oidc_user_info` y met le document de discovery brut). Sans purge, le second lit ce que le premier a
 laissé et renvoie `401` sur tous les tokens.
 
-## Deux pièges qui coûtent une démo
+## Un réglage de scène assumé
+
+Le realm porte `accessTokenLifespan: 3600` (une heure), là où Keycloak livre 5 minutes par défaut.
+C'est un **confort de scène** : avec 5 minutes, la démo meurt au milieu du talk, et une heure couvre le talk plus les questions. Ce n'est pas une
+recommandation, et le deck dit l'inverse : access tokens **courts** plus vérification offline, c'est
+le meilleur compromis en production. La session SSO est elle aussi allongée (`ssoSessionIdleTimeout`
+à 2 h) pour survivre à une mise en veille du portable.
+
+## Quatre pièges qui coûtent une démo
 
 | Symptôme | Cause | Remède |
 |---|---|---|
 | Tout répond `401` après un `castor stop` / `castor start` | Keycloak tourne en `start-dev` : il **régénère ses clés de signature** à chaque démarrage, mais l'API garde l'ancien JWKS dans `cache.app`. | `castor start` purge `cache.app` automatiquement. À la main : `php bin/console cache:pool:clear cache.app`. |
 | Tout répond `401` juste après avoir basculé offline / online | Les deux token handlers partagent la clé de cache de discovery mais n'y stockent pas la même chose. | `castor cc`. |
+| Le navigateur se croit connecté, mais l'API répond `401` | Après un `castor restart`, Keycloak a de nouvelles clés : le token gardé par le navigateur ou par la session Symfony a été signé par l'instance précédente. | Les deux apps le disent et offrent un bouton **« Oublier la session »**. |
+| L'horloge du conteneur a dérivé après une veille | Le token handler de Symfony vérifie `iat`, `nbf` et `exp` avec `allowedTimeDrift: 0`, une valeur codée en dur. Une seconde de décalage suffit. | `castor start` et `castor smoke` comparent les deux horloges et vous préviennent. Redémarrer Docker Desktop. |
 
-Dans les deux cas, `demo/api/var/log/dev.log` donne la raison exacte du rejet : le token handler `oidc`
+« Oublier la session » n'est pas un doublon de « Se déconnecter ». La déconnexion normale est une
+déconnexion **RP-initiated** : elle envoie un `id_token_hint` au Provider pour fermer aussi la session
+SSO. Si Keycloak a redémarré, ce token a été signé par l'instance précédente, et le Provider répond
+`400`. « Oublier la session » se contente de jeter l'état local, ce qui est le seul remède sûr dans ce
+cas précis.
+
+Dans tous les cas, `demo/api/var/log/dev.log` donne la raison exacte du rejet : le token handler `oidc`
 loggue la signature, l'audience, l'issuer ou le claim manquant.
