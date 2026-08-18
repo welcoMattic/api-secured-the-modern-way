@@ -31,7 +31,7 @@ class: sec-gw
 
 # Choisissez votre préférée !
 
-### Open source ou commerciale, auto-hébergée ou SaaS, le choix est vaste !
+Open source ou commerciale, auto-hébergée ou SaaS, le choix est vaste !
 
 <ServiceGroup europe label="Europe" :cols="4" class="mt-4">
   <Logo :size="3" src="/gravitee.webp" label="Gravitee" />
@@ -76,7 +76,7 @@ Trois domaines entiers que votre API n'a plus à porter.
 
 <v-click>
 
-<div class="gw-punch">Tout ça <b>en amont</b> de votre API<br/> et sans <b>"polluer"</b> votre code applicatif.</div>
+<div class="slide-punch is-centered">Tout ça <b>en amont</b> de votre API<br/> et sans <b>"polluer"</b> votre code applicatif.</div>
 
 </v-click>
 
@@ -87,17 +87,6 @@ Trois domaines entiers que votre API n'a plus à porter.
   align-items: stretch;
 }
 .gw-grid :deep(.ds-card__icon) { font-size: 2.7rem; }
-.gw-punch {
-  margin-top: 1.5rem;
-  text-align: center;
-  font-family: "Sora", sans-serif;
-  font-size: 1.7rem;
-  font-weight: 800;
-  line-height: 1.25;
-  color: var(--c-fg);
-  text-wrap: balance;
-}
-.gw-punch b { color: var(--sec, var(--c-accent)); }
 </style>
 
 <!--

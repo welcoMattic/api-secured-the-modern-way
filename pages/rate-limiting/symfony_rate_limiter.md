@@ -109,8 +109,7 @@ class Photo
 
 <v-click>
 
-#### Une opération limitée, l'autre non. 
-#### Le même style déclaratif que `security:`. {.mt-6}
+<div class="slide-punch">Une opération limitée, l'autre non.<br/>Le même style déclaratif que <code>security:</code></div>
 
 </v-click>
 
@@ -142,7 +141,7 @@ final class RateLimitHeadersListener
 
 <v-click>
 
-Les bons clients lisent ces en-têtes et **ralentissent** avant le 429. {.opacity-70}
+<div class="slide-note">Les bons clients lisent ces en-têtes et <b>ralentissent</b> avant le 429.</div>
 
 </v-click>
 

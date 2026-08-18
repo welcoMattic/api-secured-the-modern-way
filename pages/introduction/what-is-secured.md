@@ -20,7 +20,11 @@ class: pillars
   </Pillar>
 </CardGrid>
 
-### Et bien plus… {.text-center .mt-6}
+<v-click>
+
+<div class="slide-punch is-centered">Et bien plus…</div>
+
+</v-click>
 
 <style scoped>
 /* Hero slide: the three pillars carry the whole talk, so let them breathe. */

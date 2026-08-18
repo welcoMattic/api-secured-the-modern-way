@@ -15,6 +15,10 @@ Fondation neutre, re-thémable en changeant ces variables.
   chacune avec sa variante `--a-N-rgb` pour les tintes `rgba()`.
 - Accents sémantiques : `--c-accent` (magenta de marque), `--c-accent-2` (teal).
 - Échelles : `--fs-*`, `--sp-*`, `--radius*`, `--shadow-card`.
+- `--font-emoji` : pile de polices emoji, **épinglée dans chaque `font-family`**.
+  Sans elle, le navigateur peint l'emoji avec une police de repli puis re-résout
+  vers la police emoji couleur, ce qui produit un saut de taille visible à
+  l'arrivée sur la slide.
 
 ## Couleur par section (fil rouge)
 
@@ -51,8 +55,44 @@ Sans classe (intro, conclusion) : `--sec` retombe sur `--c-accent` (magenta).
 ## Composants (`theme/components/`)
 
 - `<Card accent icon|badge title>` + `<CardGrid cols>` : cartes à accent (rampe).
-- `<LogoGrid gapX gapY>` + `<Logo src label eu strong>` : grilles de logos unifiées.
+- `<Pillar accent icon title tag question lead>` : carte « pilier », en-tête à
+  hauteur fixe pour que les cartes restent alignées même si un nom passe sur
+  deux lignes.
+- `<LogoGrid gapX gapY cols>` + `<Logo src label eu strong size>` : grilles de
+  logos. Sans `cols`, disposition `flex-wrap` ; avec `cols`, grille à colonnes
+  fixes, seule façon d'obtenir des rangées régulières quand les labels ont des
+  largeurs inégales.
+- `<ServiceGroup europe label cols>` : groupe de logos encadré et titré.
 - `<Alert type>` : callout (info / warning / error), clair.
+
+## Utilitaires de slide (`theme/styles/layout.css`)
+
+Deux lignes de clôture reviennent partout dans le deck. Elles s'écrivaient de
+sept façons différentes (h4 + marge ad-hoc, classes scopées par slide, utilitaires
+`opacity-*` bruts) ; elles ont désormais un seul vocabulaire.
+
+| Classe         | Rôle                                          |
+|----------------|-----------------------------------------------|
+| `.slide-punch` | L'assertion sur laquelle la slide atterrit    |
+| `.slide-note`  | La glose discrète qui nuance ce qui précède   |
+
+Les deux suivent l'alignement ambiant (à gauche sur `default`) ; ajouter
+`.is-centered` sur les slides héros dont le contenu est lui-même centré.
+`.slide-punch` colore ses `<b>` avec `--sec`, `.slide-note` les passe en `--c-fg`.
+
+**Toujours les écrire en `<div class="...">`**, jamais avec la syntaxe d'attribut
+`{.slide-punch}` : dès qu'une ligne contient du code inline ou un `<br/>`,
+l'attribut s'accroche au dernier fragment au lieu du bloc entier.
+
+## Diagrammes (`theme/setup/mermaid.ts`)
+
+- `fontFamily` **doit** rester aligné sur la police réellement rendue (Inter).
+  Mermaid calcule la géométrie du SVG en mesurant le texte : si le thème impose
+  une autre police au rendu, les labels sortent de leurs boîtes.
+- `mirrorActors: false` supprime la rangée d'acteurs dupliquée en bas.
+- Ne **pas** utiliser l'option `{scale: N}` de Slidev sur un bloc mermaid : elle
+  désynchronise le texte des formes. Pour réduire un diagramme, jouer sur
+  `messageMargin` / `boxMargin` via un `%%{init}%%` local.
 
 ## Chrome global
 
@@ -68,6 +108,6 @@ Sans classe (intro, conclusion) : `--sec` retombe sur `--c-accent` (magenta).
 
 ## Reste possible (non bloquant)
 
-- Migrer les grandes grilles OIDC/gateway vers `<LogoGrid>` (aujourd'hui en markup
-  inline calé sur 2 lignes ; fonctionnel, migration = pur refactor).
+- Les blocs de code côte à côte (config Symfony) restent en grille Uno brute :
+  aucun composant du thème ne couvre ce cas, et il est unique.
 - Extraire tokens + layouts + composants dans un paquet `slidev-theme-*` publiable.

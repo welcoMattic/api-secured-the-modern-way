@@ -170,7 +170,7 @@ class Photo
 }
 ```
 
-Le bundle transforme chaque scope en rôle : `ROLE_OAUTH2_` + le scope en majuscules. {.opacity-60}
+<div class="slide-note">Le bundle transforme chaque scope en rôle : <code>ROLE_OAUTH2_</code> + le scope en majuscules.</div>
 
 ---
 layout: default
@@ -183,7 +183,7 @@ class: sec-authz
 
 - 👤 Écrans de **login** et de **consentement**
 - 🔑 **Rotation** des clés de signature
-- 🧯 **MFA**, mot de passe oublié, révocation de sessions
+- ⛓️ **MFA**, mot de passe oublié, révocation de sessions
 - 📊 **Audit** : qui a autorisé quoi, et quand
 
 </v-clicks>
@@ -196,4 +196,4 @@ class: sec-authz
 # Vous maintenez un serveur d'autorisation
 
 C'est un **produit à part entière**. <br>
-Et il tombe en même temps que votre API.
+Trop lié à votre API : l'un **peut faire tomber** l'autre
