@@ -6,80 +6,396 @@
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
         {% block stylesheets %}
         <style>
+            /* Design tokens from the deck's design system */
             :root {
-                --bg-color: #1a1a1a;
-                --text-color: #ffffff;
-                --link-color: #4da6ff;
-                --button-bg: #2d2d2d;
-                --button-border: #404040;
-                --success-bg: #28a745;
-                --error-bg: #dc3545;
+                /* Surfaces & text (light base) */
+                --c-bg: #ffffff;
+                --c-surface: #f6f8fb;
+                --c-fg: #0e131f;
+                --c-muted: #57637a;
+                --c-border: #dce3ec;
+                --c-border-strong: #c2ccda;
+
+                /* Accent ramp */
+                --a-1: #0d9488;
+                --a-4: #4f46e5;
+                --a-7: #c32186;
+
+                /* Semantic */
+                --sec: var(--a-4);
+                --ok: var(--a-1);
+                --ko: var(--a-7);
+
+                /* Radius */
+                --radius: .85rem;
+                --radius-lg: 1.25rem;
+                --radius-pill: 999px;
+
+                /* Shadow */
+                --shadow-card: 0 1px 2px rgba(14,19,31,.05), 0 8px 24px rgba(14,19,31,.06);
             }
-            
-            * { box-sizing: border-box; margin: 0; padding: 0; }
+
+            /* THE hard constraint: the page never scrolls */
+            html, body {
+                height: 100%;
+            }
+
             body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                background: var(--bg-color);
-                color: var(--text-color);
-                font-size: 18px;
+                margin: 0;
+                padding: 0;
+                background: var(--c-bg);
+                color: var(--c-fg);
+                font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: clamp(14px, 1.2vw, 16px);
                 line-height: 1.6;
-                padding: 2rem;
-                min-height: 100vh;
+                display: grid;
+                grid-template-rows: auto 1fr;
+                overflow: hidden;
             }
-            
-            a {
-                color: var(--link-color);
+
+            /* ============================================================
+               LOGGED OUT: centred hero
+               ============================================================ */
+            .logged-out {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                place-self: center;
+                max-width: 600px;
+                padding: clamp(1.5rem, 3vw, 2.5rem);
+            }
+
+            .logged-out h1 {
+                font-family: Sora, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: clamp(2rem, 4vw, 2.75rem);
+                font-weight: 600;
+                color: var(--c-fg);
+                margin: 0 0 .5rem;
+            }
+
+            .eyebrow {
+                font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: clamp(0.9rem, 1.4vw, 1.1rem);
+                color: var(--c-muted);
+                margin: 0 0 1.5rem;
+            }
+
+            .note {
+                font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+                color: var(--c-muted);
+                margin: 1.5rem 0 0 0;
+            }
+
+            /* Primary button */
+            .btn-primary {
+                font-family: Sora, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: clamp(1rem, 1.8vw, 1.25rem);
+                font-weight: 500;
+                padding: clamp(0.75rem, 1.2vw, 1rem) clamp(1.5rem, 2.5vw, 2rem);
+                background: var(--sec);
+                color: #fff;
+                border: none;
+                border-radius: var(--radius);
+                cursor: pointer;
+                transition: opacity 0.2s;
+                text-decoration: none;
+                display: inline-block;
+            }
+
+            .btn-primary:hover {
+                opacity: 0.9;
+            }
+
+            /* ============================================================
+               LOGGED IN: topbar + main area
+               ============================================================ */
+            .logged-in {
+                display: grid;
+                grid-template-rows: auto 1fr;
+                gap: clamp(1rem, 1.5vw, 1.5rem);
+                width: 100%;
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: clamp(1.5rem, 3vw, 2.5rem);
+            }
+
+            .topbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .topbar-left h1 {
+                font-family: Sora, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: clamp(1.5rem, 2.5vw, 1.85rem);
+                font-weight: 600;
+                color: var(--c-fg);
+                margin: 0;
+            }
+
+            .topbar-left .eyebrow {
+                font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: clamp(0.85rem, 1.2vw, 1rem);
+                color: var(--c-muted);
+            }
+
+            .topbar-right {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .user-pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.35rem 0.75rem;
+                background: var(--c-surface);
+                border-radius: var(--radius-pill);
+                font-size: clamp(0.9rem, 1.2vw, 1rem);
+            }
+
+            .user-pill strong {
+                font-weight: 600;
+                color: var(--c-fg);
+            }
+
+            .btn-secondary {
+                font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+                padding: 0.4rem 0.75rem;
+                background: transparent;
+                color: var(--c-muted);
+                border: 1px solid var(--c-border);
+                border-radius: var(--radius);
+                cursor: pointer;
+                transition: all 0.2s;
                 text-decoration: none;
             }
-            
+
+            .btn-secondary:hover {
+                background: var(--c-surface);
+                color: var(--c-fg);
+            }
+
+            /* Main area - two column grid */
+            .main-area {
+                display: grid;
+                grid-template-columns: 1fr 0.9fr;
+                gap: clamp(1rem, 1.5vw, 1.25rem);
+                width: 100%;
+            }
+
+            /* ============================================================
+               CARDS
+               ============================================================ */
+            .card {
+                background: var(--c-surface);
+                border-radius: var(--radius-lg);
+                box-shadow: var(--shadow-card);
+                display: flex;
+                flex-direction: column;
+                border: 1px solid var(--c-border);
+            }
+
+            .card-header {
+                padding: clamp(1rem, 1.5vw, 1.25rem);
+                border-bottom: 1px solid var(--c-border);
+            }
+
+            .card-header h2 {
+                font-family: Sora, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: clamp(1.1rem, 1.5vw, 1.25rem);
+                font-weight: 600;
+                color: var(--c-fg);
+                margin: 0 0 0.25rem;
+            }
+
+            .card-header .subtitle {
+                font-size: clamp(0.8rem, 1.1vw, 0.9rem);
+                color: var(--c-muted);
+                margin: 0;
+            }
+
+            .card-body {
+                flex: 1;
+                padding: clamp(1rem, 1.5vw, 1.25rem);
+                display: grid;
+                grid-template-rows: auto 1fr;
+                gap: clamp(0.75rem, 1vw, 1rem);
+                min-height: 0;
+            }
+
+            /* Key-claims block */
+            .key-claims {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            .key-claims .row {
+                display: flex;
+                gap: 0.75rem;
+                font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+            }
+
+            .key-claims .row .key {
+                color: var(--c-muted);
+            }
+
+            .key-claims .row .value {
+                color: var(--c-fg);
+            }
+
+            .key-claims .row .value.sec-emph {
+                color: var(--sec);
+                font-weight: 600;
+            }
+
+            /* Scrollable content region */
+            .scroll-content {
+                min-height: 0;
+                overflow: auto;
+                font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: clamp(0.75rem, 0.95vw, 0.85rem);
+                line-height: 1.5;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                color: var(--c-fg);
+            }
+
+            /* Note */
+            .note {
+                font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+                color: var(--c-muted);
+                margin: 0.75rem 0 0 0;
+            }
+
+            /* Actions */
+            .actions {
+                margin: 0;
+            }
+
+            form {
+                display: block;
+                margin: 0 0 clamp(0.5rem, 0.8vw, 0.75rem) 0;
+            }
+
+            button[type="submit"] {
+                font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: clamp(0.9rem, 1.2vw, 1rem);
+                padding: clamp(0.8rem, 1.2vw, 1rem) 1rem;
+                background: var(--c-surface);
+                color: var(--c-fg);
+                border: 2px solid var(--c-border);
+                border-radius: var(--radius);
+                cursor: pointer;
+                transition: all 0.2s;
+                width: 100%;
+                text-align: left;
+            }
+
+            button[type="submit"]:hover {
+                background: var(--c-bg);
+                border-color: var(--c-border-strong);
+            }
+
+            /* Response panel */
+            .result-panel {
+                margin: 0;
+                padding: clamp(1rem, 1.5vw, 1.25rem);
+                border-radius: var(--radius);
+                font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: clamp(0.75rem, 0.95vw, 0.85rem);
+                line-height: 1.5;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                color: var(--c-fg);
+                background: var(--c-bg);
+                min-height: 0;
+                overflow: auto;
+            }
+
+            .response-header {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: clamp(2rem, 3vw, 2.75rem);
+                font-weight: 600;
+                margin: 0 0 0.75rem;
+            }
+
+            .response-header .status-label {
+                font-size: clamp(1rem, 1.5vw, 1.15rem);
+                font-weight: 400;
+                color: var(--c-fg);
+            }
+
+            a {
+                color: var(--sec);
+                text-decoration: none;
+            }
+
             a:hover {
                 text-decoration: underline;
             }
-            
-            h1 { font-size: 2rem; margin-bottom: 1.5rem; }
-            .user-info { margin: 1rem 0; }
-            .user-info span { margin-right: 1rem; }
-            
-            .actions { margin: 2rem 0; }
-            form { display: inline-block; margin-right: 1rem; }
-            
-            button[type="submit"] {
-                font-size: 1rem;
-                padding: 0.5rem 1rem;
-                background: var(--button-bg);
-                color: var(--text-color);
-                border: 1px solid var(--button-border);
-                border-radius: 4px;
-                cursor: pointer;
+
+            /* ============================================================
+               HIDE EMPTY PANELS
+               ============================================================ */
+            .logged-out {
+                display: none;
             }
-            
-            button[type="submit"]:hover {
-                background: #3a3a3a;
+
+            .logged-in {
+                display: none;
             }
-            
-            .result-panel {
-                margin-top: 2rem;
-                padding: 1rem;
-                border-radius: 4px;
-                font-family: 'Courier New', monospace;
-                font-size: 0.85rem;
-                white-space: pre-wrap;
+
+            /* ============================================================
+               RESPONSIVE
+               ============================================================ */
+            @media (max-width: 1024px) {
+                .main-area {
+                    grid-template-columns: 1fr;
+                }
+
+                form {
+                    margin: 0 0 0.75rem 0;
+                }
+
+                .topbar {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+
+                .topbar-right {
+                    width: 100%;
+                    justify-content: space-between;
+                }
             }
-            
-            .result-panel.success {
-                background: rgba(40, 167, 69, 0.2);
-                border-left: 4px solid var(--success-bg);
-            }
-            
-            .result-panel.error {
-                background: rgba(220, 53, 69, 0.2);
-                border-left: 4px solid var(--error-bg);
-            }
-            
-            .note {
-                margin-top: 1rem;
-                font-size: 0.9rem;
-                color: #888;
+
+            @media (max-width: 768px) {
+                body {
+                    padding: 1rem;
+                }
+
+                .logged-in {
+                    padding: 1rem;
+                }
+
+                .main-area {
+                    gap: 1rem;
+                }
+
+                .card-body {
+                    gap: 0.75rem;
+                }
             }
         </style>
         {% endblock %}

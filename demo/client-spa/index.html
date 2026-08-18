@@ -3,19 +3,84 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Client SPA - Demo OIDC</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%234f46e5%22/><text y=%22.9em%22 x=%22.5em%22 text-anchor=%22middle%22 font-size=%2262%22 fill=%22%23fff%22 font-family=%22system-ui%22>JS</text></svg>" />
+    <title>App cliente JS - démo OIDC</title>
   </head>
   <body>
     <div id="app">
-      <h1>App cliente JS <small>authorization_code + PKCE</small></h1>
-      <div id="auth"></div>
-      <div id="user"></div>
-      <div id="actions"></div>
-      <div class="token-container">
-        <div id="id-token"></div>
-        <div id="access-token"></div>
-      </div>
-      <div id="response"></div>
+      <!-- État déconnecté -->
+      <section class="hero" id="hero">
+        <h1>App cliente JS</h1>
+        <p class="eyebrow">authorization_code + PKCE</p>
+        <button id="login-btn" class="btn-primary">Se connecter avec Keycloak</button>
+        <p class="note">
+          Cette app ne connaît aucun mot de passe.<br />
+          Elle confie l'authentification à l'OIDC Provider.
+        </p>
+      </section>
+
+      <!-- État connecté -->
+      <section class="workbench" id="workbench" hidden>
+        <header class="topbar">
+          <div class="topbar-left">
+            <h1>App cliente JS</h1>
+            <p class="eyebrow">authorization_code + PKCE</p>
+          </div>
+          <div class="topbar-right">
+            <span class="user-pill" id="user-pill"></span>
+            <button id="logout-btn" class="btn-secondary">Se déconnecter</button>
+          </div>
+        </header>
+
+        <div class="main-area">
+          <article class="card">
+            <div class="card-head">
+              <h2>ID token</h2>
+              <p class="subtitle">pour l'application cliente</p>
+            </div>
+            <div class="card-body">
+              <dl class="claims" id="id-claims"></dl>
+              <pre class="json" id="id-json"></pre>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <h2>Access token</h2>
+              <p class="subtitle">pour l'API</p>
+              <span class="ttl" id="access-ttl"></span>
+            </div>
+            <div class="card-body">
+              <dl class="claims" id="access-claims"></dl>
+              <pre class="json" id="access-json"></pre>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <h2>Appeler l'API</h2>
+              <p class="subtitle">avec le token en en-tête <code>Authorization</code></p>
+            </div>
+            <div class="card-body">
+              <div class="actions">
+                <button class="api-btn" data-method="GET" data-token="access">
+                  GET <code>/api/photos</code>
+                </button>
+                <button class="api-btn" data-method="POST" data-token="access">
+                  POST <code>/api/photos</code>
+                </button>
+                <button class="api-btn is-counter" data-method="GET" data-token="id">
+                  GET <code>/api/photos</code> avec l'ID token
+                  <small>le contre-exemple : doit échouer</small>
+                </button>
+              </div>
+              <div class="response" id="response">
+                <p class="response-idle">Aucun appel pour l'instant.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

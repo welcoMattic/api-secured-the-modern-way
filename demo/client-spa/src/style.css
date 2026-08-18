@@ -1,212 +1,439 @@
-/* Theme sombre optimise pour la projection */
+/* Design tokens from the deck's design system */
 :root {
-  --bg: #1a1a1a;
-  --text: #e0e0e0;
-  --text-muted: #888;
-  --accent: #00d4aa;
-  --error: #ff5555;
-  --success: #55ff55;
-  --border: #444;
-  --code-bg: #2a2a2a;
-  --btn-bg: #333;
-  --btn-hover: #444;
+  /* Surfaces & text (light base) */
+  --c-bg: #ffffff;
+  --c-surface: #f6f8fb;
+  --c-fg: #0e131f;
+  --c-muted: #57637a;
+  --c-border: #dce3ec;
+  --c-border-strong: #c2ccda;
+
+  /* Accent ramp */
+  --a-1: #0d9488;  /* teal    */
+  --a-4: #4f46e5;  /* indigo  */
+  --a-7: #c32186;  /* magenta */
+
+  /* Semantic */
+  --sec: var(--a-4);   /* authentication section: indigo */
+  --ok:  var(--a-1);   /* 2xx: teal */
+  --ko:  var(--a-7);   /* 4xx: magenta */
+
+  /* Radius */
+  --radius: .85rem;
+  --radius-lg: 1.25rem;
+  --radius-pill: 999px;
+
+  /* Shadow */
+  --shadow-card: 0 1px 2px rgba(14,19,31,.05), 0 8px 24px rgba(14,19,31,.06);
 }
 
 * {
   box-sizing: border-box;
 }
 
+/* THE hard constraint: the page never scrolls */
 html, body {
+  height: 100%;
+}
+
+body {
   margin: 0;
   padding: 0;
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 24px;
+  background: var(--c-bg);
+  color: var(--c-fg);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(14px, 1.2vw, 16px);
   line-height: 1.6;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
 }
 
 #app {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 40px;
-}
-
-/* Auth section */
-#auth {
-  margin-bottom: 20px;
-}
-
-#auth button,
-#user button {
-  padding: 16px 32px;
-  font-size: 24px;
-  background: var(--btn-bg);
-  color: var(--text);
-  border: 2px solid var(--border);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-#auth button:hover,
-#user button:hover {
-  background: var(--btn-hover);
-}
-
-#user {
-  margin: 20px 0 30px;
-  font-size: 28px;
-}
-
-#user strong {
-  color: var(--accent);
-}
-
-/* Actions section */
-#actions {
-  margin: 30px 0;
-}
-
-.action-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.api-btn,
-#clear-btn {
-  padding: 16px 24px;
-  font-size: 20px;
-  background: var(--btn-bg);
-  color: var(--text);
-  border: 2px solid var(--border);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.api-btn:hover,
-#clear-btn:hover {
-  background: var(--btn-hover);
-}
-
-#clear-btn {
-  background: #555;
-  border-color: #666;
-}
-
-/* Token containers */
-.token-container {
+  width: 100%;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin: 30px 0;
+  grid-template-rows: auto 1fr;
+  gap: clamp(1rem, 1.5vw, 1.5rem);
 }
 
-#id-token,
-#access-token {
-  background: var(--code-bg);
-  border-radius: 8px;
-  padding: 20px;
-  overflow-x: auto;
+/* ==============================================================
+   LOGGED OUT: centred hero
+   ============================================================== */
+.logged-out {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  place-self: center;
+  max-width: 600px;
 }
 
-#id-token h3,
-#access-token h3 {
-  margin: 0 0 15px;
-  font-size: 24px;
-  color: var(--accent);
+.logged-out h1 {
+  font-family: Sora, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 600;
+  color: var(--c-fg);
+  margin: 0 0 .5rem;
 }
 
-#access-token p {
-  margin: 0 0 15px;
-  font-size: 18px;
-  color: var(--text-muted);
+.logged-out .eyebrow {
+  font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(0.9rem, 1.4vw, 1.1rem);
+  color: var(--c-muted);
+  margin: 0 0 1.5rem;
 }
 
-#access-token code,
-#id-token code {
-  background: var(--bg);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 18px;
+.logged-out .note {
+  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+  color: var(--c-muted);
+  margin: 1.5rem 0 0 0;
 }
 
-pre {
+/* Primary button */
+.btn-primary {
+  font-family: Sora, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  font-weight: 500;
+  padding: clamp(0.75rem, 1.2vw, 1rem) clamp(1.5rem, 2.5vw, 2rem);
+  background: var(--sec);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+/* ==============================================================
+   LOGGED IN: topbar + main area
+   ============================================================== */
+.logged-in {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: clamp(1rem, 1.5vw, 1.5rem);
+  width: 100%;
+}
+
+/* Topbar */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.topbar-left h1 {
+  font-family: Sora, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(1.5rem, 2.5vw, 1.85rem);
+  font-weight: 600;
+  color: var(--c-fg);
   margin: 0;
-  font-family: 'SF Mono', Consolas, monospace;
-  font-size: 18px;
+}
+
+.topbar-left .eyebrow {
+  font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(0.85rem, 1.2vw, 1rem);
+  color: var(--c-muted);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--c-surface);
+  border-radius: var(--radius-pill);
+  font-size: clamp(0.9rem, 1.2vw, 1rem);
+}
+
+.user-pill strong {
+  font-weight: 600;
+  color: var(--c-fg);
+}
+
+.btn-secondary {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+  padding: 0.4rem 0.75rem;
+  background: transparent;
+  color: var(--c-muted);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: var(--c-surface);
+  color: var(--c-fg);
+}
+
+/* Main area - three column grid */
+.main-area {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.9fr;
+  gap: clamp(1rem, 1.5vw, 1.25rem);
+  width: 100%;
+}
+
+/* ==============================================================
+   CARDS
+   ============================================================== */
+.card {
+  background: var(--c-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--c-border);
+}
+
+.card-header {
+  padding: clamp(1rem, 1.5vw, 1.25rem);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.card-header h2 {
+  font-family: Sora, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(1.1rem, 1.5vw, 1.25rem);
+  font-weight: 600;
+  color: var(--c-fg);
+  margin: 0 0 0.25rem;
+}
+
+.card-header .subtitle {
+  font-size: clamp(0.8rem, 1.1vw, 0.9rem);
+  color: var(--c-muted);
+  margin: 0;
+}
+
+.card-body {
+  flex: 1;
+  padding: clamp(1rem, 1.5vw, 1.25rem);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: clamp(0.75rem, 1vw, 1rem);
+  min-height: 0;
+}
+
+/* Key-claims block */
+.key-claims {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.key-claims .row {
+  display: flex;
+  gap: 0.75rem;
+  font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+}
+
+.key-claims .row .key {
+  color: var(--c-muted);
+}
+
+.key-claims .row .value {
+  color: var(--c-fg);
+}
+
+.key-claims .row .value.sec-emph {
+  color: var(--sec);
+  font-weight: 600;
+}
+
+/* Scrollable JSON region */
+.json-scroll {
+  min-height: 0;
+  overflow: auto;
+  background: var(--c-bg);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(0.75rem, 0.95vw, 0.85rem);
   line-height: 1.5;
   white-space: pre-wrap;
   word-wrap: break-word;
+  color: var(--c-fg);
 }
 
-/* Response section */
-#response {
-  background: var(--code-bg);
-  border-radius: 8px;
-  padding: 20px;
-  margin-top: 20px;
+/* ==============================================================
+   ACTION CARD (Card 3)
+   ============================================================== */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.5rem, 0.8vw, 0.75rem);
 }
 
+.api-btn {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(0.9rem, 1.2vw, 1rem);
+  padding: clamp(0.8rem, 1.2vw, 1rem) 1rem;
+  background: var(--c-surface);
+  color: var(--c-fg);
+  border: 2px solid var(--c-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.api-btn:hover {
+  background: var(--c-bg);
+  border-color: var(--c-border-strong);
+}
+
+/* Counter-example button: visually marked as deliberate refusal */
+.api-btn.ko-btn {
+  border-color: var(--ko);
+  color: var(--ko);
+  background: rgba(195, 33, 134, 0.05);
+}
+
+.api-btn.ko-btn:hover {
+  background: rgba(195, 33, 134, 0.1);
+  border-color: var(--ko);
+}
+
+#clear-btn {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(0.8rem, 1.05vw, 0.9rem);
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  color: var(--c-muted);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color 0.2s;
+  text-align: left;
+}
+
+#clear-btn:hover {
+  color: var(--c-fg);
+  background: var(--c-surface);
+}
+
+/* Response area */
 .response-header {
-  font-size: 32px;
-  font-weight: bold;
-  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(2rem, 3vw, 2.75rem);
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+}
+
+.response-header .status-label {
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  font-weight: 400;
+  color: var(--c-fg);
 }
 
 .response-body {
   margin: 0;
-  font-family: 'SF Mono', Consolas, monospace;
-  font-size: 18px;
+  min-height: 0;
+  overflow: auto;
+  font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(0.75rem, 0.95vw, 0.85rem);
   line-height: 1.5;
   white-space: pre-wrap;
   word-wrap: break-word;
+  color: var(--c-fg);
 }
 
-@media (max-width: 1024px) {
-  :root {
-    font-size: 20px;
-  }
-
-  .token-container {
-    grid-template-columns: 1fr;
-  }
-
-  #app {
-    padding: 20px;
-  }
-
-  .action-buttons {
-    flex-direction: column;
-  }
-
-  .api-btn,
-  #clear-btn {
-    width: 100%;
-  }
-}
-
-h1 {
-  font-size: 1.6rem;
-  margin: 0 0 1.5rem;
-  color: var(--accent);
-}
-
-h1 small {
-  display: block;
-  font-size: 1rem;
-  font-weight: 400;
-  color: var(--text-muted);
-  font-family: ui-monospace, 'Fira Code', monospace;
-}
-
-/* Les panneaux vides ne doivent pas laisser de rectangles gris a la projection */
+/* ==============================================================
+   HIDE EMPTY PANELS
+   ============================================================== */
+#auth:empty,
+#user:empty,
+#actions:empty,
 #id-token:empty,
 #access-token:empty,
 #response:empty {
   display: none;
 }
+
+/* ==============================================================
+   RESPONSIVE
+   ============================================================== */
+@media (max-width: 1280px) {
+  .main-area {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .main-area .card:last-child {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 1024px) {
+  .main-area {
+    grid-template-columns: 1fr;
+  }
+
+  .main-area .card:last-child {
+    grid-column: auto;
+  }
+
+  .action-buttons {
+    gap: 0.75rem;
+  }
+
+  .api-btn {
+    padding: 1rem;
+  }
+
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .topbar-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 1rem;
+  }
+
+  #app {
+    padding: 1rem;
+  }
+
+  .logged-out h1 {
+    font-size: 1.75rem;
+  }
+
+  .main-area {
+    gap: 1rem;
+  }
+
+  .card-body {
+    gap: 0.75rem;
+  }
+
+  .api-btn {
+    font-size: 0.95rem;
+  }
+}
+
