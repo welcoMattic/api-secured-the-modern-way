@@ -223,7 +223,7 @@ sequenceDiagram
 
 <Alert type="info">
 
-**OAuth 2.1** : PKCE obligatoire. Le bundle League l'exige déjà (clients publics).
+**OAuth 2.1** : PKCE obligatoire.
 
 </Alert>
 
