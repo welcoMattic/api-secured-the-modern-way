@@ -37,15 +37,8 @@ jobs:
 
       # Le site est servi depuis https://<user>.github.io/<repo>/, donc il faut
       # un base path. Il est dérivé du nom du dépôt, rien à coder en dur.
-      #
-      # --router-mode hash est obligatoire pour un déploiement en sous-répertoire :
-      # en mode history, la navigation d'une slide à l'autre re-préfixe le base
-      # path et produit /<repo>/<repo>/4, donc un 404.
       - name: Construire le site
-        run: |
-          bun run slidev build \
-            --base /${{ github.event.repository.name }}/ \
-            --router-mode hash
+        run: bun run slidev build --base /${{ github.event.repository.name }}/
 
       - uses: actions/upload-pages-artifact@v5
         with:
