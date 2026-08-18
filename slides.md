@@ -15,6 +15,11 @@ drawings:
 exportFilename: api-secured-the-modern-way-api-platform-con-2026
 transition: slide-left
 mdc: true
+fonts:
+  sans: Inter
+  serif: Sora
+  mono: Fira Code
+  weights: '400,500,600,700,800'
 themeConfig:
   color: "#0F131E"
   inverted-color: "#F9F9F9"
@@ -97,10 +102,6 @@ src: ./pages/authentication/definition.md
 
 ---
 src: ./pages/authentication/implementation.md
----
-
----
-src: ./pages/authentication/token_introspection.md
 ---
 
 ---

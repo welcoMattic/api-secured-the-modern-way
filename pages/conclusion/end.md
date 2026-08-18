@@ -1,14 +1,16 @@
 ---
-layout: default
+layout: closing
 hideInToc: true
 ---
 
-# 🙏 Merci !
+<div class="closing-eyebrow">API SECURED, THE MODERN WAY</div>
 
-## Des questions ? {.mt-24 .!text-6xl .mx-auto .text-center}
+# <span class="accent">Merci !</span>
 
-<div class="absolute top-0 right-4">
+## Des questions ?
 
+<div class="closing-contact">
+  <span><img src="/bluesky.svg" alt="Bluesky"/> @welcomattic.com</span>
+  <span><img src="/github.png" alt="GitHub"/> welcoMattic</span>
+  <span><img src="/email.png" alt="Email"/> mathieu.santostefano@sensiolabs.com</span>
 </div>
-
-[//]: # (<arrow x1="920" y1="200" x2="920" y2="350" color="green" width="3" />)

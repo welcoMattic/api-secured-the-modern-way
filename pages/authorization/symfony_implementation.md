@@ -1,36 +1,35 @@
 ---
 layout: default
+class: sec-authz
 ---
 
-# Implémentation d'OAuth2 dans Symfony
+# Serveur OAuth2 avec API Platform / Symfony
 
 <v-clicks>
 
-- 📦 **Bundle** : `league/oauth2-server-bundle`
-- 🔧 **Intégration** : le bundle Symfony officiel du serveur OAuth2 de League
-- 🛡️ **Résultat** : **embarquer un authorization server OAuth2 moderne** dans votre API Symfony
-- ⚡ **En pratique** : 
-  - Votre API est le **resource server**
-  - Le bundle gère la validation des tokens et la vérification des scopes pour les endpoints protégés
+- 📦 `league/oauth2-server-bundle`
+- 🏛️ Votre API = **authorization server + resource server**
+- 🎫 Émission + validation des tokens, contrôle des **scopes**
 
 </v-clicks>
 
 ---
 layout: default
+class: sec-authz
 ---
 
-# Installation du bundle
-
-<v-clicks>
+# Installation
 
 ```bash
 composer require league/oauth2-server-bundle
-```
 
-</v-clicks>
+# Persistance des clients et tokens
+composer require doctrine/doctrine-bundle doctrine/orm
+```
 
 ---
 layout: default
+class: sec-authz
 ---
 
 # Configuration minimale
@@ -79,75 +78,122 @@ oauth2:
 
 ---
 layout: default
+class: sec-authz
 ---
 
-# Entité Client
+# Créer un client OAuth2
 
-```php
-use League\OAuth2\Server\Entities;
+En ligne de commande
 
-#[ORM\Entity]
-class Client implements ClientEntityInterface
-{
-    #[ORM\Id, ORM\GeneratedValue, ORM\Column]
-    private ?int $id = null;
-    
-    #[ORM\Column(length: 80)]
-    private string $identifier;
-    
-    #[ORM\Column(length: 80)]
-    private string $secret;
-    
-    public function getIdentifier(): string
-    {
-        return $this->identifier;
-    }
-}
+```shell
+php bin/console league:oauth2-server:create-client \
+    --grant-type authorization_code \
+    --redirect-uri https://photoprint.example/callback \
+    --scope PHOTOS_READ \
+    PhotoPrint
 ```
+
+<v-click>
+
+<Alert type="info">
+
+Clients et tokens **persistés par le bundle**.
+
+</Alert>
+
+</v-click>
 
 ---
 layout: default
+class: sec-authz
 ---
 
-# Entité Access token
+# Déclarer les scopes
 
-```php
-use League\OAuth2\Server\Entities;
-
-#[ORM\Entity]
-class AccessToken implements AccessTokenEntityInterface
-{
-    #[ORM\Id, ORM\GeneratedValue, ORM\Column]
-    private ?int $id = null;
-    
-    #[ORM\ManyToOne(targetEntity: Client::class)]
-    private ClientEntityInterface $client;
-    
-    #[ORM\Column(type: 'json')]
-    private array $scopes = [];
-    
-    public function getClient(): ClientEntityInterface
-    {
-        return $this->client;
-    }
-}
+```yaml
+# config/packages/league_oauth2_server.yaml
+league_oauth2_server:
+    scopes:
+        available: [PHOTOS_READ, PHOTOS_WRITE]
+        default: [PHOTOS_READ]
 ```
+
+<v-click>
+
+<Alert type="warning">
+
+Client **sans scope = accès à tout**. Toujours des scopes par défaut.
+
+</Alert>
+
+</v-click>
 
 ---
 layout: default
+class: sec-authz
 ---
 
-# Endpoint d'API protégé
+# Durée de vie des tokens
+
+```yaml
+# config/packages/league_oauth2_server.yaml
+league_oauth2_server:
+    authorization_server:
+        access_token_ttl: PT1H   # 1 heure (défaut)
+        refresh_token_ttl: P1M   # 1 mois (défaut)
+        enable_refresh_token_grant: true
+```
+
+<v-clicks>
+
+- ⏳ **Access token court** : fenêtre d'exploitation réduite
+- ♻️ **Refresh token** : renouvelle sans l'utilisateur
+- 🔄 **Rotation** : refresh utilisé = révoqué
+
+</v-clicks>
+
+---
+layout: default
+class: sec-authz
+---
+
+# API Platform applique les scopes du token
 
 ```php
-// src/Controller/ApiController.php
-class ApiController extends AbstractController
+// src/Entity/Photo.php
+#[ApiResource(security: "is_granted('ROLE_OAUTH2_PHOTOS_READ')")]
+#[GetCollection]
+#[Post(security: "is_granted('ROLE_OAUTH2_PHOTOS_WRITE')")]
+class Photo
 {
-    #[Route('/api/protected')]
-    #[IsGranted('ROLE_OAUTH2_<scope>')]
-    public function protectedEndpoint(): JsonResponse
-    {
-        return $this->json(['data' => 'Protected resource']);
-    }
+    // ...
 }
 ```
+
+Le bundle transforme chaque scope en rôle : `ROLE_OAUTH2_` + le scope en majuscules. {.opacity-60}
+
+---
+layout: default
+class: sec-authz
+---
+
+# Le bundle ne fait pas tout à votre place
+
+<v-clicks>
+
+- 👤 Écrans de **login** et de **consentement**
+- 🔑 **Rotation** des clés de signature
+- 🧯 **MFA**, mot de passe oublié, révocation de sessions
+- 📊 **Audit** : qui a autorisé quoi, et quand
+
+</v-clicks>
+
+---
+layout: statement
+class: sec-authz
+---
+
+## Vous maintenez un serveur d'autorisation
+
+C'est un **produit à part entière**. <br>
+Et il tombe en même temps que votre API.

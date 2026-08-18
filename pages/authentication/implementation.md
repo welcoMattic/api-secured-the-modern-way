@@ -1,276 +1,310 @@
 ---
 layout: fact
+class: sec-authn
 ---
 
 ## Contrairement au bundle serveur OAuth2, <br> nous n'implémentons pas notre propre OIDC Provider.
 
 ---
 layout: default
+class: sec-authn
 ---
 
-# OIDC Providers open source
+# OIDC Providers (OP) Open Source
 
-Peuvent aussi jouer le rôle d'Identity Providers (IdP)
+<ServiceGroup europe label="Europe" :cols="4" class="mt-3">
+  <Logo :size="2.4" src="/authelia.png" label="Authelia" />
+  <Logo :size="2.4" src="/goauthentik.png" label="Authentik" />
+  <Logo :size="2.4" src="/ferriskey.png" label="FerrisKey" />
+  <Logo :size="2.4" src="/gravitee.webp" label="Gravitee AM" />
+  <Logo :size="2.4" src="/ory-hydra.png" label="Ory Hydra" />
+  <Logo :size="2.4" src="/pocketid.png" label="PocketID" />
+  <Logo :size="2.4" src="/rauthy.png" label="Rauthy" />
+  <Logo :size="2.4" src="/zitadel.png" label="Zitadel" />
+</ServiceGroup>
 
-<div class="flex flex-wrap gap-x-20 gap-y-6 justify-center my-4 pt-8">
-    <span class="flex flex-col items-center">
-        <img src="/authelia.png" alt="authelia logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Authelia</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/casdoor.png" alt="casdoor logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Casdoor</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/goauthentik.png" alt="authentik logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Authentik</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/hanko.png" alt="hanko logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Hanko</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/keycloak.png" alt="keycloak logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Keycloak <br/></div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/logto.png" alt="logto logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">LogTo</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/ory-hydra.png" alt="ory hydra logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Ory Hydra</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/pocketid.png" alt="pocketid logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">PocketID</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/rauthy.png" alt="rauthy logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Rauthy</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/supertokens.png" alt="supertokens logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">SuperTokens</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/zitadel.png" alt="zitadel logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Zitadel</div>
-    </span>
-</div>
+<ServiceGroup label="Reste du monde" :cols="4" class="mt-3">
+  <Logo :size="2.4" src="/casdoor.png" label="Casdoor" />
+  <Logo :size="2.4" src="/dex.svg" label="Dex" />
+  <Logo :size="2.4" src="/keycloak.png" label="Keycloak" />
+  <Logo :size="2.4" src="/supertokens.png" label="SuperTokens" />
+</ServiceGroup>
 
-<div class="mt-8 p-4 bg-gray-100 rounded-lg text-sm text-center">
-    <strong>Ils parlent tous la même langue :</strong> le protocole OIDC<br/>
+<div class="text-center text-sm mt-4" style="color:var(--c-muted)">
+  <strong style="color:var(--c-fg)">Ils parlent tous la même langue :</strong> le protocole OIDC
 </div>
 
 ---
 layout: default
+class: sec-authn
 ---
 
-# OpenID Connect Providers (OP) en SaaS {.!mb-4}
-Peuvent aussi jouer le rôle d'Identity Providers (IdP)
+# OIDC Providers SaaS
 
-<div class="flex flex-wrap gap-x-12 gap-y-6 justify-center my-4 pt-8">
-    <span class="flex flex-col items-center">
-        <img src="/auth0.png" alt="auth0 logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Auth0</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/aws-cognito.png" alt="aws-cognito logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">AWS Cognito</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/bare.png" alt="bare id logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Bare ID</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/cidaas.png" alt="cloud iam logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Cidaas</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/cloud-iam.png" alt="cloud iam logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Cloud-IAM</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/entra_id.png" alt="entra id logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Microsoft Entra ID <br/> <small>(formerly Azure AD)</small></div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/firebase.png" alt="firebase logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Firebase Auth</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/hanko.png" alt="hanko logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Hanko</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/loginradius.png" alt="loginradius logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">LoginRadius</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/okta.png" alt="okta logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Okta</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/quasr.png" alt="quasr logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Quasr</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/supertokens.png" alt="supertokens logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">SuperTokens</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/zitadel.png" alt="zitadel logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Zitadel</div>
-    </span>
-</div>
+<ServiceGroup europe label="Europe" :cols="4" class="mt-3">
+  <Logo :size="2.4" src="/cidaas.png" label="Cidaas" />
+  <Logo :size="2.4" src="/cloud-iam.png" label="Cloud-IAM" />
+  <Logo :size="2.4" src="/gravitee.webp" label="Gravitee AM" />
+  <Logo :size="2.4" src="/zitadel.png" label="Zitadel" />
+</ServiceGroup>
 
-<div class="mt-8 p-4 bg-gray-100 rounded-lg text-sm text-center">
-    <strong>Ils parlent tous la même langue :</strong> le protocole OIDC<br/>
+<ServiceGroup label="Reste du monde" :cols="5" class="mt-3">
+  <Logo :size="2.4" src="/auth0.png" label="Auth0" />
+  <Logo :size="2.4" src="/aws-cognito.png" label="AWS Cognito" />
+  <Logo :size="2.4" src="/clerk.png" label="Clerk" />
+  <Logo :size="2.4" src="/entra_id.png" label="Microsoft Entra ID <br/> <small>(formerly Azure AD)</small>" />
+  <Logo :size="2.4" src="/firebase.png" label="Firebase Auth" />
+  <Logo :size="2.4" src="/kinde.png" label="Kinde" />
+  <Logo :size="2.4" src="/loginradius.png" label="LoginRadius" />
+  <Logo :size="2.4" src="/okta.png" label="Okta" />
+  <Logo :size="2.4" src="/pingone.svg" label="PingOne" />
+  <Logo :size="2.4" src="/supertokens.png" label="SuperTokens" />
+</ServiceGroup>
+
+<div class="text-center text-sm mt-4" style="color:var(--c-muted)">
+  <strong style="color:var(--c-fg)">Ils parlent tous la même langue :</strong> le protocole OIDC
 </div>
 
 ---
 layout: default
+class: sec-authn
 ---
 
-# Besoin de SSO social ? {.!mb-36}
+# Besoin de SSO social ? {.!mb-12}
 
-### La plupart des OIDC providers listés supportent le SSO social nativement, <br> par simple configuration des client credentials.
+### **SSO social natif** : quelques client credentials à configurer.
+
+<LogoGrid :gapX="5" class="pt-12">
+  <Logo src="/google.svg" label="Google" />
+  <Logo src="/facebook.svg" label="Facebook" />
+  <Logo src="/apple.svg" label="Apple" />
+  <Logo src="/github.png" label="GitHub" />
+</LogoGrid>
 
 ---
 layout: default
+class: sec-authn
 ---
 
-# Symfony supporte (en grande partie) OIDC
+# Votre API redevient un simple resource server
 
 <v-clicks>
 
-- 📚 Votre API reste le **resource server**
-- 🛂 Votre OIDC Provider est l'**authorization server**
-- 👥 Les utilisateurs sont **stockés dans l'OIDC Provider**
-- 🛰️ Votre API **s'appuie sur l'OIDC Provider** pendant le processus de sécurité pour **vérifier l'identité de l'utilisateur et récupérer ses informations**
+- 👉 Les **apps clientes** redirigent les utilisateurs vers l'**OIDC Provider** 
+- 🛂 L'**OIDC Provider** les authentifient et **émet les tokens**
+- 👥 Les **comptes** vivent dans l'**OIDC Provider**, plus dans votre base
+- 🧩 Votre **API** doit **vérifier** les tokens
+- 🚫 Aucun écran de login ni de consentement à coder
+- 🏦 Votre **API** se concentre sur le métier
 
 </v-clicks>
 
 ---
 layout: default
+class: sec-authn
 ---
 
-# Symfony supporte (en grande partie) OIDC
-
-## 🦸 Symfony propose 2 stratégies OIDC : {.mb-8}
+# Symfony vérifie les access tokens nativement
 
 <v-clicks>
 
-  - 📶 `OidcUserInfoTokenHandler` pour **valider les tokens à distance** auprès de l'OIDC Provider
-  - 📵 `OidcTokenHandler` pour **valider les tokens localement** avec la clé publique de l'OIDC Provider
+- 🔌 Authenticator **`access_token`** dans le firewall
+- 📥 Lit l'en-tête **`Authorization: Bearer`** par défaut
+- 🧩 Un **token handler** décide *comment* valider
+- 🎯 Deux handlers OIDC natifs : **`oidc`** et **`oidc_user_info`**
 
 </v-clicks>
+
+---
+layout: default
+class: sec-authn
+---
+
+# Vérification offline : la signature suffit
+
+```yaml
+# config/packages/security.yaml
+security:
+    firewalls:
+        api:
+            pattern: ^/api
+            stateless: true
+            access_token:
+                token_handler:
+                    oidc:
+                        algorithms: ['RS256']
+                        audience: 'api-photos'
+                        issuers: ['https://id.example.com/realms/photos']
+                        discovery:
+                            base_uri: 'https://id.example.com/realms/photos/'
+                            cache: { id: cache.app }
+```
 
 <v-click>
 
-## Les deux nécessitent les composants HttpClient et Cache. {.mt-8 .mb-4}
+<Alert type="info">
 
-```shell
-composer require symfony/http-client symfony/cache
-```
+`composer require web-token/jwt-library`. <br/> Les clés publiques viennent du `.well-known` : vérification en local.
+
+</Alert>
 
 </v-click>
 
 ---
 layout: default
+class: sec-authn
 ---
 
-# OidcUserInfoTokenHandler
+# Vérification online : on interroge le Provider
 
 ```yaml
 # config/packages/security.yaml
 security:
     firewalls:
-        main:
-            # ...
-            access_token:
-                token_handler:
-                    oidc_user_info: https://your-oidc-provider/realms/demo/protocol/openid-connect/userinfo
-```
-
-Symfony appelle l'endpoint user info pour valider le token et récupérer les infos utilisateur pendant l'authentification.
-
----
-layout: default
----
-
-# Avec OIDC Discovery
-
-```yaml
-# config/packages/security.yaml
-security:
-    firewalls:
-        main:
-            # ...
+        api:
+            pattern: ^/api
+            stateless: true
             access_token:
                 token_handler:
                     oidc_user_info:
-                        base_uri: https://your-oidc-provider/realms/demo/
+                        base_uri: 'https://id.example.com/realms/photos/'
+                        claim: email
                         discovery:
-                            cache:
-                                id: cache.app
+                            cache: { id: cache.app }
 ```
 
-Symfony découvre automatiquement les endpoints OIDC (dont user info) et les met en cache pour de meilleures performances.
+<v-click>
+
+<Alert type="info">
+
+`composer require symfony/http-client`. <br/> Un appel HTTP au Provider à **chaque requête** entrante.
+
+</Alert>
+
+</v-click>
 
 ---
 layout: default
+class: sec-authn
 ---
 
-# OidcTokenHandler {.!-mb-4}
+# Offline ou online : un arbitrage, pas un gagnant
 
-Nécessite une bibliothèque pour manipuler les tokens JWT :
+|                          | `oidc` (offline)          | `oidc_user_info` (online) |
+|--------------------------|---------------------------|---------------------------|
+| **Appel réseau**         | Aucun                     | Un par requête            |
+| **Révocation d'un token**| Visible à l'expiration    | Immédiate                 |
+| **Provider indisponible**| L'API continue de servir  | L'API ne répond plus      |
+| **Dépendance**           | `web-token/jwt-library`   | `symfony/http-client`     |
 
-```shell
-composer require web-token/jwt-library
-```
+<v-click>
 
-```yaml
-# config/packages/security.yaml
-security:
-    firewalls:
-        main:
-            # ...
-            access_token:
-                token_handler:
-                    oidc:
-                        algorithms: ['ES256', 'RS256'] # Algorithmes utilisés pour signer le JWS
-                        audience: 'api-example' # Audience (claim `aud`) : requis pour la validation
-                        issuers: ['https://oidc.example.com'] # Issuers (claim `iss`) : requis pour la validation
-                        keyset: '{"keys":[{"kty":"...","k":"..."}]}' # Un JWK encodé en JSON
-```
+#### Access tokens courts + offline : le meilleur compromis dans la majorité des cas. {.mt-6}
 
-Symfony valide le token localement avec les JWK fournis, sans dépendre de l'OIDC Provider.
+</v-click>
 
 ---
 layout: default
+class: sec-authn
 ---
 
-# Avec OIDC Discovery
+# OIDC ne standardise pas la notion de rôle
 
-```yaml
-# config/packages/security.yaml
-security:
-    firewalls:
-        main:
-            # ...
-            access_token:
-                token_handler:
-                    oidc:
-                        algorithms: ['ES256', 'RS256']
-                        audience: 'api-example'
-                        issuers: ['https://oidc.example.com']
-                        discovery:
-                            base_uri: https://www.example.com/realms/demo/
-                            cache:
-                                id: cache.app
+<v-clicks>
+
+- 🪪 `OidcUser` par défaut : **`ROLE_USER`**, et rien d'autre
+- 🧾 Le claim porteur des rôles varie : `realm_access`, `groups`, `scope`...
+- 🔁 À vous de **mapper** les claims vers des rôles Symfony
+
+</v-clicks>
+
+<v-click>
+
+<Alert type="warning">
+
+Le code de Symfony le dit explicitement : les specs OIDC et OAuth n'ont **aucune** notion de rôle.
+
+</Alert>
+
+</v-click>
+
+---
+layout: default
+class: sec-authn
+---
+
+# Le mapping vit dans un UserProvider dédié
+
+```php
+// src/Security/OidcUserProvider.php
+class OidcUserProvider implements AttributesBasedUserProviderInterface
+{
+    public function loadUserByIdentifier(string $id, array $attributes = []): UserInterface
+    {
+        return new OidcUser(
+            userIdentifier: $id,
+            roles: $this->mapRoles($attributes), // claims -> ROLE_*
+            sub: $attributes['sub'],
+            email: $attributes['email'] ?? null,
+        );
+    }
+
+    private function mapRoles(array $attributes): array
+    {
+        // ...
+    }
+
+    // + refreshUser() et supportsClass(), hérités de UserProviderInterface
+}
 ```
 
-Symfony découvre automatiquement les JWK OIDC et les met en cache pour de meilleures performances.
+`$attributes` contient les claims du token. {.opacity-60}
 
+---
+layout: default
+class: sec-authn
+---
+
+# La ressource API Platform, elle, ne change pas
+
+```php
+// src/Entity/Photo.php
+#[ApiResource(security: "is_granted('ROLE_USER')")]
+#[GetCollection]
+#[Post(security: "is_granted('ROLE_PHOTOS_WRITE')")]
+class Photo
+{
+    // ...
+}
+```
+
+<v-click>
+
+#### Même expression qu'avec OAuth2. <br/> Seule la **source des rôles** a changé. {.mt-6}
+
+</v-click>
+
+---
+layout: default
+class: sec-authn
+---
+
+# Et si le client est lui aussi une app Symfony ?
+
+<v-clicks>
+
+- ✅ **Vérifier** un access token : natif (`access_token`)
+- ❌ **Initier** le flow authorization_code : pas encore dans le core
+- 📦 `drenso/symfony-oidc-bundle` couvre le login côté client
+
+</v-clicks>
+
+<v-click>
+
+<Alert type="info">
+
+🚧 Je travaille sur une série de **PRs pour amener ce flow dans Symfony directement**.
+
+</Alert>
+
+</v-click>

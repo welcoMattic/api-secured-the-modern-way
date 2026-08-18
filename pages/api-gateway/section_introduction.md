@@ -1,76 +1,109 @@
 ---
 layout: section
+class: sec-gw
 ---
 
-# 🎁 L'API Gateway, la surprise !
+<div class="section-index">🎁</div>
 
----
-layout: default
----
+# L'API Gateway
 
-# Ces derniers sujets sont-ils la responsabilité de votre API ?
-
-### Authentification, autorisation, rate limiting et, plus globalement, sécuriser et protéger vos APIs : c'est un travail à plein temps ! {.mt-8}
-
-### Les API Gateways ou les plateformes d'API Management sont là pour vous y aider ! {.mt-10}
+La surprise !
 
 ---
 layout: default
+class: sec-gw
+---
+
+# Est-ce vraiment le job de votre API ?
+
+<v-clicks>
+
+- 🔐 Auth, autorisation, rate limiting, protection...
+- ⏳ Un **travail à plein temps**
+- 🛎️ **API Gateway / API Management** : c'est leur métier
+
+</v-clicks>
+
+---
+layout: default
+class: sec-gw
 ---
 
 # Choisissez votre préférée !
 
 ### Open source ou commerciale, auto-hébergée ou SaaS, le choix est vaste !
 
-<div class="flex flex-wrap gap-x-34 gap-y-10 justify-center my-4 pt-8">
-    <span class="flex flex-col items-center">
-        <img src="/apisix.svg" alt="apisix logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Apisix</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/gravitee.webp" alt="gravitee logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Gravitee</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/konghq.webp" alt="konghq logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Kong</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/krakend.webp" alt="krakend logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">KrakenD</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/otoroshi.png" alt="otoroshi logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Otoroshi</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/tyk.webp" alt="tyk logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Tyk</div>
-    </span>
-    <span class="flex flex-col items-center">
-        <img src="/zuplo.webp" alt="zuplo logo" class="w-16 h-16 object-contain"/>
-        <div class="text-center mt-2">Zuplo</div>
-    </span>
-</div>
+<ServiceGroup europe label="Europe" :cols="4" class="mt-4">
+  <Logo :size="3" src="/gravitee.webp" label="Gravitee" />
+  <Logo :size="3" src="/krakend.svg" label="KrakenD" />
+  <Logo :size="3" src="/otoroshi.png" label="Otoroshi" />
+  <Logo :size="3" src="/traefik.png" label="Traefik" />
+</ServiceGroup>
+
+<ServiceGroup label="Reste du monde" :cols="4" class="mt-4">
+  <Logo :size="3" src="/aws-api-gateway.svg" label="Amazon API Gateway" />
+  <Logo :size="3" src="/apigee.png" label="Apigee" />
+  <Logo :size="3" src="/apisix.svg" label="Apisix" />
+  <Logo :size="3" src="/konghq.webp" label="Kong" />
+</ServiceGroup>
 
 ---
 layout: default
+class: sec-gw
 ---
 
 # Déléguez !
 
-<v-clicks>
+Trois domaines entiers que votre API n'a plus à porter.
 
-- 🔐 Authentification / autorisation
-- ⏱️ Rate limiting
-- 🪵 Logging
-- 📊 Monitoring
-- ... et plus encore !
-
-</v-clicks>
+<CardGrid :cols="3" class="gw-grid">
+  <Card v-click :accent="1" icon="🔐" title="Accès">
+    Authentification<br/>
+    Autorisation<br/>
+    CORS (préflight + en-têtes)
+  </Card>
+  <Card v-click :accent="4" icon="🛡️" title="Protection">
+    WAF : SQLi, XSS, OWASP<br/>
+    Détection de bots<br/>
+    IP allow/deny, géo-blocage
+  </Card>
+  <Card v-click :accent="7" icon="📊" title="Exploitation">
+    Rate limiting<br/>
+    Logging<br/>
+    Monitoring
+  </Card>
+</CardGrid>
 
 <v-click>
 
-#### La plupart des API Gateways offrent ces fonctionnalités de base nativement et finement configurables.
+<div class="gw-punch">Tout ça <b>en amont</b> de votre API<br/> et sans <b>"polluer"</b> votre code applicatif.</div>
 
 </v-click>
+
+<style scoped>
+/* Takeaway slide: the grouping is the insight, the punchline is the payoff. */
+.gw-grid {
+  margin-top: 1.1rem;
+  align-items: stretch;
+}
+.gw-grid :deep(.ds-card__icon) { font-size: 2.7rem; }
+.gw-punch {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-family: "Sora", sans-serif;
+  font-size: 1.7rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--c-fg);
+  text-wrap: balance;
+}
+.gw-punch b { color: var(--sec, var(--c-accent)); }
+</style>
+
+<!--
+Liste non exhaustive : la plupart des gateways couvrent bien plus.
+
+CORS, à ne pas survoler : c'est le navigateur qui applique la Same-Origin Policy, pas votre API. La gateway répond aux requêtes préflight (OPTIONS) et ajoute les en-têtes Access-Control-Allow-*. L'intérêt : une politique cross-origin centralisée et cohérente sur tout le parc, au lieu de reconfigurer nelmio/cors-bundle dans chaque service Symfony.
+
+Message clé : trois domaines entiers sortent de votre code applicatif. C'est le take away de la section.
+-->
