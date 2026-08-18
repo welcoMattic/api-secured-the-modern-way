@@ -1,0 +1,5 @@
+*/vendor/
+*/var/
+client-spa/node_modules/
+client-spa/dist/
+*.env.local

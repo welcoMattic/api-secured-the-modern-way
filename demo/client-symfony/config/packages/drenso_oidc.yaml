@@ -1,0 +1,9 @@
+drenso_oidc:
+    clients:
+        default:
+            well_known_url: '%env(OIDC_WELL_KNOWN_URL)%'
+            client_id: '%env(OIDC_CLIENT_ID)%'
+            client_secret: '%env(OIDC_CLIENT_SECRET)%'
+            redirect_route: app_login_check
+            # PKCE activé même pour un client confidentiel : OAuth 2.1 le recommande
+            code_challenge_method: S256

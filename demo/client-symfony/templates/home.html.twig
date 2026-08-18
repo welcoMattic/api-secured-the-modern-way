@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Client Symfony - API Secured{% endblock %}
+
+{% block body %}
+    {% if app.user %}
+        {# Utilisateur connecté #}
+        <h1>Client Symfony connecté</h1>
+        
+        <div class="user-info">
+            <strong>Utilisateur :</strong>
+            <span>{{ app.user.preferredUsername }}</span>
+            <span>{{ app.user.email }}</span>
+        </div>
+        
+        <div class="actions">
+            <a href="{{ path('app_logout') }}">Se déconnecter</a>
+        </div>
+        
+        <div class="actions">
+            <form action="{{ path('app_photos_list') }}" method="post">
+                <button type="submit">GET /api/photos</button>
+            </form>
+            
+            <form action="{{ path('app_photos_create') }}" method="post">
+                <button type="submit">POST /api/photos</button>
+            </form>
+        </div>
+        
+        <p class="note">
+            Avec bob, le POST retourne 403.<br>
+            Cette décision est prise par l'API à partir de l'access token, jamais par cette application.
+        </p>
+    {% else %}
+        {# Utilisateur non connecté #}
+        <h1>Client Symfony</h1>
+        <p>
+            <a href="{{ path('app_login') }}">Se connecter avec Keycloak</a>
+        </p>
+    {% endif %}
+
+    {# Résultat des appels API #}
+    {% for flash in app.flashes('api_result') %}
+        {% set status = flash.status %}
+        {% set body = flash.body %}
+        {% set isSuccess = status >= 200 and status < 300 %}
+        
+        <div class="result-panel {{ isSuccess ? 'success' : 'error' }}">
+            <strong>HTTP {{ status }}</strong>
+            <pre>{{ body }}</pre>
+        </div>
+    {% endfor %}
+{% endblock %}

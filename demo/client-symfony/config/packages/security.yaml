@@ -1,0 +1,28 @@
+security:
+    # Pas de mots de passe locaux : toute l'authentification passe par Keycloak
+    providers:
+        oidc:
+            id: App\Security\OidcUserProvider
+
+    firewalls:
+        dev:
+            pattern: ^/(_profiler|_wdt|assets|build)/
+            security: false
+        main:
+            lazy: true
+            provider: oidc
+            oidc:
+                check_path: app_login_check
+                login_path: app_login
+                client: default
+                user_identifier_property: sub
+                # RP-initiated logout : déclenche aussi la déconnexion chez Keycloak
+                enable_end_session_listener: true
+            logout:
+                path: app_logout
+                target: app_home
+
+    access_control:
+        - { path: ^/(login|logout)$, roles: PUBLIC_ACCESS }
+        - { path: ^/$, roles: PUBLIC_ACCESS }
+        - { path: ^/, roles: ROLE_USER }

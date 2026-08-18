@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Client Symfony{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        {% block stylesheets %}
+        <style>
+            :root {
+                --bg-color: #1a1a1a;
+                --text-color: #ffffff;
+                --link-color: #4da6ff;
+                --button-bg: #2d2d2d;
+                --button-border: #404040;
+                --success-bg: #28a745;
+                --error-bg: #dc3545;
+            }
+            
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: var(--bg-color);
+                color: var(--text-color);
+                font-size: 18px;
+                line-height: 1.6;
+                padding: 2rem;
+                min-height: 100vh;
+            }
+            
+            a {
+                color: var(--link-color);
+                text-decoration: none;
+            }
+            
+            a:hover {
+                text-decoration: underline;
+            }
+            
+            h1 { font-size: 2rem; margin-bottom: 1.5rem; }
+            .user-info { margin: 1rem 0; }
+            .user-info span { margin-right: 1rem; }
+            
+            .actions { margin: 2rem 0; }
+            form { display: inline-block; margin-right: 1rem; }
+            
+            button[type="submit"] {
+                font-size: 1rem;
+                padding: 0.5rem 1rem;
+                background: var(--button-bg);
+                color: var(--text-color);
+                border: 1px solid var(--button-border);
+                border-radius: 4px;
+                cursor: pointer;
+            }
+            
+            button[type="submit"]:hover {
+                background: #3a3a3a;
+            }
+            
+            .result-panel {
+                margin-top: 2rem;
+                padding: 1rem;
+                border-radius: 4px;
+                font-family: 'Courier New', monospace;
+                font-size: 0.85rem;
+                white-space: pre-wrap;
+            }
+            
+            .result-panel.success {
+                background: rgba(40, 167, 69, 0.2);
+                border-left: 4px solid var(--success-bg);
+            }
+            
+            .result-panel.error {
+                background: rgba(220, 53, 69, 0.2);
+                border-left: 4px solid var(--error-bg);
+            }
+            
+            .note {
+                margin-top: 1rem;
+                font-size: 0.9rem;
+                color: #888;
+            }
+        </style>
+        {% endblock %}
+
+        {% block javascripts %}
+        {% endblock %}
+
+        {% set frankenphp_hot_reload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
+        {% if frankenphp_hot_reload %}
+        <meta name="frankenphp-hot-reload:url" content="{{ frankenphp_hot_reload }}">
+        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
+        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
+        {% endif %}
+    </head>
+    <body>
+        {% block body %}{% endblock %}
+    </body>
+</html>
