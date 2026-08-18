@@ -3,7 +3,8 @@ layout: fact
 class: sec-authn
 ---
 
-## Contrairement au bundle serveur OAuth2, <br> nous n'implémentons pas notre propre OIDC Provider.
+## Nous n'implémentons pas notre propre OIDC Provider.
+<div class="slide-punch is-centered">C'est un métier à part entière.</div>
 
 ---
 layout: default
@@ -70,16 +71,26 @@ layout: default
 class: sec-authn
 ---
 
-# Besoin de SSO social ? {.!mb-12}
+# Besoin de SSO social ?
 
-### **SSO social natif** : quelques client credentials à configurer.
+Quelques client credentials à configurer, et c'est branché.
 
-<LogoGrid :gapX="5" class="pt-12">
-  <Logo src="/google.svg" label="Google" />
-  <Logo src="/facebook.svg" label="Facebook" />
-  <Logo src="/apple.svg" label="Apple" />
-  <Logo src="/github.png" label="GitHub" />
+<LogoGrid :cols="4" :gapY="2.4" class="sso-grid">
+  <Logo :size="4.2" src="/google.svg" label="Google" />
+  <Logo :size="4.2" src="/microsoft.svg" label="Microsoft" />
+  <Logo :size="4.2" src="/apple.svg" label="Apple" />
+  <Logo :size="4.2" src="/facebook.svg" label="Facebook" />
+  <Logo :size="4.2" src="/github.png" label="GitHub" />
+  <Logo :size="4.2" src="/gitlab.svg" label="GitLab" />
+  <Logo :size="4.2" src="/linkedin.svg" label="LinkedIn" />
+  <Logo :size="4.2" src="/bluesky.svg" label="Bluesky" />
 </LogoGrid>
+
+<div class="slide-note is-centered">Pas une ligne de code, <b>que de la configuration</b>. Keycloak fournit douze connecteurs en standard.</div>
+
+<style scoped>
+.sso-grid { margin-top: 0.2rem; }
+</style>
 
 ---
 layout: default
@@ -177,7 +188,7 @@ security:
 
 <Alert type="info">
 
-`composer require symfony/http-client`. <br/> Un appel HTTP au Provider à **chaque requête** entrante.
+`composer require symfony/http-client`. <br/> Un appel HTTP au Provider à **chaque requête** entrante sur l'API.
 
 </Alert>
 
@@ -199,7 +210,7 @@ class: sec-authn
 
 <v-click>
 
-#### Access tokens courts + offline : le meilleur compromis dans la majorité des cas. {.mt-6}
+<div class="slide-punch">Access tokens courts + offline : le meilleur compromis dans la majorité des cas.</div>
 
 </v-click>
 
@@ -258,14 +269,14 @@ class OidcUserProvider implements AttributesBasedUserProviderInterface
 }
 ```
 
-`$attributes` contient les claims du token. {.opacity-60}
+<div class="slide-note"><code>$attributes</code> contient les claims du token.</div>
 
 ---
 layout: default
 class: sec-authn
 ---
 
-# La ressource API Platform, elle, ne change pas
+# La ressource API Platform ne change pas
 
 ```php
 // src/Entity/Photo.php
@@ -280,7 +291,7 @@ class Photo
 
 <v-click>
 
-#### Même expression qu'avec OAuth2. <br/> Seule la **source des rôles** a changé. {.mt-6}
+<div class="slide-punch">Même expression qu'avec OAuth2.<br/>Seule la <b>source des rôles</b> a changé.</div>
 
 </v-click>
 
@@ -294,17 +305,42 @@ class: sec-authn
 <v-clicks>
 
 - ✅ **Vérifier** un access token : natif (`access_token`)
-- ❌ **Initier** le flow authorization_code : pas encore dans le core
+- ❌ **Initier** le flow authorization_code : pas encore dans le Core
 - 📦 `drenso/symfony-oidc-bundle` couvre le login côté client
+
+  - 🛣️ Redirection vers l'OIDC Provider
+  - 🔄 Échange de l'`authorization_code` contre la paire de tokens
+  - 🪪 Authentification de l'utilisateur au sein de l'app Symfony
 
 </v-clicks>
 
-<v-click>
+---
+layout: default
+class: sec-authn
+---
 
-<Alert type="info">
+# Bientôt natif dans Symfony ?
 
-🚧 Je travaille sur une série de **PRs pour amener ce flow dans Symfony directement**.
+PR ouverte sur la branche **8.2**, en cours de review.
 
-</Alert>
+<div class="pr-shot">
+  <img src="/pr-64954.png" alt="symfony/symfony PR 64954 : Add an OIDC Authorization Code Flow authenticator" />
+</div>
 
-</v-click>
+<div class="slide-note is-centered pr-link">github.com/symfony/symfony/pull/<b>64954</b></div>
+
+<style scoped>
+.pr-shot {
+  margin-top: 0.8rem;
+  display: flex;
+  justify-content: center;
+}
+.pr-shot img {
+  width: 100%;
+  max-width: 38rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--c-border);
+  box-shadow: var(--shadow-card);
+}
+.pr-link { font-family: "Fira Code", monospace; }
+</style>

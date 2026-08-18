@@ -69,10 +69,6 @@ src: ./pages/speaker.md
 ---
 
 ---
-src: ./pages/introduction/agenda.md
----
-
----
 src: ./pages/introduction/what-is-secured.md
 ---
 

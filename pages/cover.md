@@ -16,7 +16,7 @@
       <span class="px-4 py-1.5 rounded-full border" style="background:rgba(107,140,240,0.13);border-color:rgba(107,140,240,0.55);color:#b3c1fa">PKCE</span>
       <span class="px-4 py-1.5 rounded-full border" style="background:rgba(140,120,238,0.13);border-color:rgba(140,120,238,0.55);color:#c8bcf8">JWT</span>
       <span class="px-4 py-1.5 rounded-full border" style="background:rgba(178,110,232,0.13);border-color:rgba(178,110,232,0.55);color:#ddb6f4">SSO</span>
-      <span class="px-4 py-1.5 rounded-full border" style="background:rgba(195,33,134,0.14);border-color:rgba(195,33,134,0.55);color:#f2b0d8">+ une surprise 🎁</span>
+      <span class="px-4 py-1.5 rounded-full border" style="background:rgba(195,33,134,0.14);border-color:rgba(195,33,134,0.55);color:#f2b0d8">🎁</span>
     </div>
   </div>
 
