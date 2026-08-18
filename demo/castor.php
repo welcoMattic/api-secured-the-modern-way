@@ -64,19 +64,23 @@ function start(): void
 
     // 4. symfony server:start pour l'API sur le port 8100
     io()->text('Démarrage du serveur de l\'API sur le port 8100...');
-    run('symfony server:start -d --port=8100 --no-tls', context: api_context());
+    run('symfony server:start -d --port=8100 --no-tls', context: api_context()->withAllowFailure());
 
     // 5. symfony server:start pour le client Symfony sur le port 8101
     io()->text('Démarrage du serveur du client Symfony sur le port 8101...');
-    run('symfony server:start -d --port=8101 --no-tls', context: client_symfony_context());
+    run('symfony server:start -d --port=8101 --no-tls', context: client_symfony_context()->withAllowFailure());
 
     // 6. Vite dev server pour le client SPA, en arrière-plan
     io()->text('Démarrage du serveur Vite du client SPA sur le port 5173...');
     fs()->mkdir(__DIR__.'/var');
     // La sortie est redirigee vers un fichier : sinon le processus detache garde le tuyau
     // ouvert et run() attend indefiniment. Le PID est celui du shell de bun.
-    run('nohup bun run dev > ../var/spa.log 2>&1 & echo $! > ../var/spa.pid', context: client_spa_context());
-    sleep(3);
+    if ('000' === trim(capture('curl -s -o /dev/null --max-time 2 -w "%{http_code}" http://localhost:5173/', onFailure: '000'))) {
+        run('nohup bun run dev > ../var/spa.log 2>&1 & echo $! > ../var/spa.pid', context: client_spa_context());
+        sleep(3);
+    } else {
+        io()->text('Vite ecoute deja sur 5173, on le laisse tranquille.');
+    }
 
     // 7. Affichage final avec les URLs et les comptes
     io()->success('Toute la démo est démarrée !');
