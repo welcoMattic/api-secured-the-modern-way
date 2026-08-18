@@ -5,7 +5,7 @@ namespace App\Controller;
 use Drenso\OidcBundle\OidcClientInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class SecurityController extends AbstractController
 {
@@ -29,9 +29,10 @@ class SecurityController extends AbstractController
     }
 
     #[Route('/logout', name: 'app_logout')]
-    public function logout(): void
+    public function logout(): never
     {
-        // La déconnexion est gérée par le firewall (oidc + logout).
+        // Jamais atteinte non plus : le firewall intercepte /logout.
         // enable_end_session_listener: true déclenche aussi la déconnexion chez Keycloak.
+        throw new \LogicException('app_logout doit être interceptée par le firewall.');
     }
 }

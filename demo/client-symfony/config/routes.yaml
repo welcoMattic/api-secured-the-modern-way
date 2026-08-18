@@ -1,37 +1,11 @@
 # yaml-language-server: $schema=../vendor/symfony/routing/Loader/schema/routing.schema.json
 
 # This file is the entry point to configure the routes of your app.
+# Methods with the #[Route] attribute are automatically imported.
 # See also https://symfony.com/doc/current/routing.html
 
 # To list all registered routes, run the following command:
 #   bin/console debug:router
 
-app_login:
-    path: /login
-    controller: App\Controller\SecurityController::login
-    methods: GET
-
-app_login_check:
-    path: /login_check
-    controller: App\Controller\SecurityController::loginCheck
-    methods: GET
-
-app_logout:
-    path: /logout
-    controller: App\Controller\SecurityController::logout
-    methods: GET
-
-app_home:
-    path: /
-    controller: App\Controller\PhotoController::home
-    methods: GET
-
-app_photos_list:
-    path: /photos/list
-    controller: App\Controller\PhotoController::list
-    methods: POST
-
-app_photos_create:
-    path: /photos/create
-    controller: App\Controller\PhotoController::create
-    methods: POST
+controllers:
+    resource: routing.controllers

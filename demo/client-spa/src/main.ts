@@ -1,4 +1,5 @@
 import './style.css'
+import type { User } from 'oidc-client-ts'
 import { userManager } from './oidc'
 import { callApi, decodeJwt } from './api'
 
@@ -20,8 +21,12 @@ if (window.location.search.includes('code=')) {
   userManager.getUser().then(user => renderApp(user))
 }
 
-function renderApp(user?: any): void {
-  if (!user || !user.profile || user.expired) {
+function renderApp(user: User | null): void {
+  // Des const locales, pas des proprietes : TypeScript garde le narrowing dans les callbacks
+  const idToken = user?.id_token
+  const accessToken = user?.access_token
+
+  if (!user || !user.profile || user.expired || !idToken || !accessToken) {
     // État déconnecté
     authContainer.innerHTML = '<button id="login-btn">Se connecter avec Keycloak</button>'
     userContainer.innerHTML = ''
@@ -40,12 +45,12 @@ function renderApp(user?: any): void {
 
   document.getElementById('logout-btn')!.addEventListener('click', () => userManager.signoutRedirect())
 
-  // Tokens décodés
-  const idToken = decodeJwt(user.id_token)
-  const accessToken = decodeJwt(user.access_token)
+  // Tokens décodés : deux destinataires, deux contenus
+  const idClaims = decodeJwt(idToken)
+  const accessClaims = decodeJwt(accessToken)
 
-  idTokenContainer.innerHTML = `<h3>ID token -&gt; l&apos;application cliente</h3><pre>${JSON.stringify(idToken, null, 2)}</pre>`
-  accessTokenContainer.innerHTML = `<h3>Access token -&gt; l&apos;API</h3><p><small>Note : l&apos;<code>aud</code> doit contenir <code>api-photos</code> et <code>realm_access.roles</code> contient les rôles.</small></p><pre>${JSON.stringify(accessToken, null, 2)}</pre>`
+  idTokenContainer.innerHTML = `<h3>ID token -&gt; l&apos;application cliente</h3><pre>${JSON.stringify(idClaims, null, 2)}</pre>`
+  accessTokenContainer.innerHTML = `<h3>Access token -&gt; l&apos;API</h3><p><small>Note : l&apos;<code>aud</code> doit contenir <code>api-photos</code> et <code>realm_access.roles</code> porte les rôles.</small></p><pre>${JSON.stringify(accessClaims, null, 2)}</pre>`
 
   // Boutons d'action
   actionsContainer.innerHTML = `
@@ -61,7 +66,7 @@ function renderApp(user?: any): void {
     btn.addEventListener('click', async () => {
       const method = (btn as HTMLElement).dataset.method as 'GET' | 'POST'
       const tokenType = (btn as HTMLElement).dataset.token!
-      const token = tokenType === 'id' ? user.id_token : user.access_token
+      const token = tokenType === 'id' ? idToken : accessToken
 
       const result = await callApi(method, token)
       showResponse(result.status, result.body)
@@ -74,9 +79,11 @@ function renderApp(user?: any): void {
 }
 
 function showResponse(status: number, body: string): void {
-  const color = status >= 200 && status < 300 ? 'green' : 'red'
+  const ok = status >= 200 && status < 300
   responseContainer.innerHTML = `
-    <div class="response-header" style="color: ${color}">HTTP ${status}</div>
-    <pre class="response-body">${body || '(vide)'}</pre>
+    <div class="response-header" style="color: ${ok ? 'var(--success)' : 'var(--error)'}">HTTP ${status}</div>
+    <pre class="response-body"></pre>
   `
+  // textContent et pas innerHTML : le corps vient de l'API, on l'affiche tel quel
+  responseContainer.querySelector('.response-body')!.textContent = body || '(vide)'
 }

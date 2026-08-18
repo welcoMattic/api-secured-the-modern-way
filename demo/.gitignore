@@ -1,5 +1,7 @@
 */vendor/
 */var/
+var/
 client-spa/node_modules/
 client-spa/dist/
 *.env.local
+.castor.stub.php

@@ -189,3 +189,24 @@ pre {
     width: 100%;
   }
 }
+
+h1 {
+  font-size: 1.6rem;
+  margin: 0 0 1.5rem;
+  color: var(--accent);
+}
+
+h1 small {
+  display: block;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  font-family: ui-monospace, 'Fira Code', monospace;
+}
+
+/* Les panneaux vides ne doivent pas laisser de rectangles gris a la projection */
+#id-token:empty,
+#access-token:empty,
+#response:empty {
+  display: none;
+}

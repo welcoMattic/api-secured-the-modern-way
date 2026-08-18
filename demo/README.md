@@ -51,7 +51,7 @@ Le point clé : **côté API, rien ne change**. Le resource server ne sait pas q
 ```bash
 castor install   # composer install x2 + bun install
 castor start     # keycloak + api + client-symfony + client-spa
-castor open      # ouvre les 3 apps dans le navigateur
+castor open      # ouvre les 3 apps et la console Keycloak
 ```
 
 `castor stop` arrête tout. `castor smoke` vérifie l'API en ligne de commande, sans navigateur.

@@ -4,7 +4,7 @@ namespace App\Api;
 
 use Drenso\OidcBundle\Security\Token\OidcToken;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
