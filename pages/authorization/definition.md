@@ -14,9 +14,9 @@ class: sec-authz
 
 # 👀 Focus du jour
 
-Le scénario **au nom de l'utilisateur** (authorization code).
+Le scénario **au nom de l'utilisateur** <br> (Authorization Code Flow).
 
-<span class="text-base italic opacity-60">OAuth2 gère aussi les *client credentials*, sans utilisateur. [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749)</span>
+<span class="text-base italic opacity-60">OAuth2 gère aussi les *Client Credentials Flow*, sans utilisateur. [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749)</span>
 
 ---
 layout: default
@@ -25,17 +25,35 @@ class: sec-authz
 
 # Alice, PhotoPrint et CloudPics
 
-<v-clicks>
+<div class="story">
 
-- 👩‍🦰 Alice utilise **PhotoPrint** et **CloudPics**
-- 📸 PhotoPrint veut **les photos d'Alice** sur CloudPics
-- 🔐 Sans le **mot de passe CloudPics** d'Alice
-- 🔗 PhotoPrint **redirige** Alice vers CloudPics
-- 🔢 Alice **autorise** → un **code** à usage unique
-- 🔄 Code **échangé** contre un **access token**
-- ✅ Access token → **accès aux photos**
+<div class="beat" v-click>
+  <div class="beat__label">Le décor</div>
+  <div class="beat__body">
+    👩‍🦰 Alice utilise <b>PhotoPrint</b> et <b>CloudPics</b>.<br/>
+    📸 PhotoPrint veut <b>les photos d'Alice</b>, hébergées sur CloudPics.
+  </div>
+</div>
 
-</v-clicks>
+<div class="beat" v-click>
+  <div class="beat__label">La contrainte</div>
+  <div class="beat__body">
+    🔐 Sans jamais lui demander son <b>mot de passe CloudPics</b>.
+  </div>
+</div>
+
+<div class="beat" v-click>
+  <div class="beat__label">Le flow</div>
+  <div class="beat__body">
+    🔗 PhotoPrint <b>redirige</b> Alice vers CloudPics, qui lui demande son accord.<br/>
+    <blockquote class="mt-2 mb-4 !text-base">Autorises-tu PhotoPrint a accéder à tes photos CloudPics ?</blockquote>
+    🔢 Alice <b>autorise</b> : CloudPics émet un <b>code</b> à usage unique.<br/>
+    🔄 PhotoPrint <b>échange</b> ce code contre un <b>access token</b><br/>
+    🌁 PhotoPrint <b>accède</b> aux photos d'Alice grâce à l'access token
+  </div>
+</div>
+
+</div>
 
 <v-click>
 
@@ -47,9 +65,39 @@ class: sec-authz
 
 </v-click>
 
+<style scoped>
+/* Récit en trois temps : le label porte le rythme, le corps porte l'histoire. */
+.story {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+.beat {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr;
+  gap: 1.4rem;
+  align-items: start;
+}
+.beat__label {
+  padding-top: 0.35rem;
+  font-family: "Sora", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sec, var(--c-accent));
+  border-top: 3px solid var(--sec, var(--c-accent));
+}
+.beat__body {
+  font-size: 1.2rem;
+  line-height: 1.7;
+}
+</style>
+
 ---
 layout: iframe
-url: https://s.icepanel.io/GPg85hHAHAN9PQ/prFj
+url: https://s.icepanel.io/GPg85hHAHAN9PQ/prFj/landscape/diagrams/viewer?diagram=ArYURElFMf&drawer=collapsed&flow=MOk1HsWr2U&flow_step=qksr799o76&model=k2TvCLQDNF&x1=320.8&x2=2176.9&y1=-416&y2=576
 ---
 
 ---
@@ -57,29 +105,27 @@ layout: default
 class: sec-authz
 ---
 
-# Les rôles OAuth2
+# Les parties prenantes
 
-<div class="grid grid-cols-3 gap-6 mt-6 w-full">
+<CardGrid :cols="3" class="oauth-roles">
+  <Card v-click :accent="1" icon="👩‍🦰" title="Alice">
+    <b>Resource owner</b><br/>
+    Elle seule peut accorder l'accès à ses photos.
+  </Card>
+  <Card v-click :accent="2" icon="🌁" title="PhotoPrint">
+    <b>Client</b><br/>
+    Demande les photos <b>pour le compte</b> d'Alice, avec son autorisation.
+  </Card>
+  <Card v-click :accent="3" icon="☁️" title="CloudPics">
+    <b>Authorization server<br/>+ Resource server</b><br/>
+    Émet les access tokens, et héberge les photos.
+  </Card>
+</CardGrid>
 
-<div v-click class="p-6 rounded-xl bg-sky-50 border-2 border-sky-200 text-center">
-  <div class="text-5xl mb-3">☁️</div>
-  <div class="font-bold text-xl text-sky-900">CloudPics</div>
-  <div class="text-sm text-gray-600 mt-2">Resource server <br/> + Authorization server</div>
-</div>
-
-<div v-click class="p-6 rounded-xl bg-fuchsia-50 border-2 border-fuchsia-200 text-center">
-  <div class="text-5xl mb-3">🌁</div>
-  <div class="font-bold text-xl text-fuchsia-900">PhotoPrint</div>
-  <div class="text-sm text-gray-600 mt-2">Client application</div>
-</div>
-
-<div v-click class="p-6 rounded-xl bg-amber-50 border-2 border-amber-200 text-center">
-  <div class="text-5xl mb-3">👩‍🦰</div>
-  <div class="font-bold text-xl text-amber-900">Alice</div>
-  <div class="text-sm text-gray-600 mt-2">Resource owner</div>
-</div>
-
-</div>
+<style scoped>
+.oauth-roles { margin-top: 1rem; align-items: stretch; }
+.oauth-roles :deep(.ds-card__icon) { font-size: 2.7rem; }
+</style>
 
 ---
 layout: default
@@ -99,7 +145,7 @@ Le code d'autorisation passe en clair vers le client
 
 <v-click>
 
-#### Le code d'autorisation peut être **volé**. {.mt-8}
+<div class="slide-punch">Le code d'autorisation peut être <b>volé</b>.</div>
 
 </v-click>
 
@@ -120,7 +166,7 @@ class: sec-authz
 
 <v-click>
 
-#### Le code volé s'échange **sans obstacle** → access token d'Alice. {.mt-8}
+<div class="slide-punch">Le code volé s'échange <b>sans obstacle</b> → access token d'Alice.</div>
 
 </v-click>
 
@@ -131,7 +177,7 @@ class: sec-authz
 
 # La parade : PKCE
 
-**P**roof **K**ey for **C**ode **E**xchange ([RFC 7636](https://datatracker.ietf.org/doc/html/rfc7636)) {.text-xl .opacity-60}
+**P**roof **K**ey for **C**ode **E**xchange ([RFC 7636](https://datatracker.ietf.org/doc/html/rfc7636))
 
 <v-clicks>
 
@@ -144,9 +190,7 @@ class: sec-authz
 
 <v-click>
 
-#### Le challenge est **irréversible**. Sans le verifier, le code ne vaut rien. {.mt-6}
-
-#### On prouve lors de l'échange qu'on est bien l'initiateur du flow. {.mt-6}
+<div class="slide-punch">Le challenge est <b>irréversible</b>, sans le verifier le code ne vaut rien.<br/>On prouve à l'échange qu'on est bien l'initiateur du flow.</div>
 
 </v-click>
 
