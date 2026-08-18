@@ -20,6 +20,9 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    # Sans plafond, une étape qui pend immobilise la file de déploiement
+    # pendant des dizaines de minutes (concurrency: cancel-in-progress false).
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v7
 
@@ -33,6 +36,7 @@ jobs:
       # `download: true` dans slides.md déclenche un export PDF pendant le build,
       # qui a besoin d'un vrai navigateur. Sans ça, le build échoue.
       - name: Installer Chromium pour l'export PDF
+        timeout-minutes: 6
         run: bunx playwright install --with-deps chromium
 
       # Le site est servi depuis https://<user>.github.io/<repo>/, donc il faut
