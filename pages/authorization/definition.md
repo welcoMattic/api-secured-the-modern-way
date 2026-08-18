@@ -12,7 +12,9 @@ layout: statement
 class: sec-authz
 ---
 
-# 👀 Focus du jour
+## 👀 {.!text-7xl .mb-6}
+
+# Focus du jour
 
 Le scénario **au nom de l'utilisateur** <br> (Authorization Code Flow).
 
@@ -160,6 +162,7 @@ class: sec-authz
 
 - 📱 PhotoPrint tourne **chez Alice** (SPA, app mobile)
 - 🔓 Un secret embarqué serait **extractible** (DevTools, décompilation)
+- 💥 Un secret unique donnerait accès aux photos de TOUS les utilisateurs de CloudPics
 - 🙅 À l'échange du code, PhotoPrint ne peut **rien prouver**
 
 </v-clicks>
@@ -234,7 +237,7 @@ layout: default
 class: sec-authz
 ---
 
-# Le token en transit
+# Le token ne prouve rien : le détenir suffit
 
 ```http
 GET /api/photos HTTP/1.1
@@ -244,8 +247,27 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 
 <v-clicks>
 
-- 🎫 **Bearer** = porteur : le détenir suffit
-- 🔒 **HTTPS** obligatoire, jamais dans l'URL
-- ⏳ Compensé par des **durées de vie courtes**
+- 🎫 **Bearer** = « au porteur » : aucune preuve n'est demandée au client
+- 🕵️ Volé, il est **indiscernable** d'un token légitime. L'API ne peut pas trancher
+- 🔒 D'où **TLS obligatoire**, et jamais dans une URL : historique, logs, `Referer`
 
 </v-clicks>
+
+<v-click>
+
+<div class="slide-punch">Par défaut, rien n'empêche l'usage d'un token volé.<br/>On ne corrige pas ça, on <b>limite sa durée de validité</b>.</div>
+
+</v-click>
+
+<!--
+Le mot à ne pas lâcher : « au porteur ». C'est un ticket de métro, pas une carte
+d'identité. Le contrôleur vérifie le ticket, jamais qui le présente.
+
+C'est exactement la faiblesse que PKCE corrigeait pour le code d'autorisation,
+sauf qu'ici elle reste. D'où l'enchaînement sur les durées de vie et le refresh.
+
+Si on demande comment faire mieux : DPoP (RFC 9449, Standards Track) lie le token
+à une clé cryptographique du client, ce qui rend un token volé inutilisable.
+Même idée que PKCE, appliquée au token. Ce n'est pas le comportement par défaut,
+et Symfony ne le gère pas nativement.
+-->
