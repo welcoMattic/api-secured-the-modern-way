@@ -145,6 +145,12 @@ Trois détails qui servent le propos :
 | Le claim `aud` est colorié dans les deux cartes de tokens | C'est le seul endroit que vous montrez du doigt : `photoprint` d'un côté, `cloudpics-api` de l'autre. À côté, `azp` dit qui a reçu le token. |
 | L'access token affiche son temps restant | Ça illustre « les access tokens sont courts », et ça vous prévient avant que la démo ne réponde `401`. |
 | Le `401` affiche l'en-tête `WWW-Authenticate` | L'API n'a pas de corps à renvoyer sur un `401` : elle dit `error="invalid_token"` dans l'en-tête. |
+| Les deux apps ont un bouton **« avec l'ID token »**, encadré en magenta | Il envoie l'ID token à la place de l'access token, et récolte un `401`. Un jeton parfaitement valide et parfaitement signé, mais dont l'audience est le client, pas l'API. |
+
+Les deux `401` possibles ne disent pas la même chose, et les apps les distinguent : sur le
+contre-exemple, le refus **est** la démonstration, donc elles expliquent l'audience. Sur un vrai token
+devenu invérifiable, elles proposent « Oublier la session ». Confondre les deux ferait dire à la démo
+l'inverse de ce que vous racontez.
 
 Les apps retirent la `trace` PHP des corps d'erreur avant de les afficher. En dev, un `403` d'API
 Platform pèse 2,5 ko de chemins de vendor : projeté, ça noie la seule ligne qui compte,
@@ -158,10 +164,10 @@ Platform pèse 2,5 ko de chemins de vendor : projeté, ça noie la seule ligne q
 | `api/src/Security/OidcUserProvider.php` | Le mapping `realm_access.roles` -> `ROLE_*`. OIDC n'a aucune notion de rôle : ce mapping est à votre charge. |
 | `api/src/Entity/Photo.php` | La ressource API Platform, inchangée : `is_granted('ROLE_USER')` et `is_granted('ROLE_PHOTOS_WRITE')`. |
 | `client-spa/src/oidc.ts` | Les quinze lignes qui font de PhotoPrint un client OIDC. PKCE S256 est le défaut de la bibliothèque. |
-| `client-spa/src/main.ts` | La distinction ID token (pour PhotoPrint) / access token (pour CloudPics API). |
+| `client-spa/src/main.ts` | La distinction ID token (pour PhotoPrint) / access token (pour CloudPics API), et le contre-exemple. |
 | `client-symfony/config/packages/drenso_oidc.yaml` | La config du client confidentiel PhotoBook, secret compris. |
 | `client-symfony/src/Security/OidcIdentityProvider.php` | PhotoBook n'a besoin que de l'identité. Les rôles restent l'affaire de l'API : la classe est nommée autrement que celle de l'API, exprès. |
-| `client-symfony/src/Api/PhotoApiClient.php` | Comment PhotoBook relaie l'access token de la session vers CloudPics API. |
+| `client-symfony/src/Api/PhotoApiClient.php` | Comment PhotoBook relaie l'access token de la session vers CloudPics API, et `listWithIdToken()` pour le contre-exemple. |
 
 ## Basculer offline / online
 

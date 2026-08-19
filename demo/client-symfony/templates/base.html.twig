@@ -354,6 +354,23 @@
 
             .api-btn:hover { border-color: var(--sec); transform: translateY(-1px); }
 
+            .api-btn small {
+                display: block;
+                margin-top: .15rem;
+                font-size: .78em;
+                color: var(--c-muted);
+            }
+
+            /* Le contre-exemple : un refus attendu, pas une panne. */
+            .api-btn.is-counter {
+                border-color: var(--ko);
+                color: var(--ko);
+                background: rgba(195, 33, 134, .05);
+            }
+
+            .api-btn.is-counter small { color: var(--ko); opacity: .8; }
+            .api-btn.is-counter:hover { background: rgba(195, 33, 134, .1); border-color: var(--ko); }
+
             /* Le nombre d'enfants varie (statut, challenge, indice, corps). Le flex les
                dimensionne tous automatiquement, et seul le corps absorbe la place restante
                puis défile : la carte ne grandit jamais. */

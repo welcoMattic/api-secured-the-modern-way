@@ -49,6 +49,12 @@
                         <form action="{{ path('app_photos_create') }}" method="post">
                             <button type="submit" class="api-btn">POST <code>/api/photos</code></button>
                         </form>
+                        <form action="{{ path('app_photos_id_token') }}" method="post">
+                            <button type="submit" class="api-btn is-counter">
+                                GET <code>/api/photos</code> avec l'ID token
+                                <small>le contre-exemple : doit échouer</small>
+                            </button>
+                        </form>
                     </div>
 
                     <div class="response">
@@ -68,7 +74,13 @@
                                 {% if result.challenge %}
                                     <p class="response-challenge">WWW-Authenticate: {{ result.challenge }}</p>
                                 {% endif %}
-                                {% if result.status == 401 %}
+                                {% if result.counterExample|default(false) %}
+                                    <p class="response-hint">
+                                        L'ID token dit <b>qui</b> est l'utilisateur, à PhotoBook.
+                                        Son audience, c'est PhotoBook, pas l'API.
+                                        Seul l'access token ouvre l'API CloudPics.
+                                    </p>
+                                {% elseif result.status == 401 %}
                                     {# Se croire connecté et récolter un 401 : le token n'est plus
                                        vérifiable. Cas classique quand Keycloak a redémarré. #}
                                     <p class="response-hint">

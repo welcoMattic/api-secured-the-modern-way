@@ -2,6 +2,7 @@
 
 namespace App\Api;
 
+use Drenso\OidcBundle\Model\OidcTokens;
 use Drenso\OidcBundle\Security\Token\OidcToken;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
@@ -22,13 +23,13 @@ class PhotoApiClient
     }
 
     /**
-     * Récupère l'access token depuis le token de sécurité.
+     * Les deux tokens de la session.
      *
-     * Le token OidcToken stocke l'objet OidcTokens comme attribut,
-     * et AbstractToken::__serialize() inclut les attributs.
-     * L'access token survit donc dans la session entre les requêtes.
+     * OidcToken stocke l'objet OidcTokens comme attribut, et
+     * AbstractToken::__serialize() inclut les attributs : la paire survit donc
+     * dans la session entre les requêtes.
      */
-    private function accessToken(): string
+    private function tokens(): OidcTokens
     {
         $token = $this->tokenStorage->getToken();
 
@@ -40,7 +41,7 @@ class PhotoApiClient
             ));
         }
 
-        return $token->getAuthData()->getAccessToken();
+        return $token->getAuthData();
     }
 
     /**
@@ -48,7 +49,7 @@ class PhotoApiClient
      */
     public function list(): array
     {
-        return $this->appeler('GET', []);
+        return $this->appeler('GET', $this->tokens()->getAccessToken(), []);
     }
 
     /**
@@ -56,10 +57,22 @@ class PhotoApiClient
      */
     public function create(string $title, string $url): array
     {
-        return $this->appeler('POST', [
+        return $this->appeler('POST', $this->tokens()->getAccessToken(), [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'body' => json_encode(['title' => $title, 'url' => $url], \JSON_THROW_ON_ERROR),
         ]);
+    }
+
+    /**
+     * Le contre-exemple : appeler l'API avec l'ID token au lieu de l'access token.
+     *
+     * L'ID token dit à PhotoBook QUI est l'utilisateur. Son audience est PhotoBook
+     * lui-même, pas l'API. Le token handler de l'API valide l'audience : ce jeton
+     * parfaitement valide et parfaitement signé se fait donc refuser en 401.
+     */
+    public function listWithIdToken(): array
+    {
+        return $this->appeler('GET', $this->tokens()->getIdToken(), []);
     }
 
     /**
@@ -67,9 +80,9 @@ class PhotoApiClient
      *
      * @return array{status: int, body: string, challenge: ?string}
      */
-    private function appeler(string $methode, array $options): array
+    private function appeler(string $methode, string $token, array $options): array
     {
-        $options['headers'] = ($options['headers'] ?? []) + ['Authorization' => 'Bearer '.$this->accessToken()];
+        $options['headers'] = ($options['headers'] ?? []) + ['Authorization' => 'Bearer '.$token];
 
         try {
             $response = $this->httpClient->request($methode, $this->apiBaseUrl.'/api/photos', $options);
