@@ -5,6 +5,13 @@ framework:
     # Note that the session will be started ONLY if you read or write from it.
     session: true
 
+    # Derrière le proxy inverse de Clever Cloud. Sans ça, Symfony croit répondre en
+    # http : PhotoBook générerait un redirect_uri en http que CloudPics ID refuse,
+    # et l'API renverrait des IRI Hydra en http. Vide en local, donc sans effet.
+    trusted_proxies: '%env(default::TRUSTED_PROXIES)%'
+    trusted_headers: ['x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port', 'x-forwarded-prefix']
+
+
     #esi: true
     #fragments: true
 

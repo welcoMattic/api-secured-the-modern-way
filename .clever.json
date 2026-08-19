@@ -1,0 +1,28 @@
+{
+  "apps": [
+    {
+      "app_id": "app_953687a1-de02-426a-9abc-383bd6b67c20",
+      "org_id": "orga_e111048c-73d3-4e63-92d3-60acacdc8a23",
+      "deploy_url": "https://push-n3-par-clevercloud-customers.services.clever-cloud.com/app_953687a1-de02-426a-9abc-383bd6b67c20.git",
+      "git_ssh_url": "git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_953687a1-de02-426a-9abc-383bd6b67c20.git",
+      "name": "cloudpics-api",
+      "alias": "api"
+    },
+    {
+      "app_id": "app_92b62b7a-af0c-4c10-9852-2e100f87ed55",
+      "org_id": "orga_e111048c-73d3-4e63-92d3-60acacdc8a23",
+      "deploy_url": "https://push-n3-par-clevercloud-customers.services.clever-cloud.com/app_92b62b7a-af0c-4c10-9852-2e100f87ed55.git",
+      "git_ssh_url": "git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_92b62b7a-af0c-4c10-9852-2e100f87ed55.git",
+      "name": "photobook",
+      "alias": "book"
+    },
+    {
+      "app_id": "app_0d834ea6-3ae9-4a5d-ae77-5279d1757571",
+      "org_id": "orga_e111048c-73d3-4e63-92d3-60acacdc8a23",
+      "deploy_url": "https://push-n3-par-clevercloud-customers.services.clever-cloud.com/app_0d834ea6-3ae9-4a5d-ae77-5279d1757571.git",
+      "git_ssh_url": "git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_0d834ea6-3ae9-4a5d-ae77-5279d1757571.git",
+      "name": "photoprint",
+      "alias": "print"
+    }
+  ]
+}
