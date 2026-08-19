@@ -20,7 +20,7 @@ export async function callApi(method: 'GET' | 'POST', token: string): Promise<Ap
     response = await fetch(url, {
       method,
       headers,
-      body: method === 'POST' ? JSON.stringify({ title: 'Nouvelle photo', url: 'https://example.com/photo.jpg' }) : undefined,
+      body: method === 'POST' ? JSON.stringify({ title: 'Photo déposée par PhotoPrint', url: 'https://cloudpics.example/photo.jpg' }) : undefined,
     })
   } catch {
     // API injoignable : fetch rejette, il n'y a pas de statut HTTP. Sans ce filet,

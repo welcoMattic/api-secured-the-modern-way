@@ -1,6 +1,6 @@
 api_platform:
-    title: 'API Photos'
-    description: "Resource server de démonstration. Il ne connaît aucun compte : il vérifie les access tokens émis par Keycloak."
+    title: 'CloudPics API'
+    description: "Les photos d'Alice vivent ici. CloudPics API est un simple resource server : il ne connaît aucun compte et ne délivre aucun token, il vérifie ceux que CloudPics ID a émis."
     version: 1.0.0
     formats:
         jsonld:

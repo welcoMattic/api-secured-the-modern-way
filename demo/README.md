@@ -2,37 +2,61 @@
 
 Démo compagnon du talk **API Secured, the Modern Way** (API Platform Con 2026).
 
-Elle montre **une seule idée** : l'API n'authentifie plus personne. Un OIDC Provider (Keycloak)
-émet les tokens, l'API se contente de les **vérifier** avec les token handlers **natifs** de Symfony.
+Elle montre **une seule idée** : l'API n'authentifie plus personne. Un OIDC Provider émet les tokens,
+l'API se contente de les **vérifier** avec les token handlers **natifs** de Symfony.
 
 La partie « API Platform comme serveur d'autorisation OAuth2 » (`league/oauth2-server-bundle`)
 est volontairement hors périmètre.
 
-## Les quatre briques
+## La démo reprend l'histoire du deck
 
-| Brique | Rôle | Techno | URL |
-|---|---|---|---|
-| `keycloak/` | OIDC Provider : comptes, login, consentement, émission des tokens | Keycloak 26 (Docker) | http://localhost:8080 |
-| `api/` | Resource server : vérifie les access tokens, applique les rôles | API Platform 4 / Symfony 8.1 | http://localhost:8100 |
-| `client-spa/` | App cliente JS : `authorization_code` + PKCE dans le navigateur | Vite + TypeScript + `oidc-client-ts` | http://localhost:5173 |
-| `client-symfony/` | App cliente Symfony : `authorization_code` côté serveur | Symfony 8.1 + `drenso/symfony-oidc-bundle` | http://localhost:8101 |
+Le talk raconte **Alice**, **PhotoPrint** et **CloudPics**. La démo distribue les mêmes rôles, et en
+ajoute deux que la bascule vers OIDC rend nécessaires.
+
+| Acteur | Rôle | Dossier | Techno | URL |
+|---|---|---|---|---|
+| ☁️ **CloudPics API** | Resource server : les photos d'Alice vivent ici | `api/` | API Platform 4 / Symfony 8.1 | http://localhost:8100 |
+| 🛂 **CloudPics ID** | OIDC Provider : comptes, login, émission des tokens | `keycloak/` | Keycloak 26 (Docker) | http://localhost:8080 |
+| 🌁 **PhotoPrint** | Client **public** : tourne chez Alice, aucun secret à garder | `client-spa/` | Vite + TypeScript + `oidc-client-ts` | http://localhost:5173 |
+| 📕 **PhotoBook** | Client **confidentiel** : tourne sur son serveur, lui peut garder un secret | `client-symfony/` | Symfony 8.1 + `drenso/symfony-oidc-bundle` | http://localhost:8101 |
+
+Dans la section OAuth2 du deck, **CloudPics** cumule deux rôles : serveur d'autorisation *et* resource
+server. Toute la démonstration OIDC consiste à lui retirer le premier. CloudPics garde les photos,
+**CloudPics ID** prend l'identité. C'est pour ça que la démo compte quatre acteurs là où l'histoire
+d'origine en comptait trois.
+
+**PhotoPrint** garde le rôle que la slide « Rien ne prouve que c'est PhotoPrint » lui donne : une app
+qui tourne chez Alice, donc incapable de garder un secret, donc PKCE. **PhotoBook** est son pendant
+confidentiel : un autre service tiers qui veut les photos d'Alice, mais qui tourne sur son propre
+serveur. Les deux passent par le même Provider, et l'API ne fait aucune différence entre eux.
 
 ```
-  client-spa (JS)  ─┐                        ┌─ authorization_code + PKCE ─→ Keycloak
-                    ├─ Bearer access_token ─→ API Platform ─ discovery .well-known ─→ Keycloak
-  client-symfony ──┘                        └─ vérification offline (signature RS256)
+  🌁 PhotoPrint  ─┐                             ┌─ authorization_code + PKCE ─→ 🛂 CloudPics ID
+                  ├─ Bearer access_token ─→ ☁️ CloudPics API ─ discovery ────→ 🛂 CloudPics ID
+  📕 PhotoBook  ──┘                             └─ vérification offline (signature RS256)
 ```
 
 ## Les deux chemins d'authentification
 
-| | App cliente JS (`client-spa`) | App cliente Symfony (`client-symfony`) |
+| | 🌁 PhotoPrint | 📕 PhotoBook |
 |---|---|---|
+| **Où tourne le client ?** | Chez Alice, dans son navigateur | Sur le serveur de PhotoBook |
 | **Qui initie le flow ?** | Le navigateur, via `oidc-client-ts` | Le serveur, via `drenso/symfony-oidc-bundle` |
-| **Client OIDC** | Public + PKCE S256 | Confidentiel (client secret) |
+| **Client OIDC** | Public + PKCE S256 | Confidentiel (`client_secret`) + PKCE |
 | **Ce que Symfony fournit nativement** | Rien côté client : c'est du JS | Pas encore le flow `authorization_code` ([PR #64954](https://github.com/symfony/symfony/pull/64954)) |
 | **Côté API** | `access_token` + token handler `oidc` (natif) | Identique : le même firewall, le même handler |
 
-Le point clé : **côté API, rien ne change**. Le resource server ne sait pas quel type de client lui parle.
+Le point clé : **côté CloudPics API, rien ne change**. Le resource server ne sait pas quel type de
+client lui parle, et il n'a pas à le savoir.
+
+### Le beat à ne pas rater sur scène
+
+Connectez-vous d'abord sur PhotoPrint, puis ouvrez PhotoBook et cliquez sur « Se connecter ».
+**Aucun écran de login n'apparaît** : la session est déjà ouverte chez CloudPics ID. Les deux apps
+affichent alors le **même `sub`**, et chacune a reçu ses propres tokens.
+
+Une authentification, un Provider, deux clients tiers. Aucune des deux apps n'a jamais vu le mot de
+passe d'Alice, et aucune ne sait que l'autre existe.
 
 > **Pourquoi 8100 / 8101 et pas 8000 / 8001 ?** Pour qu'une démo live n'entre jamais en collision
 > avec un autre serveur Symfony déjà lancé sur la machine. Les ports sont regroupés dans `castor.php`
@@ -50,37 +74,45 @@ Le point clé : **côté API, rien ne change**. Le resource server ne sait pas q
 
 ```bash
 castor install   # composer install x2 + bun install
-castor start     # keycloak + api + client-symfony + client-spa
-castor open      # ouvre les 3 apps et la console Keycloak
+castor start     # CloudPics ID + CloudPics API + PhotoBook + PhotoPrint
+castor open      # ouvre les 3 apps et la console de CloudPics ID
 ```
 
 `castor stop` arrête tout. `castor smoke` vérifie l'API en ligne de commande, sans navigateur.
 
 ## Comptes de démo
 
-| Utilisateur | Mot de passe | Rôles realm Keycloak | Rôles Symfony dans l'API | GET /api/photos | POST /api/photos |
-|---|---|---|---|---|---|
-| `alice` | `alice` | `PHOTOS_READ`, `PHOTOS_WRITE` | `ROLE_USER`, `ROLE_PHOTOS_READ`, `ROLE_PHOTOS_WRITE` | 200 | 201 |
-| `bob` | `bob` | `PHOTOS_READ` | `ROLE_USER`, `ROLE_PHOTOS_READ` | 200 | **403** |
+Deux comptes CloudPics, et une différence qui se voit à l'écran.
 
-Le `403` de bob est la démonstration : l'autorisation vit dans l'API, l'authentification vit dans le Provider.
+| Compte | Mot de passe | Le compte CloudPics | Rôles realm | Rôles dans l'API | GET | POST |
+|---|---|---|---|---|---|---|
+| `alice` | `alice` | Compte complet : elle consulte et dépose | `PHOTOS_READ`, `PHOTOS_WRITE` | `ROLE_USER`, `ROLE_PHOTOS_READ`, `ROLE_PHOTOS_WRITE` | 200 | 201 |
+| `bob` | `bob` | Offre gratuite : lecture seule | `PHOTOS_READ` | `ROLE_USER`, `ROLE_PHOTOS_READ` | 200 | **403** |
 
-Console d'admin Keycloak : http://localhost:8080 (`admin` / `admin`).
+Le `403` de bob est la démonstration, et il est le même depuis PhotoPrint et depuis PhotoBook :
+l'**autorisation** vit dans CloudPics API, l'**authentification** vit dans CloudPics ID. Changer de
+client ne change rien à ce que bob a le droit de faire.
 
-## Le realm `photos`
+Console d'admin de CloudPics ID : http://localhost:8080 (`admin` / `admin`).
+
+## Le realm `photos`, alias CloudPics ID
 
 Importé au démarrage depuis `keycloak/import/photos-realm.json`. Keycloak tourne en `start-dev`, sur
 une base H2 interne au conteneur, et aucun volume n'est monté. Comme `castor stop` fait un
 `docker compose down -v`, **chaque cycle repart d'un realm propre** : les comptes, les données et
 surtout les **clés de signature** sont neufs.
 
-| Client | Type | Flow | Redirect URI |
-|---|---|---|---|
-| `photos-spa` | public | `authorization_code` + PKCE S256 | `http://localhost:5173/*` |
-| `photos-symfony` | confidentiel (`photos-symfony-secret`) | `authorization_code` | `http://localhost:8101/*` |
-| `photos-smoke-test` | public | `password` (Direct Access Grants) | aucune |
+| `client_id` | Acteur | Type | Flow | Redirect URI |
+|---|---|---|---|---|
+| `photoprint` | 🌁 PhotoPrint | public | `authorization_code` + PKCE S256 | `http://localhost:5173/*` |
+| `photobook` | 📕 PhotoBook | confidentiel (`photobook-secret`) | `authorization_code` + PKCE S256 | `http://localhost:8101/*` |
+| `cloudpics-smoke-test` | (outillage) | public | `password` (Direct Access Grants) | aucune |
 
-`photos-smoke-test` existe **uniquement** pour `castor smoke`. Le flow `password` est déprécié
+Ces `client_id` ne sont pas décoratifs : ils apparaissent dans les tokens que vous projetez. L'access
+token de PhotoPrint porte `azp: photoprint` et `aud: cloudpics-api`, ce qui se lit d'un coup d'oeil :
+**délivré à PhotoPrint, valable pour l'API CloudPics**.
+
+`cloudpics-smoke-test` existe **uniquement** pour `castor smoke`. Le flow `password` est déprécié
 (OAuth 2.1) : il n'est pas montré dans le talk.
 
 ### Le piège de l'audience
@@ -90,7 +122,7 @@ si ce client a des rôles sur le client `account`). Jamais votre API. Or le toke
 Symfony **valide l'audience** : sans mapper, chaque requête tombe en `401`.
 
 Le realm ajoute donc un protocol mapper `oidc-audience-mapper` sur chaque client, qui injecte
-`api-photos` dans le claim `aud`. C'est la valeur attendue par `OIDC_AUDIENCE` dans l'API.
+`cloudpics-api` dans le claim `aud`. C'est la valeur attendue par `OIDC_AUDIENCE` dans l'API.
 
 ## Les deux apps clientes sont faites pour être projetées
 
@@ -110,7 +142,7 @@ Trois détails qui servent le propos :
 
 | Détail | Pourquoi |
 |---|---|
-| Le claim `aud` est colorié dans les deux cartes de tokens | C'est le seul endroit que vous montrez du doigt : `photos-spa` d'un côté, `api-photos` de l'autre. |
+| Le claim `aud` est colorié dans les deux cartes de tokens | C'est le seul endroit que vous montrez du doigt : `photoprint` d'un côté, `cloudpics-api` de l'autre. À côté, `azp` dit qui a reçu le token. |
 | L'access token affiche son temps restant | Ça illustre « les access tokens sont courts », et ça vous prévient avant que la démo ne réponde `401`. |
 | Le `401` affiche l'en-tête `WWW-Authenticate` | L'API n'a pas de corps à renvoyer sur un `401` : elle dit `error="invalid_token"` dans l'en-tête. |
 
@@ -125,9 +157,11 @@ Platform pèse 2,5 ko de chemins de vendor : projeté, ça noie la seule ligne q
 | `api/config/packages/security.yaml` | Le firewall `access_token` + token handler `oidc` (offline). La variante `oidc_user_info` (online) est en commentaire. |
 | `api/src/Security/OidcUserProvider.php` | Le mapping `realm_access.roles` -> `ROLE_*`. OIDC n'a aucune notion de rôle : ce mapping est à votre charge. |
 | `api/src/Entity/Photo.php` | La ressource API Platform, inchangée : `is_granted('ROLE_USER')` et `is_granted('ROLE_PHOTOS_WRITE')`. |
-| `client-spa/src/main.ts` | `authorization_code` + PKCE, et la distinction ID token (pour le client) / access token (pour l'API). |
-| `client-symfony/config/packages/drenso_oidc.yaml` | La config du client OIDC côté serveur. |
-| `client-symfony/src/Security/OidcUserProvider.php` | Le client Symfony n'a besoin que de l'identité : les rôles restent l'affaire de l'API. |
+| `client-spa/src/oidc.ts` | Les quinze lignes qui font de PhotoPrint un client OIDC. PKCE S256 est le défaut de la bibliothèque. |
+| `client-spa/src/main.ts` | La distinction ID token (pour PhotoPrint) / access token (pour CloudPics API). |
+| `client-symfony/config/packages/drenso_oidc.yaml` | La config du client confidentiel PhotoBook, secret compris. |
+| `client-symfony/src/Security/OidcIdentityProvider.php` | PhotoBook n'a besoin que de l'identité. Les rôles restent l'affaire de l'API : la classe est nommée autrement que celle de l'API, exprès. |
+| `client-symfony/src/Api/PhotoApiClient.php` | Comment PhotoBook relaie l'access token de la session vers CloudPics API. |
 
 ## Basculer offline / online
 

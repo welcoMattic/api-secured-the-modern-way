@@ -1,13 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}App cliente Symfony - démo OIDC{% endblock %}
+{% block title %}PhotoBook · client confidentiel{% endblock %}
 
 {% block body %}
 {% if app.user %}
     <section class="workbench">
         <header class="topbar">
             <div>
-                <h1>App cliente Symfony</h1>
+                <h1><span class="role__icon">📕</span> PhotoBook <span class="role-inline">client confidentiel</span></h1>
                 <p class="eyebrow">authorization_code · drenso/symfony-oidc-bundle</p>
             </div>
             <div class="topbar-right">
@@ -19,7 +19,7 @@
         <div class="main-area">
             <article class="card">
                 <div class="card-head">
-                    <h2>Identité fournie par l'OP</h2>
+                    <h2>Identité fournie par CloudPics ID</h2>
                     <p class="subtitle">aucun compte, aucun mot de passe dans cette application</p>
                 </div>
                 <div class="card-body">
@@ -29,8 +29,8 @@
                         <dt>email</dt><dd>{{ app.user.email }}</dd>
                     </dl>
                     <p class="card-note">
-                        L'application ne reçoit que <strong>ROLE_USER</strong>, et rien d'autre.
-                        Les permissions sur les photos sont décidées par l'<strong>API</strong>,
+                        PhotoBook ne reçoit que <strong>ROLE_USER</strong>, et rien d'autre.
+                        Les permissions sur les photos sont décidées par l'<strong>API CloudPics</strong>,
                         à partir de l'access token. Jamais ici.
                     </p>
                 </div>
@@ -38,7 +38,7 @@
 
             <article class="card">
                 <div class="card-head">
-                    <h2>Appeler l'API</h2>
+                    <h2>Appeler l'API CloudPics</h2>
                     <p class="subtitle">le serveur relaie l'access token de la session</p>
                 </div>
                 <div class="card-body">
@@ -87,12 +87,13 @@
     </section>
 {% else %}
     <section class="hero">
-        <h1 class="tick">App cliente Symfony</h1>
+        <p class="role"><span class="role__icon">📕</span> client confidentiel</p>
+        <h1 class="tick">PhotoBook</h1>
         <p class="eyebrow">authorization_code · drenso/symfony-oidc-bundle</p>
-        <a href="{{ path('app_login') }}" class="btn-primary">Se connecter avec Keycloak</a>
+        <a href="{{ path('app_login') }}" class="btn-primary">Se connecter avec CloudPics ID</a>
         <p class="note">
-            Cette app ne connaît aucun mot de passe.<br>
-            Elle confie l'authentification à l'OIDC Provider.
+            PhotoBook assemble des albums avec les photos d'Alice, hébergées chez <b>CloudPics</b>.<br>
+            Il tourne sur son propre serveur : lui peut garder un secret.
         </p>
     </section>
 {% endif %}

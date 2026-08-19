@@ -113,15 +113,18 @@ function start(): void
     io()->success('Toute la démo est démarrée !');
     
     io()->table(
-        ['Service', 'URL', 'Comptes de démo'],
+        ['Acteur', 'Rôle', 'URL'],
         [
-            ['Keycloak (admin)', 'http://localhost:8080', 'admin / admin'],
-            ['API Platform (docs)', 'http://localhost:8100/api/docs', ''],
-            ['Client SPA (JS)', 'http://localhost:5173/', 'alice / alice, bob / bob'],
-            ['Client Symfony', 'http://localhost:8101/', 'alice / alice, bob / bob'],
+            ['CloudPics ID', 'OIDC Provider (admin / admin)', 'http://localhost:8080'],
+            ['CloudPics API', 'Resource server', 'http://localhost:8100/api/docs'],
+            ['PhotoPrint', 'Client public, PKCE', 'http://localhost:5173/'],
+            ['PhotoBook', 'Client confidentiel', 'http://localhost:8101/'],
         ]
     );
-    io()->note('Alice: PHOTOS_READ + PHOTOS_WRITE (GET/POST OK). Bob: PHOTOS_READ seul (GET OK, POST 403).');
+    io()->note([
+        'alice / alice : compte complet, PHOTOS_READ + PHOTOS_WRITE. Elle lit et dépose.',
+        'bob / bob : offre gratuite, PHOTOS_READ seul. Il lit, mais son POST tombe en 403.',
+    ]);
 }
 
 /**
@@ -219,8 +222,8 @@ function db_reset(): void
     // Insérer deux photos de démo
     // Le Photo entity a: id (auto), title (string), url (string)
     io()->text('Insertion des photos de démo...');
-    run('php bin/console dbal:run-sql "INSERT INTO photo (title, url) VALUES (\'Photo de Alice\', \'https://example.com/alice.jpg\')"', context: api_context());
-    run('php bin/console dbal:run-sql "INSERT INTO photo (title, url) VALUES (\'Photo de Bob\', \'https://example.com/bob.jpg\')"', context: api_context());
+    run('php bin/console dbal:run-sql "INSERT INTO photo (title, url) VALUES (\'Coucher de soleil sur le Golden Gate\', \'https://cloudpics.example/alice/golden-gate.jpg\')"', context: api_context());
+    run('php bin/console dbal:run-sql "INSERT INTO photo (title, url) VALUES (\'Alice au sommet du Mont Tamalpais\', \'https://cloudpics.example/alice/tamalpais.jpg\')"', context: api_context());
 
     io()->success('Base de données réinitialisée avec deux photos de démo.');
 }
@@ -228,8 +231,9 @@ function db_reset(): void
 #[AsTask(name: 'smoke', description: 'Teste l\'API en ligne de commande sans navigateur')]
 function smoke(): void
 {
-    // photos-smoke-test existe uniquement pour le test CLI, le flow password est déprécié (OAuth 2.1)
-    $clientId = 'photos-smoke-test';
+    // cloudpics-smoke-test existe uniquement pour le test CLI. Le flow password est déprécié
+    // par OAuth 2.1 : il n'est jamais montré dans le talk.
+    $clientId = 'cloudpics-smoke-test';
     $realm = 'photos';
     $keycloakUrl = 'http://localhost:8080';
     $apiUrl = 'http://localhost:8100';

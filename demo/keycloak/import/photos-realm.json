@@ -53,7 +53,7 @@
   ],
   "clients": [
     {
-      "clientId": "photos-spa",
+      "clientId": "photoprint",
       "publicClient": true,
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
@@ -69,12 +69,12 @@
       },
       "protocolMappers": [
         {
-          "name": "api-photos-audience",
+          "name": "cloudpics-api-audience",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-audience-mapper",
           "consentRequired": false,
           "config": {
-            "included.client.audience": "api-photos",
+            "included.client.audience": "cloudpics-api",
             "id.token.claim": "false",
             "access.token.claim": "true",
             "introspection.token.claim": "true"
@@ -94,12 +94,14 @@
             "id.token.claim": "false"
           }
         }
-      ]
+      ],
+      "name": "PhotoPrint",
+      "description": "Client public tiers. Tourne dans le navigateur d'Alice, ne peut garder aucun secret : PKCE S256."
     },
     {
-      "clientId": "photos-symfony",
+      "clientId": "photobook",
       "publicClient": false,
-      "secret": "photos-symfony-secret",
+      "secret": "photobook-secret",
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
       "redirectUris": [
@@ -113,12 +115,12 @@
       },
       "protocolMappers": [
         {
-          "name": "api-photos-audience",
+          "name": "cloudpics-api-audience",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-audience-mapper",
           "consentRequired": false,
           "config": {
-            "included.client.audience": "api-photos",
+            "included.client.audience": "cloudpics-api",
             "id.token.claim": "false",
             "access.token.claim": "true",
             "introspection.token.claim": "true"
@@ -138,21 +140,23 @@
             "id.token.claim": "false"
           }
         }
-      ]
+      ],
+      "name": "PhotoBook",
+      "description": "Client confidentiel tiers. Tourne sur son propre serveur, donc il peut garder un secret."
     },
     {
-      "clientId": "photos-smoke-test",
+      "clientId": "cloudpics-smoke-test",
       "publicClient": true,
       "standardFlowEnabled": false,
       "directAccessGrantsEnabled": true,
       "protocolMappers": [
         {
-          "name": "api-photos-audience",
+          "name": "cloudpics-api-audience",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-audience-mapper",
           "consentRequired": false,
           "config": {
-            "included.client.audience": "api-photos",
+            "included.client.audience": "cloudpics-api",
             "id.token.claim": "false",
             "access.token.claim": "true",
             "introspection.token.claim": "true"
@@ -172,11 +176,14 @@
             "id.token.claim": "false"
           }
         }
-      ]
+      ],
+      "name": "Smoke test (CLI)",
+      "description": "Existe uniquement pour castor smoke. Flow password, deprecie par OAuth 2.1 : jamais montre dans le talk."
     }
   ],
   "accessTokenLifespan": 3600,
   "ssoSessionIdleTimeout": 7200,
   "ssoSessionMaxLifespan": 36000,
-  "loginTheme": "photos"
+  "loginTheme": "photos",
+  "displayName": "CloudPics ID"
 }

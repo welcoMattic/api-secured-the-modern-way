@@ -3,19 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%234f46e5%22/><text y=%22.9em%22 x=%22.5em%22 text-anchor=%22middle%22 font-size=%2262%22 fill=%22%23fff%22 font-family=%22system-ui%22>JS</text></svg>" />
-    <title>App cliente JS - démo OIDC</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%234f46e5%22/><text y=%22.9em%22 x=%22.5em%22 text-anchor=%22middle%22 font-size=%2262%22 fill=%22%23fff%22 font-family=%22system-ui%22>PP</text></svg>" />
+    <title>PhotoPrint · client public</title>
   </head>
   <body>
     <div id="app">
       <!-- État déconnecté -->
       <section class="hero" id="hero">
-        <h1 class="tick">App cliente JS</h1>
+        <p class="role"><span class="role__icon">🌁</span> client public</p>
+        <h1 class="tick">PhotoPrint</h1>
         <p class="eyebrow">authorization_code + PKCE</p>
-        <button id="login-btn" class="btn-primary">Se connecter avec Keycloak</button>
+        <button id="login-btn" class="btn-primary">Se connecter avec CloudPics ID</button>
         <p class="note">
-          Cette app ne connaît aucun mot de passe.<br />
-          Elle confie l'authentification à l'OIDC Provider.
+          PhotoPrint veut imprimer les photos d'Alice, hébergées chez <b>CloudPics</b>.<br />
+          Sans jamais lui demander son mot de passe.
         </p>
       </section>
 
@@ -23,8 +24,8 @@
       <section class="workbench" id="workbench" hidden>
         <header class="topbar">
           <div>
-            <h1>App cliente JS</h1>
-            <p class="eyebrow">authorization_code + PKCE</p>
+            <h1><span class="role__icon">🌁</span> PhotoPrint <span class="role-inline">client public</span></h1>
+            <p class="eyebrow">authorization_code + PKCE · aucun secret à garder</p>
           </div>
           <div class="topbar-right">
             <span class="user-pill" id="user-pill"></span>
@@ -36,7 +37,7 @@
           <article class="card">
             <div class="card-head">
               <h2>ID token</h2>
-              <p class="subtitle">pour l'application cliente</p>
+              <p class="subtitle">pour PhotoPrint</p>
             </div>
             <div class="card-body">
               <dl class="claims" id="id-claims"></dl>
@@ -47,7 +48,7 @@
           <article class="card">
             <div class="card-head">
               <h2>Access token</h2>
-              <p class="subtitle">pour l'API</p>
+              <p class="subtitle">pour l'API CloudPics</p>
               <span class="ttl" id="access-ttl"></span>
             </div>
             <div class="card-body">
@@ -58,7 +59,7 @@
 
           <article class="card">
             <div class="card-head">
-              <h2>Appeler l'API</h2>
+              <h2>Appeler l'API CloudPics</h2>
               <p class="subtitle">avec le token en en-tête <code>Authorization</code></p>
             </div>
             <div class="card-body">

@@ -72,6 +72,7 @@ function render(user: User | null): void {
   ])
   renderClaims(accessClaims, [
     ['aud', accessPayload.aud, true],
+    ['azp', accessPayload.azp, false],
     ['realm_access.roles', (accessPayload.realm_access as Record<string, unknown> | undefined)?.roles, false],
   ])
 

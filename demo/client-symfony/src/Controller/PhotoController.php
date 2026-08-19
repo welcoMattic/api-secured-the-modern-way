@@ -33,7 +33,7 @@ class PhotoController extends AbstractController
     #[Route('/photos/create', name: 'app_photos_create', methods: ['POST'])]
     public function create(PhotoApiClient $photoApiClient, Request $request): Response
     {
-        $result = $photoApiClient->create('Photo créée depuis le client Symfony', 'https://example.com/symfony.jpg');
+        $result = $photoApiClient->create('Photo déposée par PhotoBook', 'https://cloudpics.example/album.jpg');
 
         $request->getSession()->getFlashBag()->add('api_result', [
             'status' => $result['status'],
