@@ -214,3 +214,62 @@ cas précis.
 
 Dans tous les cas, `demo/api/var/log/dev.log` donne la raison exacte du rejet : le token handler `oidc`
 loggue la signature, l'audience, l'issuer ou le claim manquant.
+
+## La démo en ligne, sur Clever Cloud
+
+Déployée dans l'orga `ms-ambassador`, région `par`.
+
+| Acteur | URL publique | Ressource Clever |
+|---|---|---|
+| 🛂 CloudPics ID | https://qxvnvwdyd6l71qxfrdu2-keycloak.services.clever-cloud.com | add-on `keycloak` 26.7.1, plan BASE (~37 € / 30 j) |
+| ☁️ CloudPics API | https://cloudpics-api.cleverapps.io | app `php` nano, build dédié M |
+| 🌁 PhotoPrint | https://photoprint-demo.cleverapps.io | app `static` pico, build dédié M |
+| 📕 PhotoBook | https://photobook-demo.cleverapps.io | app `php` nano, build dédié M |
+
+Le realm est le **même** qu'en local : ses redirect URI acceptent à la fois `localhost` et les domaines
+Clever, donc `castor start` continue de fonctionner sans rien changer.
+
+```bash
+clever deploy --alias api     # CloudPics API
+clever deploy --alias book    # PhotoBook
+clever deploy --alias print   # PhotoPrint
+```
+
+Les trois apps facturent en continu. `clever stop --alias api|book|print` entre deux répétitions, et
+`clever restart` avant le talk.
+
+### Ce que Clever Cloud demande en plus du local
+
+| Point | Pourquoi |
+|---|---|
+| `symfony/apache-pack` sur les deux apps PHP | Le runtime PHP sert derrière Apache, et le squelette API Platform ne fournit aucun `.htaccess`. Sans lui, Apache exécute `index.php` mais sans réécrire l'URL : Symfony ne voit jamais le chemin demandé et répond `404` sur toutes les routes. |
+| `trusted_proxies` dans les deux `framework.yaml` | Derrière le proxy inverse, Symfony se croit en `http`. PhotoBook générerait un `redirect_uri` en `http` que CloudPics ID refuserait. |
+| Le seed dans `api/clever-post-build.sh` | `CC_POST_BUILD_HOOK` s'exécute depuis la **racine du dépôt**, pas depuis `APP_FOLDER`. Un `php bin/console` nu échoue sur « Could not open input file ». |
+| `APP_FOLDER` sur les apps PHP, mais **pas** sur l'app statique | Le monorepo se gère avec `APP_FOLDER`. Sur le runtime `static`, cette variable combinée à un webroot profond fait échouer la phase de run : là, on construit depuis la racine avec `CC_BUILD_COMMAND` et `CC_WEBROOT=/demo/client-spa/dist`. |
+| Un build dédié (`--build-flavor M`) | Par défaut le build tourne sur l'instance elle-même : un `composer install` d'API Platform ne tient pas dans 512 Mo. |
+
+Le SPA reçoit ses `VITE_*` comme variables d'environnement Clever : Vite leur donne priorité sur les
+fichiers `.env`, donc le bundle de production pointe sur les URL publiques sans toucher au dépôt.
+
+### Le realm, côté add-on managé
+
+L'add-on Keycloak de Clever monte un FS Bucket. Le realm et le thème de login s'y déposent, puis on
+relance l'instance pour déclencher l'import :
+
+```bash
+# Récupérer les identifiants FTP du bucket de l'add-on, puis :
+curl --ftp-create-dirs -T keycloak/import/photos-realm.json "ftp://$HOST/realms/import/photos-realm.json" --user "$USER:$PASS"
+curl --ftp-create-dirs -T keycloak/themes/photos/login/theme.properties "ftp://$HOST/themes/photos/login/theme.properties" --user "$USER:$PASS"
+clever restart --app <app-java-de-l-addon> --without-cache
+```
+
+### Deux choses à savoir
+
+**L'admin de CloudPics ID n'est pas `admin/admin`.** L'add-on managé génère son propre compte
+`cc-account-admin` avec un mot de passe temporaire, et **impose de le changer à la première
+connexion**. C'est la seule différence assumée avec le local. Les comptes de démo, eux, sont
+identiques : `alice/alice` et `bob/bob`, importés depuis le realm.
+
+**La démo en ligne est publique.** N'importe qui peut se connecter en alice ou bob et écrire dans
+l'API. La base est une SQLite sur disque éphémère, recréée à chaque déploiement : il n'y a rien à
+perdre, mais ce n'est pas un environnement à traiter comme durable.
