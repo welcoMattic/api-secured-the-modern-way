@@ -251,10 +251,12 @@
 
             .btn-secondary:hover { color: var(--c-fg); border-color: var(--sec); }
 
+            /* Même partage que PhotoPrint : l'identité est une référence qu'on
+               consulte, la réponse de l'API est ce qu'on lit à voix haute. */
             .main-area {
                 min-height: 0;
                 display: grid;
-                grid-template-columns: 1fr .95fr;
+                grid-template-columns: 1fr 2fr;
                 gap: clamp(.9rem, 1.4vw, 1.4rem);
             }
 

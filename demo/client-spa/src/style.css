@@ -234,10 +234,22 @@ code { font-family: var(--font-mono); font-size: .95em; }
   font-size: clamp(.95rem, 1.25vw, 1.1rem);
 }
 
+/* Deux régions : les tokens sur un tiers, les appels à l'API sur deux tiers.
+   Les tokens sont une référence qu'on consulte, la réponse de l'API est ce
+   qu'on lit à voix haute : c'est elle qui mérite la place. */
 .main-area {
   min-height: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr .95fr;
+  grid-template-columns: 1fr 2fr;
+  gap: clamp(.9rem, 1.4vw, 1.4rem);
+}
+
+/* La carte access token porte un claim de plus, et realm_access.roles passe sur
+   deux lignes en colonne étroite : elle mérite un peu plus de hauteur. */
+.tokens {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1.25fr);
   gap: clamp(.9rem, 1.4vw, 1.4rem);
 }
 
@@ -488,12 +500,11 @@ code { font-family: var(--font-mono); font-size: .95em; }
    Repli pour une fenêtre étroite (poste de travail, pas la projection).
    Le seuil est bas exprès : à 1280 de large, on veut les trois colonnes.
    ===================================================================== */
-@media (max-width: 1100px) {
-  .main-area { grid-template-columns: 1fr 1fr; }
-  .main-area .card:last-child { grid-column: span 2; }
+@media (max-width: 1000px) {
+  .main-area { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+  .tokens { grid-template-rows: 1fr; grid-template-columns: 1fr 1fr; }
 }
 
-@media (max-width: 760px) {
-  .main-area { grid-template-columns: 1fr; }
-  .main-area .card:last-child { grid-column: auto; }
+@media (max-width: 700px) {
+  .tokens { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
 }
