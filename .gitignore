@@ -8,3 +8,4 @@ components.d.ts
 .mcp.json
 .claude/
 .playwright-mcp/
+.slidev/drawings/
