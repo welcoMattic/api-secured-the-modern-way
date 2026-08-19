@@ -14,3 +14,29 @@ api_platform:
         stateless: true
         cache_headers:
             vary: [Content-Type, Authorization, Origin]
+    # Le seul flow que le talk montre : authorization_code + PKCE, avec le client
+    # public cloudpics-docs. Ce seul bloc de config documente le schéma OAuth2 dans
+    # l'OpenAPI ET câble le bouton « Authorize » de Swagger UI.
+    oauth:
+        enabled: true
+        clientId: cloudpics-docs
+        pkce: true
+        type: oauth2
+        flow: authorizationCode
+        authorizationUrl: '%env(OIDC_ISSUER)%/protocol/openid-connect/auth'
+        tokenUrl: '%env(OIDC_ISSUER)%/protocol/openid-connect/token'
+        refreshUrl: '%env(OIDC_ISSUER)%/protocol/openid-connect/token'
+        # Les seuls scopes que le realm photos connaît. Les rôles PHOTOS_* n'en sont pas :
+        # ils arrivent dans le claim realm_access.roles, un client ne les demande pas.
+        scopes:
+            openid: "Active OIDC : sans lui, Keycloak ne fait que de l'OAuth2"
+            profile: "Informations de profil de base (nom, prénom)"
+            email: "Adresse email vérifiée de l'utilisateur"
+    swagger:
+        # Deuxième schéma, pour les clients qui détiennent déjà un access token
+        # (un CI, un curl, un client généré) et n'ont rien à négocier.
+        http_auth:
+            bearer:
+                scheme: bearer
+                bearerFormat: JWT
+        persist_authorization: true

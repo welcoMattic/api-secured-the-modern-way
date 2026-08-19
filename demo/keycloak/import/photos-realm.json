@@ -183,6 +183,53 @@
       ],
       "name": "Smoke test (CLI)",
       "description": "Existe uniquement pour castor smoke. Flow password, deprecie par OAuth 2.1 : jamais montre dans le talk."
+    },
+    {
+      "clientId": "cloudpics-docs",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://localhost:8100/*",
+        "https://cloudpics-api.cleverapps.io/*"
+      ],
+      "webOrigins": [
+        "http://localhost:8100",
+        "https://cloudpics-api.cleverapps.io"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "cloudpics-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "cloudpics-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        },
+        {
+          "name": "realm-roles-userinfo",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "access.token.claim": "false",
+            "id.token.claim": "false"
+          }
+        }
+      ],
+      "name": "CloudPics Docs",
+      "description": "Utilisé par le bouton Authorize de Swagger UI. Client public, donc PKCE S256."
     }
   ],
   "accessTokenLifespan": 3600,

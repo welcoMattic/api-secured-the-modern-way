@@ -95,6 +95,28 @@ client ne change rien à ce que bob a le droit de faire.
 
 Console d'admin de CloudPics ID : http://localhost:8080 (`admin` / `admin`).
 
+## La doc OpenAPI décrit aussi l'authentification
+
+Swagger UI : http://localhost:8100/api/docs. Spec brute :
+`php bin/console api:openapi:export --yaml` depuis `api/`.
+
+La spec déclare deux schémas de sécurité, et rien d'autre :
+
+| Schéma | Type OpenAPI | Pour qui |
+|---|---|---|
+| `oauth` | `oauth2`, flow `authorizationCode` + PKCE | Swagger UI, et tout client généré qui doit négocier un token |
+| `bearer` | `http`, `bearerFormat: JWT` | Ceux qui détiennent déjà un access token : un `curl`, un job de CI |
+
+Le bouton « Authorize » se sert du client Keycloak public `cloudpics-docs`, avec PKCE S256, et
+redirige vers `/bundles/apiplatform/swagger-ui/oauth2-redirect.html`. Le realm étant réimporté à
+chaque démarrage du conteneur (voir plus bas), un `castor restart` suffit pour que ce client
+existe. Sans lui, « Authorize » répondrait `invalid_client`.
+
+Les rôles `PHOTOS_READ` / `PHOTOS_WRITE` n'apparaissent **pas** comme des scopes OAuth2, parce
+qu'ils n'en sont pas : ils voyagent dans le claim `realm_access.roles` de l'access token. La spec
+les mentionne en prose dans la description de chaque opération, là où un générateur de clients ne
+risque pas de les confondre avec quelque chose à demander au Provider.
+
 ## Le realm `photos`, alias CloudPics ID
 
 Importé au démarrage depuis `keycloak/import/photos-realm.json`. Keycloak tourne en `start-dev`, sur
@@ -106,6 +128,7 @@ surtout les **clés de signature** sont neufs.
 |---|---|---|---|---|
 | `photoprint` | 🌁 PhotoPrint | public | `authorization_code` + PKCE S256 | `http://localhost:5173/*` |
 | `photobook` | 📕 PhotoBook | confidentiel (`photobook-secret`) | `authorization_code` + PKCE S256 | `http://localhost:8101/*` |
+| `cloudpics-docs` | 📗 Swagger UI de l'API | public | `authorization_code` + PKCE S256 | `http://localhost:8100/*` |
 | `cloudpics-smoke-test` | (outillage) | public | `password` (Direct Access Grants) | aucune |
 
 Ces `client_id` ne sont pas décoratifs : ils apparaissent dans les tokens que vous projetez. L'access
