@@ -1,0 +1,12 @@
+# cp terraform.tfvars.example terraform.tfvars puis remplir les deux secrets.
+# terraform.tfvars est dans le .gitignore : il ne part pas dans le dépôt.
+
+api_app_secret       = "REMPLACER" # openssl rand -hex 16
+photobook_app_secret = "REMPLACER" # openssl rand -hex 16
+
+# Décommenter pour déployer ailleurs que sur la démo publique. Les trois
+# domaines sont figés dans les redirectUris du realm : les changer ici oblige à
+# les changer dans keycloak/import/photos-realm.json.
+# api_vhost        = "cloudpics-api-a-moi.cleverapps.io"
+# photobook_vhost  = "photobook-a-moi.cleverapps.io"
+# photoprint_vhost = "photoprint-a-moi.cleverapps.io"

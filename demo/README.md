@@ -261,6 +261,24 @@ clever deploy --alias print   # PhotoPrint
 Les trois apps facturent en continu. `clever stop --alias api|book|print` entre deux répétitions, et
 `clever restart` avant le talk.
 
+### Tout recréer avec OpenTofu
+
+Les commandes ci-dessus déploient sur une infra qui existe déjà. Pour la recréer de zéro, le module
+d'`infra/` décrit les quatre acteurs en HCL : l'add-on Keycloak, les deux apps PHP, l'app statique,
+leurs domaines et leurs variables d'environnement.
+
+```bash
+cd infra
+cp terraform.tfvars.example terraform.tfvars
+tofu init && tofu apply
+```
+
+L'apply crée l'infra **et** déploie le code, parce que chaque app porte un bloc `deployment` qui pousse
+le HEAD du dépôt public. Seul l'import du realm reste à part : le provider n'expose pas les identifiants
+FTP du FS Bucket de l'add-on, donc c'est `infra/import-realm.sh`, une fois.
+
+Détails, reprise de l'infra existante avec `tofu import`, et coût : [`infra/README.md`](infra/README.md).
+
 ### Ce que Clever Cloud demande en plus du local
 
 | Point | Pourquoi |
