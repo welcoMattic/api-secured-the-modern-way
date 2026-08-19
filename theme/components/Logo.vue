@@ -1,16 +1,24 @@
 <script setup lang="ts">
-withDefaults(defineProps<{
+import { computed } from 'vue'
+import { resolveAssetUrl } from '../utils/layoutHelper'
+
+const props = withDefaults(defineProps<{
   src: string
   label?: string
   eu?: boolean
   strong?: boolean
   size?: number
 }>(), { eu: false, strong: false, size: 4 })
+
+// Vite rebases `<img src="/foo.png">` written literally in a template, but not a
+// path that arrives through a prop. Without this, every logo 404s once the deck is
+// served under a base path (GitHub Pages: /<repo>/).
+const resolvedSrc = computed(() => resolveAssetUrl(props.src))
 </script>
 
 <template>
   <span class="ds-logo">
-    <img :src="src" :alt="label || ''" :style="{ width: size + 'rem', height: size + 'rem' }" />
+    <img :src="resolvedSrc" :alt="label || ''" :style="{ width: size + 'rem', height: size + 'rem' }" />
     <span class="ds-logo__label" :class="{ 'ds-logo__label--strong': strong }">
       <span v-html="label"></span><span v-if="eu"> 🇪🇺</span>
     </span>
