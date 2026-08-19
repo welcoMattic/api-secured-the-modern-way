@@ -21,17 +21,17 @@ locals {
   keycloak_url  = "https://${local.keycloak_host}"
   realm_url     = "${local.keycloak_url}/realms/photos"
 
-  # CloudPics n'accepte que ses deux clients en origine CORS. Les points sont
-  # échappés : la valeur part telle quelle dans la conf CORS du bundle.
-  cors_allow_origin = format(
-    "^https://(%s|%s)$",
-    replace(var.photoprint_vhost, ".", "\\."),
-    replace(var.photobook_vhost, ".", "\\."),
-  )
-
   # Derrière le proxy inverse de Clever, Symfony se croit en http et PhotoBook
   # fabriquerait un redirect_uri en http que CloudPics ID refuserait.
   trusted_proxies = "REMOTE_ADDR"
+
+  # Aucun vhost n'est pinné : Clever attribue à chaque app son propre
+  # app-<uuid>.cleverapps.io dès la création. Vérifié sur les trois apps de la
+  # démo en ligne avec `clever domain`, le domaine par défaut reprend l'id de
+  # l'app avec un tiret à la place du underscore.
+  api_url        = "https://${replace(clevercloud_php.cloudpics_api.id, "app_", "app-")}.cleverapps.io"
+  photobook_url  = "https://${replace(clevercloud_php.photobook.id, "app_", "app-")}.cleverapps.io"
+  photoprint_url = "https://${replace(clevercloud_static.photoprint.id, "app_", "app-")}.cleverapps.io"
 }
 
 # ☁️ CloudPics API : le resource server. Il vérifie les tokens, il n'en émet aucun.
@@ -53,8 +53,6 @@ resource "clevercloud_php" "cloudpics_api" {
 
   redirect_https = true
 
-  vhosts = [{ fqdn = var.api_vhost }]
-
   # Le hook s'exécute depuis la racine du dépôt, pas depuis app_folder : le
   # script se replace lui-même dans demo/api. Un `php bin/console` nu échouerait
   # sur « Could not open input file ».
@@ -68,7 +66,7 @@ resource "clevercloud_php" "cloudpics_api" {
     APP_SECRET              = var.api_app_secret
     CC_COMPOSER_VERSION     = "2"
     DATABASE_URL            = "sqlite:///%kernel.project_dir%/var/data.db"
-    CORS_ALLOW_ORIGIN       = local.cors_allow_origin
+    CORS_ALLOW_ORIGIN       = var.cors_allow_origin
     TRUSTED_PROXIES         = local.trusted_proxies
     OIDC_ISSUER             = local.realm_url
     OIDC_DISCOVERY_BASE_URI = "${local.realm_url}/"
@@ -98,15 +96,13 @@ resource "clevercloud_php" "photobook" {
 
   redirect_https = true
 
-  vhosts = [{ fqdn = var.photobook_vhost }]
-
   environment = {
     APP_ENV             = "prod"
     APP_DEBUG           = "0"
     APP_SECRET          = var.photobook_app_secret
     CC_COMPOSER_VERSION = "2"
     TRUSTED_PROXIES     = local.trusted_proxies
-    API_BASE_URL        = "https://${var.api_vhost}"
+    API_BASE_URL        = local.api_url
     OIDC_CLIENT_ID      = "photobook"
     OIDC_CLIENT_SECRET  = var.photobook_client_secret
     OIDC_WELL_KNOWN_URL = "${local.realm_url}/.well-known/openid-configuration"
@@ -136,12 +132,10 @@ resource "clevercloud_static" "photoprint" {
 
   redirect_https = true
 
-  vhosts = [{ fqdn = var.photoprint_vhost }]
-
   environment = {
     CC_BUILD_COMMAND    = var.spa_build_command
     CC_WEBROOT          = "/demo/client-spa/dist"
-    VITE_API_BASE_URL   = "https://${var.api_vhost}"
+    VITE_API_BASE_URL   = local.api_url
     VITE_OIDC_AUTHORITY = local.realm_url
     VITE_OIDC_CLIENT_ID = "photoprint"
   }

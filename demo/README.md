@@ -265,7 +265,8 @@ Les trois apps facturent en continu. `clever stop --alias api|book|print` entre 
 
 Les commandes ci-dessus déploient sur une infra qui existe déjà. Pour la recréer de zéro, le module
 d'`infra/` décrit les quatre acteurs en HCL : l'add-on Keycloak, les deux apps PHP, l'app statique,
-leurs domaines et leurs variables d'environnement.
+leurs variables d'environnement. Aucun domaine n'est à réserver : Clever en attribue un à chaque app,
+et `tofu output` les donne après l'apply.
 
 ```bash
 cd infra
@@ -277,7 +278,7 @@ L'apply crée l'infra **et** déploie le code, parce que chaque app porte un blo
 le HEAD du dépôt public. Seul l'import du realm reste à part : le provider n'expose pas les identifiants
 FTP du FS Bucket de l'add-on, donc c'est `infra/import-realm.sh`, une fois.
 
-Détails, reprise de l'infra existante avec `tofu import`, et coût : [`infra/README.md`](infra/README.md).
+Détails, mise à jour du realm avec les domaines générés, CORS et coût : [`infra/README.md`](infra/README.md).
 
 ### Ce que Clever Cloud demande en plus du local
 

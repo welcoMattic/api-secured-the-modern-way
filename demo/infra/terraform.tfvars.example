@@ -4,9 +4,9 @@
 api_app_secret       = "REMPLACER" # openssl rand -hex 16
 photobook_app_secret = "REMPLACER" # openssl rand -hex 16
 
-# Décommenter pour déployer ailleurs que sur la démo publique. Les trois
-# domaines sont figés dans les redirectUris du realm : les changer ici oblige à
-# les changer dans keycloak/import/photos-realm.json.
-# api_vhost        = "cloudpics-api-a-moi.cleverapps.io"
-# photobook_vhost  = "photobook-a-moi.cleverapps.io"
-# photoprint_vhost = "photoprint-a-moi.cleverapps.io"
+# Les domaines ne sont pas à choisir : Clever en attribue un à chaque app, et
+# `tofu output` les donne après l'apply.
+
+# Après le premier apply, pour resserrer le CORS de l'API sur le seul domaine
+# de PhotoPrint au lieu de tout cleverapps.io :
+# cors_allow_origin = "^https://app-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\\.cleverapps\\.io$"

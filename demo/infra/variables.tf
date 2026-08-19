@@ -16,26 +16,21 @@ variable "keycloak_version" {
   default     = "26.7.1"
 }
 
-# Le realm (keycloak/import/photos-realm.json) fige ces trois domaines dans les
-# redirectUris et les webOrigins de ses clients. Les changer ici oblige à les
-# changer dans le realm, sinon le login casse avec « Invalid parameter:
-# redirect_uri ». Les valeurs par défaut sont celles de la démo publique.
-variable "api_vhost" {
-  description = "Domaine public de CloudPics API."
-  type        = string
-  default     = "cloudpics-api.cleverapps.io"
-}
+# Le module ne pin aucun vhost. Clever attribue à chaque app un domaine
+# app-<uuid>.cleverapps.io dès sa création, et les URL se dérivent de l'id des
+# ressources : aucun apply ne peut entrer en collision avec un domaine déjà pris,
+# et deux personnes peuvent déployer la démo en parallèle.
 
-variable "photobook_vhost" {
-  description = "Domaine public de PhotoBook (client confidentiel)."
+# PhotoPrint est un SPA : il appelle l'API depuis le navigateur, donc il lui faut
+# une origine autorisée. On ne peut pas y mettre son URL exacte : PhotoPrint lit
+# l'URL de l'API, l'API lirait celle de PhotoPrint, et le graphe boucle. Le motif
+# casse le cycle, au prix d'une autorisation à l'échelle de cleverapps.io. Pour
+# resserrer après le premier apply : `tofu output photoprint_url`, puis coller
+# cette valeur exacte ici.
+variable "cors_allow_origin" {
+  description = "Origines CORS acceptées par CloudPics API, sous forme d'expression régulière."
   type        = string
-  default     = "photobook-demo.cleverapps.io"
-}
-
-variable "photoprint_vhost" {
-  description = "Domaine public de PhotoPrint (client public)."
-  type        = string
-  default     = "photoprint-demo.cleverapps.io"
+  default     = "^https://app-[0-9a-f-]+\\.cleverapps\\.io$"
 }
 
 variable "api_app_secret" {
