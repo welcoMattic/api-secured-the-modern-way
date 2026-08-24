@@ -83,7 +83,7 @@ Quelques client credentials à configurer, et c'est branché.
   <Logo :size="4.2" src="/github.png" label="GitHub" />
   <Logo :size="4.2" src="/gitlab.svg" label="GitLab" />
   <Logo :size="4.2" src="/linkedin.svg" label="LinkedIn" />
-  <Logo :size="4.2" src="/x.svg" label="X (Twitter)" />
+  <Logo :size="4.2" src="/bitbucket.svg" label="Bitbucket" />
 </LogoGrid>
 
 <div class="slide-note is-centered">Pas une ligne de code, <b>que de la configuration</b>. Keycloak fournit douze connecteurs en standard.</div>
