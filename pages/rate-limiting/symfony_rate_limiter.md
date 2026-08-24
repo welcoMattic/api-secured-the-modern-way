@@ -10,7 +10,7 @@ class: sec-rate
 - 🛡️ Composant **intégré** à Symfony
 - 🎯 Contre **brute force et DoS**
 - 🔧 **3 stratégies** : fixed / sliding window, token bucket
-- 📦 Depuis Symfony **5.3** (2021)
+- 📦 Depuis Symfony **5.2** (2020)
 
 </v-clicks>
 

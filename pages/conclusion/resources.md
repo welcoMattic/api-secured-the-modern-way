@@ -11,7 +11,6 @@ layout: default
     <div><a href="https://datatracker.ietf.org/doc/html/rfc7636">RFC 7636</a> PKCE</div>
     <div><a href="https://datatracker.ietf.org/doc/html/rfc7519">RFC 7519</a> JWT</div>
     <div><a href="https://datatracker.ietf.org/doc/html/rfc7662">RFC 7662</a> Introspection</div>
-    <div><a href="https://datatracker.ietf.org/doc/html/rfc8693">RFC 8693</a> Token Exchange</div>
     <div><a href="https://openid.net/connect/">OpenID Connect</a> la spéc OIDC</div>
   </Card>
   <Card :accent="4" icon="📚" title="Documentation">

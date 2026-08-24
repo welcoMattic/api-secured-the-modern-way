@@ -69,7 +69,7 @@ src: ./pages/speaker.md
 ---
 
 ---
-src: ./pages/introduction/what-is-secured.md
+src: ./pages/introduction/what_is_secured.md
 ---
 
 ---
@@ -118,6 +118,10 @@ src: ./pages/conclusion/takeaways.md
 
 ---
 src: ./pages/conclusion/resources.md
+---
+
+---
+src: ./pages/conclusion/florent-talk.md
 ---
 
 ---

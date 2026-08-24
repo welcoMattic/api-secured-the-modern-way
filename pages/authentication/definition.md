@@ -37,9 +37,9 @@ sequenceDiagram
     participant P as OIDC Provider
     participant A as API Platform
 
-    C->>P: authorization_code + PKCE
+    C->>P: redirection + demande d'autorisation (PKCE)
     Note over P: Alice s'authentifie et consent
-    P-->>C: id_token + access_token
+    P-->>C: authorization code,<br/>échangé contre id_token + access_token
     C->>A: GET /api/photos + Bearer access_token
     A<<-->>P: vérifie l'access token
     A-->>C: 200 OK

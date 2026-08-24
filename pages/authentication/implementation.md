@@ -83,7 +83,7 @@ Quelques client credentials à configurer, et c'est branché.
   <Logo :size="4.2" src="/github.png" label="GitHub" />
   <Logo :size="4.2" src="/gitlab.svg" label="GitLab" />
   <Logo :size="4.2" src="/linkedin.svg" label="LinkedIn" />
-  <Logo :size="4.2" src="/bluesky.svg" label="Bluesky" />
+  <Logo :size="4.2" src="/x.svg" label="X (Twitter)" />
 </LogoGrid>
 
 <div class="slide-note is-centered">Pas une ligne de code, <b>que de la configuration</b>. Keycloak fournit douze connecteurs en standard.</div>
@@ -102,7 +102,7 @@ class: sec-authn
 <v-clicks>
 
 - 👉 Les **apps clientes** redirigent les utilisateurs vers l'**OIDC Provider** 
-- 🛂 L'**OIDC Provider** les authentifient et **émet les tokens**
+- 🛂 L'**OIDC Provider** les authentifie et **émet les tokens**
 - 👥 Les **comptes** vivent dans l'**OIDC Provider**, plus dans votre base
 - 🧩 Votre **API** doit **vérifier** les tokens
 - 🚫 Aucun écran de login ni de consentement à coder
@@ -144,7 +144,7 @@ security:
                 token_handler:
                     oidc:
                         algorithms: ['RS256']
-                        audience: 'api-photos'
+                        audience: 'cloudpics-api'
                         issuers: ['https://id.example.com/realms/photos']
                         discovery:
                             base_uri: 'https://id.example.com/realms/photos/'
@@ -179,7 +179,7 @@ security:
                 token_handler:
                     oidc_user_info:
                         base_uri: 'https://id.example.com/realms/photos/'
-                        claim: email
+                        claim: sub
                         discovery:
                             cache: { id: cache.app }
 ```
@@ -206,6 +206,8 @@ class: sec-authn
 | **Appel réseau**         | Aucun                     | Un par requête            |
 | **Révocation d'un token**| Visible à l'expiration    | Immédiate                 |
 | **Provider indisponible**| L'API continue de servir  | L'API ne répond plus      |
+| **Validation de `aud`**  | Oui                       | **Aucune**                |
+| **Claims lus**           | Ceux du token             | Ceux de `userinfo`        |
 | **Dépendance**           | `web-token/jwt-library`   | `symfony/http-client`     |
 
 <v-click>
@@ -224,7 +226,7 @@ class: sec-authn
 <v-clicks>
 
 - 🪪 `OidcUser` par défaut : **`ROLE_USER`**, et rien d'autre
-- 🧾 Le claim porteur des rôles varie : `realm_access`, `groups`, `scope`...
+- 🧾 RFC 9068 recommande `roles`, `groups`, `entitlements`. Keycloak émet `realm_access.roles`
 - 🔁 À vous de **mapper** les claims vers des rôles Symfony
 
 </v-clicks>
@@ -238,6 +240,29 @@ Le code de Symfony le dit explicitement : les specs OIDC et OAuth n'ont **aucune
 </Alert>
 
 </v-click>
+
+---
+layout: default
+class: sec-authn
+---
+
+# Deux claims, et une intersection
+
+<v-clicks>
+
+- 🧾 `realm_access.roles` : ce qu'Alice a le droit de faire
+- 🎫 `scope` : ce qu'Alice a autorisé **cette app** à faire en son nom
+- 🤝 Un access token ne porte que l'**intersection** des deux
+
+</v-clicks>
+
+<v-click>
+
+<div class="slide-punch">C'est le Provider qui croise, pas votre API.<br/>Keycloak : <i>full scope allowed</i> off + role scope mapping. Auth0 : RBAC.</div>
+
+</v-click>
+
+<div class="slide-note">Bob demande <code>photos:write</code> : CloudPics ID ne le lui accorde ni en scope, ni en rôle. Le resource server, lui, n'a plus qu'un claim à lire.</div>
 
 ---
 layout: default
@@ -280,7 +305,7 @@ class: sec-authn
 
 ```php
 // src/Entity/Photo.php
-#[ApiResource(security: "is_granted('ROLE_USER')")]
+#[ApiResource(security: "is_granted('ROLE_PHOTOS_READ')")]
 #[GetCollection]
 #[Post(security: "is_granted('ROLE_PHOTOS_WRITE')")]
 class Photo
@@ -291,7 +316,7 @@ class Photo
 
 <v-click>
 
-<div class="slide-punch">Même expression qu'avec OAuth2.<br/>Seule la <b>source des rôles</b> a changé.</div>
+<div class="slide-punch">Le même <code>is_granted</code> qu'avec OAuth2, au préfixe près.<br/>Seule la <b>source des rôles</b> a changé.</div>
 
 </v-click>
 
@@ -306,7 +331,7 @@ class: sec-authn
 
 - ✅ **Vérifier** un access token : natif (`access_token`)
 - ❌ **Initier** le flow authorization_code : pas encore dans le Core
-- 📦 `drenso/symfony-oidc-bundle` couvre le login côté client
+- 🚧 Un firewall `oidc_login`, en cours de review
 
   - 🛣️ Redirection vers l'OIDC Provider
   - 🔄 Échange de l'`authorization_code` contre la paire de tokens
@@ -329,15 +354,17 @@ PR ouverte sur la branche **8.2**, en cours de review.
 
 <div class="slide-note is-centered pr-link">github.com/symfony/symfony/pull/<b>64954</b></div>
 
+<div class="slide-punch">Pas de bundle dans la démo : <b>PhotoBook tourne sur cette PR</b>.</div>
+
 <style scoped>
 .pr-shot {
-  margin-top: 0.8rem;
+  margin-top: 0.4rem;
   display: flex;
   justify-content: center;
 }
 .pr-shot img {
   width: 100%;
-  max-width: 38rem;
+  max-width: 32rem;
   border-radius: var(--radius-lg);
   border: 1px solid var(--c-border);
   box-shadow: var(--shadow-card);
