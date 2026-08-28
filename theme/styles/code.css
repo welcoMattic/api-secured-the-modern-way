@@ -18,16 +18,10 @@
   }
 }
 
-:not(pre) > code:before,
-:not(pre) > code:after {
-  content: '`';
-  opacity: 0.50;
-}
-
 :not(pre) > code {
-  &:before {
-    margin-right: -0.08em;
-  }
+  /* Le contour et le fond disent déjà « code » : pas de backticks décoratifs.
+     La respiration vient donc du padding, plus des glyphes. */
+  padding: 0.08em 0.32em;
 
   outline: 1px solid var(--slidev-code-border);
   @apply rounded-sm;
