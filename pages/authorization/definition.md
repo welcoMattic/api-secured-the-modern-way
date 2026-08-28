@@ -156,28 +156,6 @@ layout: default
 class: sec-authz
 ---
 
-# Rien ne prouve que c'est PhotoPrint
-
-<v-clicks>
-
-- 📱 PhotoPrint tourne **chez Alice** (SPA, app mobile)
-- 🔓 Un secret embarqué serait **extractible** (DevTools, décompilation)
-- 💥 Un secret unique donnerait accès aux photos de TOUS les utilisateurs de CloudPics
-- 🙅 À l'échange du code, PhotoPrint ne peut **rien prouver**
-
-</v-clicks>
-
-<v-click>
-
-<div class="slide-punch">Le code volé s'échange <b>sans obstacle</b> → access token d'Alice.</div>
-
-</v-click>
-
----
-layout: default
-class: sec-authz
----
-
 # La parade : PKCE
 
 **P**roof **K**ey for **C**ode **E**xchange ([RFC 7636](https://datatracker.ietf.org/doc/html/rfc7636))
