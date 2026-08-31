@@ -26,12 +26,16 @@ api_platform:
         authorizationUrl: '%env(OIDC_ISSUER)%/protocol/openid-connect/auth'
         tokenUrl: '%env(OIDC_ISSUER)%/protocol/openid-connect/token'
         refreshUrl: '%env(OIDC_ISSUER)%/protocol/openid-connect/token'
-        # Les seuls scopes que le realm photos connaît. Les rôles PHOTOS_* n'en sont pas :
-        # ils arrivent dans le claim realm_access.roles, un client ne les demande pas.
+        # Les scopes que le realm photos connaît. photos:read et photos:write sont ceux
+        # qu'un client demande à l'utilisateur de lui déléguer : CloudPics ID n'accorde
+        # chacun que si l'utilisateur détient le rôle realm correspondant, et le rôle
+        # n'apparaît dans realm_access.roles que si le scope a été accordé.
         scopes:
             openid: "Active OIDC : sans lui, Keycloak ne fait que de l'OAuth2"
             profile: "Informations de profil de base (nom, prénom)"
             email: "Adresse email vérifiée de l'utilisateur"
+            'photos:read': "Voir les photos de l'utilisateur"
+            'photos:write': "Déposer des photos au nom de l'utilisateur"
     swagger:
         # Deuxième schéma, pour les clients qui détiennent déjà un access token
         # (un CI, un curl, un client généré) et n'ont rien à négocier.

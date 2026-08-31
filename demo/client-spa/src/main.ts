@@ -70,9 +70,13 @@ function render(user: User | null): void {
     ['aud', idPayload.aud, true],
     ['sub', idPayload.sub, false],
   ])
+  // `scope` puis `realm_access.roles`, dans cet ordre : ce que l'app a demandé, puis
+  // ce que le Provider a accordé. Sur le compte de bob, la deuxième ligne est plus
+  // courte que ce que PhotoPrint a réclamé, et c'est toute l'histoire.
   renderClaims(accessClaims, [
     ['aud', accessPayload.aud, true],
     ['azp', accessPayload.azp, false],
+    ['scope', accessPayload.scope, false],
     ['realm_access.roles', (accessPayload.realm_access as Record<string, unknown> | undefined)?.roles, false],
   ])
 
@@ -161,9 +165,14 @@ function renderResponse(status: number, body: string, challenge: string | null, 
   if (challenge) {
     nodes.push(element('p', 'response-challenge', `WWW-Authenticate: ${challenge}`))
   }
+  // Les deux 401 possibles ne disent pas la même chose, et les confondre ferait dire
+  // à la démo l'inverse de ce qu'on raconte. Sur le contre-exemple, le refus EST la
+  // démonstration : on explique l'audience, comme le fait PhotoBook.
+  if (401 === status && usedIdToken) {
+    nodes.push(element('p', 'response-hint', "L'ID token dit qui est l'utilisateur, à PhotoPrint. Son audience, c'est PhotoPrint, pas l'API. Seul l'access token ouvre l'API CloudPics."))
+  }
   // Un 401 sur l'access token, alors qu'on se croit connecté : le token n'est plus
   // vérifiable. Cas classique en démo, quand Keycloak a redémarré et régénéré ses clés.
-  // On ne dit rien pour le bouton ID token : là, le 401 est justement la démonstration.
   if (401 === status && !usedIdToken) {
     const hint = element('p', 'response-hint', "Ce token n'est plus accepté : le Provider a sans doute redémarré. ")
     const reset = document.createElement('button')

@@ -6,7 +6,10 @@ export const userManager = new UserManager({
   redirect_uri: window.location.origin + '/',
   post_logout_redirect_uri: window.location.origin + '/',
   response_type: 'code',
-  scope: 'openid profile email',
+  // photos:read et photos:write sont ce que PhotoPrint demande à Alice de lui
+  // déléguer. CloudPics ID n'accorde chaque scope que si Alice détient le rôle
+  // correspondant, et n'inscrit dans le token que ce qu'il a accordé.
+  scope: 'openid profile email photos:read photos:write',
   userStore: new WebStorageStateStore({ store: window.localStorage }),
   automaticSilentRenew: false,
 })

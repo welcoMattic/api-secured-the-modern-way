@@ -23,40 +23,40 @@ final class OidcUserProvider implements AttributesBasedUserProviderInterface
             userIdentifier: $identifier,
             roles: $this->mapRoles($attributes),
             sub: $attributes['sub'] ?? null,
-            email: $attributes['email'] ?? null,
             preferredUsername: $attributes['preferred_username'] ?? null,
+            email: $attributes['email'] ?? null,
         );
     }
 
-    /**
-     * Rafraîchit l'utilisateur : jamais appelé (firewall stateless).
-     */
     public function refreshUser(UserInterface $user): UserInterface
     {
         throw new UnsupportedUserException('Le firewall est stateless, le refresh n\'est pas supporté.');
     }
 
-    /**
-     * Vérifie que ce provider supporte la classe donnée.
-     */
     public function supportsClass(string $class): bool
     {
         return OidcUser::class === $class;
     }
 
     /**
-     * Mappe les rôles Keycloak (claims realm_access.roles) vers des rôles Symfony.
-     * - TOUJOURS ROLE_USER
-     * - Chaque rôle dans realm_access.roles devient ROLE_ + le rôle en majuscules
+     * Mappe les claims du token vers des rôles Symfony.
+     *
+     * realm_access.roles ne contient pas les rôles d'Alice : il contient ceux
+     * qu'Alice a accordés à CETTE application. Le Provider a déjà croisé les deux
+     * (Keycloak : « full scope allowed » désactivé, plus un role scope mapping sur
+     * les client scopes photos:read et photos:write). Un access token ne porte que
+     * l'autorité réellement déléguée, et le resource server n'a plus qu'à la lire.
+     *
+     * Rien à croiser ici, donc, et le mapping fonctionne à l'identique avec le
+     * token handler offline et le token handler online.
      */
     private function mapRoles(array $attributes): array
     {
         $roles = ['ROLE_USER'];
 
-        // realm_access.roles est un tableau de rôles Keycloak
-        if (isset($attributes['realm_access']['roles']) && \is_array($attributes['realm_access']['roles'])) {
-            foreach ($attributes['realm_access']['roles'] as $role) {
-                $roles[] = 'ROLE_' . \strtoupper($role);
+        foreach ($attributes['realm_access']['roles'] ?? [] as $realmRole) {
+            if (\in_array($realmRole, ['PHOTOS_READ', 'PHOTOS_WRITE'], true)) {
+                $roles[] = 'ROLE_'.$realmRole;
             }
         }
 
