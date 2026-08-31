@@ -31,4 +31,11 @@ security:
                     #         cache:
                     #             id: cache.app
 
-    access_control: []
+    # Les expressions de sécurité de Photo suffisent à refuser l'anonyme, mais elles
+    # le font ressource par ressource. Cette liste le dit une fois pour toutes, et
+    # laisse passer ce que Swagger UI doit pouvoir lire sans token.
+    access_control:
+        - { path: '^/api/docs', roles: PUBLIC_ACCESS }
+        - { path: '^/api/contexts', roles: PUBLIC_ACCESS }
+        - { path: '^/api$', roles: PUBLIC_ACCESS }
+        - { path: '^/api', roles: IS_AUTHENTICATED_FULLY }
