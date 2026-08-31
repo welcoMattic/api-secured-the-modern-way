@@ -219,13 +219,14 @@ function db_reset(): void
     io()->text('Création du schéma de la base de données...');
     run('php bin/console doctrine:schema:create', context: api_context());
 
-    // Insérer deux photos de démo
-    // Le Photo entity a: id (auto), title (string), url (string)
+    // Insérer les photos de démo avec leur propriétaire
+    // Le Photo entity a: id (auto), title (string), url (string), owner (string)
     io()->text('Insertion des photos de démo...');
-    run('php bin/console dbal:run-sql "INSERT INTO photo (title, url) VALUES (\'Coucher de soleil sur le Golden Gate\', \'https://cloudpics.example/alice/golden-gate.jpg\')"', context: api_context());
-    run('php bin/console dbal:run-sql "INSERT INTO photo (title, url) VALUES (\'Alice au sommet du Mont Tamalpais\', \'https://cloudpics.example/alice/tamalpais.jpg\')"', context: api_context());
+    run('php bin/console dbal:run-sql "INSERT INTO photo (title, url, owner) VALUES (\'Coucher de soleil sur le Golden Gate\', \'https://cloudpics.example/alice/golden-gate.jpg\', \'11111111-1111-4111-8111-111111111111\')"', context: api_context());
+    run('php bin/console dbal:run-sql "INSERT INTO photo (title, url, owner) VALUES (\'Alice au sommet du Mont Tamalpais\', \'https://cloudpics.example/alice/tamalpais.jpg\', \'11111111-1111-4111-8111-111111111111\')"', context: api_context());
+    run('php bin/console dbal:run-sql "INSERT INTO photo (title, url, owner) VALUES (\'Bob en lecture seule\', \'https://cloudpics.example/bob/read-only.jpg\', \'22222222-2222-4222-8222-222222222222\')"', context: api_context());
 
-    io()->success('Base de données réinitialisée avec deux photos de démo.');
+    io()->success('Base de données réinitialisée avec trois photos de démo.');
 }
 
 #[AsTask(name: 'smoke', description: 'Teste l\'API en ligne de commande sans navigateur')]
@@ -250,12 +251,17 @@ function smoke(): void
         }
     }
 
-    // Fonction helper pour obtenir un token
+    // Fonction helper pour obtenir un token.
+    //
+    // Le smoke demande photos:read et photos:write, exactement comme PhotoPrint et
+    // PhotoBook : sans ces scopes, CloudPics ID n'inscrit aucun rôle dans l'access
+    // token et tout répondrait 403. Ce qui distingue alice de bob n'est pas ce que
+    // le client demande, c'est ce que le Provider accorde.
     $getToken = function ($username, $password) use ($clientId, $realm, $keycloakUrl) {
         $cmd = sprintf(
             'curl -s -X POST "%s/realms/%s/protocol/openid-connect/token" \
              -H "Content-Type: application/x-www-form-urlencoded" \
-             -d "client_id=%s&grant_type=password&username=%s&password=%s"',
+             -d "client_id=%s&grant_type=password&username=%s&password=%s&scope=openid+photos%%3Aread+photos%%3Awrite"',
             $keycloakUrl,
             $realm,
             $clientId,
@@ -265,10 +271,10 @@ function smoke(): void
         return json_decode(capture($cmd), true);
     };
 
-    // Fonction helper pour tester une URL.
+    // La commande curl commune aux deux helpers ci-dessous.
     // Un POST doit porter un corps JSON-LD, sinon l'API répond 400/415 et jamais 201/403.
-    $testUrl = function ($url, $token = null, $method = 'GET') {
-        $cmd = sprintf('curl -s -o /dev/null -w "%%{http_code}" -X %s %s', $method, escapeshellarg($url));
+    $buildCurl = function ($url, $token = null, $method = 'GET') {
+        $cmd = sprintf('curl -s -X %s %s', $method, escapeshellarg($url));
         if ('POST' === $method) {
             $cmd .= " -H 'Content-Type: application/ld+json'"
                 .' --data '.escapeshellarg(json_encode(['title' => 'Photo smoke', 'url' => 'https://example.com/smoke.jpg']));
@@ -277,9 +283,65 @@ function smoke(): void
             $cmd .= ' -H '.escapeshellarg('Authorization: Bearer '.$token);
         }
 
+        return $cmd;
+    };
+
+    // Fonction helper pour tester une URL et récupérer le code HTTP.
+    $testUrl = function ($url, $token = null, $method = 'GET', $returnBody = false) use ($buildCurl) {
+        $cmd = $buildCurl($url, $token, $method);
+
         // onFailure : curl sort en erreur si rien n'écoute. On veut un FAIL lisible,
         // pas une stack trace de castor au milieu d'une démo.
-        return trim(capture($cmd.' --max-time 5', onFailure: '000'));
+        if ($returnBody) {
+            return capture($cmd.' --max-time 5', onFailure: '000');
+        }
+        return trim(capture($cmd.' -o /dev/null -w "%{http_code}" --max-time 5', onFailure: '000'));
+    };
+
+    // Le corps ET le code HTTP, en un seul appel. Indispensable dès que la requête
+    // n'est pas rejouable : le POST du test 4 crée une photo, le relancer pour lire
+    // son statut en créerait une deuxième.
+    $testUrlFull = function ($url, $token = null, $method = 'GET') use ($buildCurl) {
+        $raw = capture($buildCurl($url, $token, $method).' -w "\n%{http_code}" --max-time 5', onFailure: "\n000");
+        $cut = strrpos($raw, "\n");
+
+        return [
+            'status' => false === $cut ? '000' : trim(substr($raw, $cut + 1)),
+            'body' => false === $cut ? '' : substr($raw, 0, $cut),
+        ];
+    };
+
+    // Fonction helper pour tester une URL et compter les éléments de la collection.
+    //
+    // API Platform 4 sérialise en JSON-LD 1.1 : les clefs sont « totalItems » et « member »,
+    // sans le préfixe « hydra: » des versions précédentes. Les deux formes sont acceptées ici,
+    // pour que le test survive à une bascule de configuration.
+    $testCollectionCount = function ($url, $token) use ($testUrl) {
+        $body = $testUrl($url, $token, 'GET', true);
+        $data = json_decode($body, true);
+        if (!is_array($data)) {
+            return -1;
+        }
+
+        return $data['totalItems']
+            ?? $data['hydra:totalItems']
+            ?? count($data['member'] ?? $data['hydra:member'] ?? []);
+    };
+
+    // Les propriétaires des photos rendues par la collection.
+    //
+    // C'est l'invariant qui compte, et il est stable : un compte figé casserait au deuxième
+    // passage, puisque le POST d'alice laisse une photo de plus derrière lui.
+    $collectionOwners = function ($url, $token) use ($testUrl) {
+        $data = json_decode($testUrl($url, $token, 'GET', true), true);
+        if (!is_array($data)) {
+            return null;
+        }
+
+        return array_map(
+            static fn (array $photo) => $photo['owner'] ?? null,
+            $data['member'] ?? $data['hydra:member'] ?? []
+        );
     };
 
     // 1. no token -> 401
@@ -303,25 +365,50 @@ function smoke(): void
         exit(1);
     }
 
-    // 3. alice GET /api/photos -> 200
-    $response = $testUrl($apiUrl . '/api/photos', $aliceToken['access_token'], 'GET');
+    // Obtenir les IDs des photos pour les tests suivants
+    // Alice a 2 photos, Bob en a 1. On récupère les IDs via une requête admin (pas de filtre)
+    // Mais on ne peut pas faire ça en smoke test... On va deviner les IDs : 1, 2 pour Alice, 3 pour Bob
+    // Les sub sont déterministes : les id des utilisateurs sont épinglés dans le realm.
+    $aliceSub = '11111111-1111-4111-8111-111111111111';
+    $bobSub = '22222222-2222-4222-8222-222222222222';
+    $alicePhotoIds = [1, 2];
+    $bobPhotoId = 3;
+
+    // 3. alice GET /api/photos : elle voit au moins ses deux photos, et QUE les siennes
+    $owners = $collectionOwners($apiUrl . '/api/photos', $aliceToken['access_token']);
+    $passed = is_array($owners) && count($owners) >= 2 && [$aliceSub] === array_values(array_unique($owners));
+    io()->text(sprintf('[%s] alice GET /api/photos -> que ses photos (cloisonnement): %d photos, %d propriétaire(s)',
+        $passed ? 'PASS' : 'FAIL', is_array($owners) ? count($owners) : -1, is_array($owners) ? count(array_unique($owners)) : -1));
+    if (!$passed) $allPassed = false;
+
+    // 4. alice POST /api/photos -> 201, et le serveur impose le propriétaire
+    ['status' => $status, 'body' => $body] = $testUrlFull($apiUrl . '/api/photos', $aliceToken['access_token'], 'POST');
+    $created = json_decode($body, true);
+    $passed = '201' === $status && is_array($created) && ($created['owner'] ?? null) === $aliceSub;
+    io()->text(sprintf('[%s] alice POST /api/photos -> 201 et owner imposé par le serveur: HTTP %s, owner %s',
+        $passed ? 'PASS' : 'FAIL', $status, $created['owner'] ?? '(aucun owner dans la réponse)'));
+    if (!$passed) $allPassed = false;
+
+    // 5. bob GET /api/photos : la sienne, et rien d'autre
+    $owners = $collectionOwners($apiUrl . '/api/photos', $bobToken['access_token']);
+    $passed = is_array($owners) && 1 === count($owners) && [$bobSub] === array_values(array_unique($owners));
+    io()->text(sprintf('[%s] bob GET /api/photos -> que la sienne (cloisonnement): %d photo(s)',
+        $passed ? 'PASS' : 'FAIL', is_array($owners) ? count($owners) : -1));
+    if (!$passed) $allPassed = false;
+
+    // 6. bob GET /api/photos/{id d'une photo d'Alice} -> 403 (cloisonnement démontré)
+    $response = $testUrl($apiUrl . '/api/photos/' . $alicePhotoIds[0], $bobToken['access_token'], 'GET');
+    $passed = $response === '403';
+    io()->text(sprintf('[%s] bob GET /api/photos/{photo d\'Alice} -> 403 (cloisonnement): %s', $passed ? 'PASS' : 'FAIL', $response));
+    if (!$passed) $allPassed = false;
+
+    // 7. alice GET /api/photos/{id de sa propre photo} -> 200
+    $response = $testUrl($apiUrl . '/api/photos/' . $alicePhotoIds[0], $aliceToken['access_token'], 'GET');
     $passed = $response === '200';
-    io()->text(sprintf('[%s] alice GET /api/photos -> 200: %s', $passed ? 'PASS' : 'FAIL', $response));
+    io()->text(sprintf('[%s] alice GET /api/photos/{sa photo} -> 200: %s', $passed ? 'PASS' : 'FAIL', $response));
     if (!$passed) $allPassed = false;
 
-    // 4. alice POST /api/photos -> 201
-    $response = $testUrl($apiUrl . '/api/photos', $aliceToken['access_token'], 'POST');
-    $passed = $response === '201';
-    io()->text(sprintf('[%s] alice POST /api/photos -> 201: %s', $passed ? 'PASS' : 'FAIL', $response));
-    if (!$passed) $allPassed = false;
-
-    // 5. bob GET /api/photos -> 200
-    $response = $testUrl($apiUrl . '/api/photos', $bobToken['access_token'], 'GET');
-    $passed = $response === '200';
-    io()->text(sprintf('[%s] bob GET /api/photos -> 200: %s', $passed ? 'PASS' : 'FAIL', $response));
-    if (!$passed) $allPassed = false;
-
-    // 6. bob POST /api/photos -> 403
+    // 8. bob POST /api/photos -> 403
     $response = $testUrl($apiUrl . '/api/photos', $bobToken['access_token'], 'POST');
     $passed = $response === '403';
     io()->text(sprintf('[%s] bob POST /api/photos -> 403: %s', $passed ? 'PASS' : 'FAIL', $response));
@@ -353,4 +440,18 @@ function cc(): void
     run('php bin/console cache:pool:clear cache.app', context: client_symfony_context());
 
     io()->success('Cache vidé pour les deux applications.');
+}
+
+#[AsTask(name: 'test', description: 'Lance les tests unitaires et fonctionnels de l\'API et de PhotoBook')]
+function test(): void
+{
+    // Contrairement à « castor smoke », ces tests ne demandent ni Keycloak, ni Docker,
+    // ni serveur : le Provider et l'API sont simulés au niveau du transport HTTP.
+    io()->text('Tests de CloudPics API...');
+    run('php bin/phpunit', context: api_context());
+
+    io()->text('Tests de PhotoBook...');
+    run('php bin/phpunit', context: client_symfony_context());
+
+    io()->success('Les deux suites de tests sont passées.');
 }

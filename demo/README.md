@@ -18,7 +18,17 @@ ajoute deux que la bascule vers OIDC rend nécessaires.
 | ☁️ **CloudPics API** | Resource server : les photos d'Alice vivent ici | `api/` | API Platform 4 / Symfony 8.1 | http://localhost:8100 |
 | 🛂 **CloudPics ID** | OIDC Provider : comptes, login, émission des tokens | `keycloak/` | Keycloak 26 (Docker) | http://localhost:8080 |
 | 🌁 **PhotoPrint** | Client **public** : tourne chez Alice, aucun secret à garder | `client-spa/` | Vite + TypeScript + `oidc-client-ts` | http://localhost:5173 |
-| 📕 **PhotoBook** | Client **confidentiel** : tourne sur son serveur, lui peut garder un secret | `client-symfony/` | Symfony 8.1 + `drenso/symfony-oidc-bundle` | http://localhost:8101 |
+| 📕 **PhotoBook** | Client **confidentiel** : tourne sur son serveur, lui peut garder un secret | `client-symfony/` | Symfony 8.2-dev + authenticator natif `oidc_login` | http://localhost:8101 |
+
+PhotoBook tourne sur Symfony 8.2 de développement, parce que l'authenticator `oidc_login` n'est pas
+encore mergé. Une application ne peut pas dépendre de `symfony/symfony` (`FrameworkExtension` lève une
+exception dès qu'il le détecte), et les dépôts splittés officiels ne portent que du code mergé.
+`composer.json` prend donc les **trois composants modifiés par la PR** dans des dépôts snapshot figés
+sur la branche `demo-apiplatformcon-2026` : [security-core](https://github.com/welcoMattic/security-core),
+[security-http](https://github.com/welcoMattic/security-http) et
+[security-bundle](https://github.com/welcoMattic/security-bundle). Tout le reste de Symfony vient de
+packagist en `8.2.x-dev`. `web-token/jwt-library` s'ajoute au passage : c'est lui qui décode l'ID token,
+ici comme dans l'API. Le jour où la PR est mergée, ces quatre lignes disparaissent.
 
 Dans la section OAuth2 du deck, **CloudPics** cumule deux rôles : serveur d'autorisation *et* resource
 server. Toute la démonstration OIDC consiste à lui retirer le premier. CloudPics garde les photos,
@@ -41,9 +51,9 @@ serveur. Les deux passent par le même Provider, et l'API ne fait aucune différ
 | | 🌁 PhotoPrint | 📕 PhotoBook |
 |---|---|---|
 | **Où tourne le client ?** | Chez Alice, dans son navigateur | Sur le serveur de PhotoBook |
-| **Qui initie le flow ?** | Le navigateur, via `oidc-client-ts` | Le serveur, via `drenso/symfony-oidc-bundle` |
+| **Qui initie le flow ?** | Le navigateur, via `oidc-client-ts` | Le serveur, via l'authenticator natif `oidc_login` |
 | **Client OIDC** | Public + PKCE S256 | Confidentiel (`client_secret`) + PKCE |
-| **Ce que Symfony fournit nativement** | Rien côté client : c'est du JS | Pas encore le flow `authorization_code` ([PR #64954](https://github.com/symfony/symfony/pull/64954)) |
+| **Ce que Symfony fournit nativement** | Rien côté client : c'est du JS | Le flow `authorization_code` complet, via `oidc_login` ([PR #64954](https://github.com/symfony/symfony/pull/64954), pas encore mergée) |
 | **Côté API** | `access_token` + token handler `oidc` (natif) | Identique : le même firewall, le même handler |
 
 Le point clé : **côté CloudPics API, rien ne change**. Le resource server ne sait pas quel type de
@@ -54,6 +64,13 @@ client lui parle, et il n'a pas à le savoir.
 Connectez-vous d'abord sur PhotoPrint, puis ouvrez PhotoBook et cliquez sur « Se connecter ».
 **Aucun écran de login n'apparaît** : la session est déjà ouverte chez CloudPics ID. Les deux apps
 affichent alors le **même `sub`**, et chacune a reçu ses propres tokens.
+
+Un écran s'interpose quand même, et ce n'est pas le même : celui du **consentement**. Les deux clients
+portent `consentRequired`, et le realm repart vierge à chaque `castor start`, donc il apparaît une fois
+par app. Ne le subissez pas, servez-vous en : il liste « Voir vos photos » et « Déposer des photos »,
+c'est-à-dire les deux scopes que l'app demande, et c'est le moment où Alice **accorde** ce que
+CloudPics ID inscrira ensuite dans le token. Le mot de passe, lui, n'est demandé qu'une fois, et jamais
+par les apps.
 
 Une authentification, un Provider, deux clients tiers. Aucune des deux apps n'a jamais vu le mot de
 passe d'Alice, et aucune ne sait que l'autre existe.
@@ -78,22 +95,73 @@ castor start     # CloudPics ID + CloudPics API + PhotoBook + PhotoPrint
 castor open      # ouvre les 3 apps et la console de CloudPics ID
 ```
 
-`castor stop` arrête tout. `castor smoke` vérifie l'API en ligne de commande, sans navigateur.
+`castor stop` arrête tout. `castor smoke` vérifie l'API en ligne de commande, sans navigateur, et
+`castor test` lance les suites PHPUnit des deux applications PHP, sans rien démarrer du tout.
 
 ## Comptes de démo
 
-Deux comptes CloudPics, et une différence qui se voit à l'écran.
+Deux comptes CloudPics, et une différence qui se voit à l'écran. Les deux apps demandent les **mêmes**
+scopes pour l'un comme pour l'autre, `photos:read` et `photos:write` : ce qui les distingue à l'arrivée,
+c'est ce que CloudPics ID accorde.
 
-| Compte | Mot de passe | Le compte CloudPics | Rôles realm | Rôles dans l'API | GET | POST |
-|---|---|---|---|---|---|---|
-| `alice` | `alice` | Compte complet : elle consulte et dépose | `PHOTOS_READ`, `PHOTOS_WRITE` | `ROLE_USER`, `ROLE_PHOTOS_READ`, `ROLE_PHOTOS_WRITE` | 200 | 201 |
-| `bob` | `bob` | Offre gratuite : lecture seule | `PHOTOS_READ` | `ROLE_USER`, `ROLE_PHOTOS_READ` | 200 | **403** |
+| Compte | Mot de passe | Le compte CloudPics | Rôles realm | Scopes accordés | Rôles dans l'API | GET | POST | Ce qu'il voit |
+|---|---|---|---|---|---|---|---|---|
+| `alice` | `alice` | Compte complet : elle consulte et dépose | `PHOTOS_READ`, `PHOTOS_WRITE` | `photos:read`, `photos:write` | `ROLE_USER`, `ROLE_PHOTOS_READ`, `ROLE_PHOTOS_WRITE` | 200 | 201 | Ses 2 photos |
+| `bob` | `bob` | Offre gratuite : lecture seule | `PHOTOS_READ` | `photos:read` | `ROLE_USER`, `ROLE_PHOTOS_READ` | 200 | **403** | Sa 1 photo |
 
-Le `403` de bob est la démonstration, et il est le même depuis PhotoPrint et depuis PhotoBook :
-l'**autorisation** vit dans CloudPics API, l'**authentification** vit dans CloudPics ID. Changer de
-client ne change rien à ce que bob a le droit de faire.
+Bob a bien demandé `photos:write`, comme alice. Le Provider ne le lui a accordé **ni en scope, ni en
+rôle**, parce qu'il ne détient pas `PHOTOS_WRITE`. Projetez les deux access tokens côte à côte : c'est
+la ligne `scope` qui le dit avant la ligne `realm_access.roles`.
+
+Le cloisonnement par propriétaire et l'autorisation par rôle sont **deux mécanismes distincts** :
+l'autorisation par rôle (`ROLE_PHOTOS_WRITE`) dit ce qu'on a le droit de faire (POST pour alice, pas pour bob),
+le cloisonnement par propriétaire dit sur quoi (chaque utilisateur ne voit que ses photos, et un accès
+à la photo d'un autre retourne 403).
+
+Le `403` de bob sur POST est la démonstration de l'autorisation, et le `403` sur GET /api/photos/{id d'Alice}
+est la démonstration du cloisonnement. Les deux sont visibles depuis PhotoPrint et PhotoBook :
+l'**autorisation** et le **cloisonnement** vivent dans CloudPics API, l'**authentification** vit dans CloudPics ID.
+Changer de client ne change rien à ces règles.
 
 Console d'admin de CloudPics ID : http://localhost:8080 (`admin` / `admin`).
+
+## Rôles et scopes : c'est le Provider qui croise, pas l'API
+
+Deux claims, et il faut les deux pour savoir ce qu'une requête a le droit de faire :
+
+- `realm_access.roles` dit ce qu'**Alice** a le droit de faire ;
+- `scope` dit ce qu'Alice a autorisé **cette app** à faire en son nom.
+
+Un access token ne doit porter que l'**intersection** des deux, et cette intersection est faite par
+l'autorisation server, pas par le resource server. C'est le modèle standard : le token représente
+l'autorité réellement déléguée, et RFC 9068 le dit à sa façon, *« all the individual scope strings in
+the "scope" claim MUST have meaning for the resources indicated in the "aud" claim »*. Auth0 l'a
+productisé : avec RBAC, le claim `scope` du token est l'intersection des permissions demandées et des
+permissions de l'utilisateur.
+
+Chez Keycloak, deux réglages y suffisent, et ils sont dans `keycloak/import/photos-realm.json` :
+
+| Réglage | Effet |
+|---|---|
+| `"fullScopeAllowed": false` sur chaque client | Sans lui, Keycloak met **tous** les rôles de l'utilisateur dans **tous** ses tokens, quoi que le client ait demandé. |
+| `scopeMappings` au niveau du realm | Rattache le rôle `PHOTOS_READ` au client scope `photos:read`, et `PHOTOS_WRITE` à `photos:write`. Ces client scopes étant `optionalClientScopes`, le rôle n'entre dans le token que si le client a demandé le scope **et** que l'utilisateur détient le rôle. |
+
+Ce que ça donne, vérifiable en une commande avec le client `cloudpics-smoke-test` :
+
+| Compte | Scope demandé | `scope` du token | `realm_access.roles` |
+|---|---|---|---|
+| alice | `openid` | `openid email profile` | *(aucun)* |
+| alice | `openid photos:read` | `... photos:read` | `PHOTOS_READ` |
+| alice | `openid photos:read photos:write` | `... photos:read photos:write` | `PHOTOS_READ`, `PHOTOS_WRITE` |
+| bob | `openid photos:read photos:write` | `... photos:read` | `PHOTOS_READ` |
+
+Deux conséquences pour l'API. La première : `OidcUserProvider::mapRoles()` n'a plus rien à croiser, il
+lit un claim et préfixe. La seconde, moins évidente : **le mapping fonctionne à l'identique offline et
+online**. Si l'intersection vivait dans le resource server, elle mourrait en online, parce que le
+endpoint `userinfo` ne renvoie aucun claim `scope`.
+
+Effet de bord bienvenu : sans les rôles par défaut du realm, `aud` ne vaut plus que `cloudpics-api`,
+sans le `account` que Keycloak y ajoutait. La carte de token projetée y gagne.
 
 ## La doc OpenAPI décrit aussi l'authentification
 
@@ -112,10 +180,11 @@ redirige vers `/bundles/apiplatform/swagger-ui/oauth2-redirect.html`. Le realm �
 chaque démarrage du conteneur (voir plus bas), un `castor restart` suffit pour que ce client
 existe. Sans lui, « Authorize » répondrait `invalid_client`.
 
-Les rôles `PHOTOS_READ` / `PHOTOS_WRITE` n'apparaissent **pas** comme des scopes OAuth2, parce
-qu'ils n'en sont pas : ils voyagent dans le claim `realm_access.roles` de l'access token. La spec
-les mentionne en prose dans la description de chaque opération, là où un générateur de clients ne
-risque pas de les confondre avec quelque chose à demander au Provider.
+Le flow déclare quatre scopes, dont `photos:read` et `photos:write` : ce sont ceux qu'un client
+demande, et Swagger UI doit pouvoir les cocher pour obtenir un token utilisable. Les **rôles**
+`PHOTOS_READ` / `PHOTOS_WRITE`, eux, ne sont pas des scopes et n'apparaissent pas dans le flow : la
+spec les mentionne en prose dans la `description` de chaque opération, là où un générateur de clients
+ne risque pas de les confondre avec quelque chose à demander au Provider.
 
 ## Le realm `photos`, alias CloudPics ID
 
@@ -130,6 +199,10 @@ surtout les **clés de signature** sont neufs.
 | `photobook` | 📕 PhotoBook | confidentiel (`photobook-secret`) | `authorization_code` + PKCE S256 | `http://localhost:8101/*` |
 | `cloudpics-docs` | 📗 Swagger UI de l'API | public | `authorization_code` + PKCE S256 | `http://localhost:8100/*` |
 | `cloudpics-smoke-test` | (outillage) | public | `password` (Direct Access Grants) | aucune |
+
+Les quatre portent `"fullScopeAllowed": false` et les deux client scopes `photos:read` / `photos:write`
+en optionnels : c'est ce qui fait de `realm_access.roles` une intersection et non un décalque des rôles
+du compte. Voir « Rôles et scopes » plus haut.
 
 Ces `client_id` ne sont pas décoratifs : ils apparaissent dans les tokens que vous projetez. L'access
 token de PhotoPrint porte `azp: photoprint` et `aud: cloudpics-api`, ce qui se lit d'un coup d'oeil :
@@ -147,6 +220,11 @@ Symfony **valide l'audience** : sans mapper, chaque requête tombe en `401`.
 Le realm ajoute donc un protocol mapper `oidc-audience-mapper` sur chaque client, qui injecte
 `cloudpics-api` dans le claim `aud`. C'est la valeur attendue par `OIDC_AUDIENCE` dans l'API.
 
+Avec `fullScopeAllowed: false`, le `account` disparaît au passage : les rôles par défaut du realm ne
+sont plus dans le token, donc le mapper `audience resolve` n'a plus de client à y ajouter. `aud` vaut
+exactement `cloudpics-api`, ce qui rend la carte de token projetée plus lisible qu'un tableau à deux
+entrées.
+
 ## Les deux apps clientes sont faites pour être projetées
 
 Elles reprennent le design system du deck (`theme/styles/tokens.css`) : mêmes couleurs, même
@@ -161,11 +239,13 @@ Deux règles tenues par construction :
 - **Aucune requête réseau** pour l'affichage : pas de webfont distante, rien que le wifi de la salle
   puisse casser.
 
-Trois détails qui servent le propos :
+Quelques détails qui servent le propos. Les deux premiers ne valent que pour PhotoPrint : PhotoBook
+n'affiche pas de cartes de tokens, il affiche l'identité que le provider natif `oidc` lui a fabriquée.
 
 | Détail | Pourquoi |
 |---|---|
-| Le claim `aud` est colorié dans les deux cartes de tokens | C'est le seul endroit que vous montrez du doigt : `photoprint` d'un côté, `cloudpics-api` de l'autre. À côté, `azp` dit qui a reçu le token. |
+| Le claim `aud` est colorié dans les deux cartes de tokens de PhotoPrint | C'est le seul endroit que vous montrez du doigt : `photoprint` d'un côté, `cloudpics-api` de l'autre. À côté, `azp` dit qui a reçu le token. |
+| La carte d'access token montre `scope` juste avant `realm_access.roles` | Ce que l'app a demandé, puis ce que le Provider a accordé. Sur le compte de bob, la deuxième ligne est plus courte que la première : c'est l'intersection, à l'écran. |
 | L'access token affiche son temps restant | Ça illustre « les access tokens sont courts », et ça vous prévient avant que la démo ne réponde `401`. |
 | Le `401` affiche l'en-tête `WWW-Authenticate` | L'API n'a pas de corps à renvoyer sur un `401` : elle dit `error="invalid_token"` dans l'en-tête. |
 | Les deux apps ont un bouton **« avec l'ID token »**, encadré en magenta | Il envoie l'ID token à la place de l'access token, et récolte un `401`. Un jeton parfaitement valide et parfaitement signé, mais dont l'audience est le client, pas l'API. |
@@ -184,13 +264,41 @@ Platform pèse 2,5 ko de chemins de vendor : projeté, ça noie la seule ligne q
 | Fichier | Ce qu'il montre |
 |---|---|
 | `api/config/packages/security.yaml` | Le firewall `access_token` + token handler `oidc` (offline). La variante `oidc_user_info` (online) est en commentaire. |
-| `api/src/Security/OidcUserProvider.php` | Le mapping `realm_access.roles` -> `ROLE_*`. OIDC n'a aucune notion de rôle : ce mapping est à votre charge. |
-| `api/src/Entity/Photo.php` | La ressource API Platform, inchangée : `is_granted('ROLE_USER')` et `is_granted('ROLE_PHOTOS_WRITE')`. |
-| `client-spa/src/oidc.ts` | Les quinze lignes qui font de PhotoPrint un client OIDC. PKCE S256 est le défaut de la bibliothèque. |
-| `client-spa/src/main.ts` | La distinction ID token (pour PhotoPrint) / access token (pour CloudPics API), et le contre-exemple. |
-| `client-symfony/config/packages/drenso_oidc.yaml` | La config du client confidentiel PhotoBook, secret compris. |
-| `client-symfony/src/Security/OidcIdentityProvider.php` | PhotoBook n'a besoin que de l'identité. Les rôles restent l'affaire de l'API : la classe est nommée autrement que celle de l'API, exprès. |
+| `api/src/Security/OidcUserProvider.php` | Le mapping `realm_access.roles` -> `ROLE_*`. OIDC n'a aucune notion de rôle : ce mapping est à votre charge. Six lignes, parce que l'intersection rôle / scope a déjà été faite par le Provider. |
+| `api/src/Entity/Photo.php` | La ressource API Platform avec la propriété `owner`, et l'expression de sécurité sur l'item qui vérifie le rôle **puis** le propriétaire. L'expression d'une opération remplace celle de la ressource : oublier le rôle ici, c'est ne plus le vérifier du tout. |
+| `api/src/State/PhotoOwnerProcessor.php` | Le state processor qui impose le propriétaire côté serveur depuis l'utilisateur authentifié au POST, sans que le client ne puisse le choisir. |
+| `api/src/Doctrine/PhotoOwnerExtension.php` | L'extension Doctrine qui filtre la collection sur le propriétaire, démontrant le cloisonnement. |
+| `client-spa/src/oidc.ts` | Les quinze lignes qui font de PhotoPrint un client OIDC. PKCE S256 est le défaut de la bibliothèque, et les scopes `photos:*` sont ce que l'app demande à Alice de lui déléguer. |
+| `client-symfony/config/packages/security.yaml` | Tout PhotoBook tient là : le firewall `oidc_login` natif (issuer, client confidentiel, scopes, PKCE S256 par défaut, RP-Initiated Logout) et le provider natif `oidc`, qui ne donne que `ROLE_USER`. Les rôles restent l'affaire de l'API. |
+| `client-symfony/config/routes/security.yaml` | L'import du route loader qui déclare la route du `check_path`. Sans lui, le retour du Provider tombe sur un 404 du routeur. |
 | `client-symfony/src/Api/PhotoApiClient.php` | Comment PhotoBook relaie l'access token de la session vers CloudPics API, et `listWithIdToken()` pour le contre-exemple. |
+
+## Les tests
+
+`castor test` lance les deux suites. Elles ne demandent **ni Docker, ni Keycloak, ni serveur** :
+CloudPics ID et CloudPics API sont simulés au niveau du transport HTTP, via
+`framework.http_client.mock_response_factory`. Autrement dit, aucun service de sécurité n'est
+remplacé : le firewall, le token handler `oidc` et sa discovery sont ceux qui tournent sur scène.
+
+| Suite | Ce qu'elle prouve |
+|---|---|
+| `api/tests/Api/PhotoSecurityTest.php` | Les refus et les accès de CloudPics API, cas par cas : pas de token, token qui n'est pas un JWT, ID token refusé sur son audience, signature d'un autre émetteur, autre issuer, token expiré, authentifié mais sans rôle, cloisonnement par propriétaire, 403 de bob sur POST, propriétaire imposé au POST même si le client tente de le choisir, et `/api/docs` toujours lisible sans token. |
+| `api/tests/Security/OidcUserProviderTest.php` | Le mapping des claims vers des `ROLE_*`, y compris le cas « aucun rôle accordé » et celui d'un rôle realm que l'API ne connaît pas. |
+| `client-symfony/tests/Api/PhotoApiClientTest.php` | Le jeton que PhotoBook envoie vraiment (access token, puis ID token sur le contre-exemple), le retrait de la `trace` PHP, la remontée du `WWW-Authenticate`, et une API injoignable qui ne lève aucune exception. |
+| `client-symfony/tests/Controller/PhotoControllerTest.php` | Les trois boutons, du clic à l'affichage, contre-exemple compris : la vue explique l'audience au lieu de proposer d'oublier la session. |
+| `client-symfony/tests/Controller/SecurityControllerTest.php` | « Oublier la session » face à « Se déconnecter », et la présence de la route du `check_path`. |
+
+Deux détails qui évitent des faux échecs, et qui sont documentés là où ils vivent :
+
+- `api/config/packages/test/cache.yaml` met `cache.app` en mémoire. Sur disque, le JWKS découvert
+  survivrait d'un run au suivant, alors que la paire de clés de test est régénérée à chaque processus :
+  tous les tokens tomberaient en `401` au deuxième run. C'est le même piège que celui de la bascule
+  offline / online, en plus discret.
+- Aucune clé privée n'est commitée. `api/tests/Oidc/TestKeys.php` génère la paire RS256 du faux
+  Provider au premier appel, et une seconde paire « imposteur » pour le seul test qui doit échouer.
+
+`castor smoke` reste complémentaire : lui parle à la vraie stack, en HTTP, et c'est ce qui valide le
+realm, les horloges et la bascule du token handler.
 
 ## Basculer offline / online
 
@@ -200,12 +308,26 @@ le second commenté :
 - `oidc` : vérifie la **signature** localement, avec les clés publiques du `.well-known`. Zéro appel réseau par requête.
 - `oidc_user_info` : appelle le Provider **à chaque requête**. Révocation immédiate, mais l'API tombe si le Provider tombe.
 
-Une différence que le tableau du deck ne montre pas : le handler `oidc_user_info` **ne valide pas
-l'audience**. Il présente l'access token au `userinfo` du Provider et lit les claims de la réponse.
-Passer en online, c'est donc aussi renoncer au contrôle de `aud` : n'importe quel token valide du realm,
-même émis pour une autre API, est accepté. C'est un argument de plus pour l'offline.
+Le handler `oidc_user_info` **ne valide pas l'audience**. Il présente l'access token au `userinfo` du
+Provider et lit les claims de la réponse. Passer en online, c'est donc renoncer au contrôle de `aud` :
+n'importe quel token valide du realm, même émis pour une autre API, est accepté. RFC 9068 est pourtant
+catégorique, *« the resource server MUST validate that the "aud" claim contains a resource indicator
+value corresponding to an identifier the resource server expects for itself »*.
 
-Commentez l'un, décommentez l'autre, `castor cc`, et rejouez `castor smoke`.
+Il ne voit pas non plus le claim `scope` : `userinfo` décrit l'utilisateur, pas l'autorisation accordée.
+Ici ça ne coûte rien, puisque l'intersection est faite par le Provider et que le mapper
+`realm-roles-userinfo` place `realm_access.roles` dans la réponse `userinfo`. Mais une API qui aurait
+mis l'intersection dans son resource server tomberait à `ROLE_USER` en basculant online, sans rien voir
+venir. Le vrai pendant online d'une vérification de token, celui qui renvoie `scope`, `aud` et
+`client_id`, c'est l'introspection (RFC 7662).
+
+Symfony fournit d'ailleurs un handler `oauth2` pour l'introspection, mais il ne remplace pas
+`oidc_user_info` ici : il fabrique un `OAuth2User` sans passer par le user provider configuré (le
+`UserBadge` qu'il retourne porte déjà un loader, et `AccessTokenAuthenticator` ne le remplace que si
+c'est un `FallbackUserLoader`). Donc pas de mapping de rôles, et pas de démo.
+
+Commentez l'un, décommentez l'autre, `castor cc`, et rejouez `castor smoke` : les huit tests passent
+dans les deux modes.
 
 `castor cc` purge aussi le pool `cache.app`, et ce n'est pas cosmétique : les deux handlers y écrivent
 sous **la même clé** de discovery, mais pas le même contenu (le handler `oidc` y met le JWKS, le handler
