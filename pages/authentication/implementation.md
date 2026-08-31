@@ -42,10 +42,11 @@ class: sec-authn
 
 # OIDC Providers SaaS
 
-<ServiceGroup europe label="Europe" :cols="4" class="mt-3">
+<ServiceGroup europe label="Europe" :cols="5" class="mt-3">
   <Logo :size="2.4" src="/cidaas.png" label="Cidaas" />
   <Logo :size="2.4" src="/cloud-iam.png" label="Cloud-IAM" />
   <Logo :size="2.4" src="/gravitee.webp" label="Gravitee AM" />
+  <Logo :size="2.4" src="/please-open-it.svg" badge="/clevercloud.svg" badgeAlt="Clever Cloud" label="Please Open It <br/> <small>(le Keycloak managé de Clever Cloud)</small>" />
   <Logo :size="2.4" src="/zitadel.png" label="Zitadel" />
 </ServiceGroup>
 
