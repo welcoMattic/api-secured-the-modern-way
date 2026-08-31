@@ -1,0 +1,8 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # tests/ est hors du périmètre de services.yaml : la fabrique de réponses doit
+    # être déclarée à la main pour être référençable depuis la config framework.
+    App\Tests\Api\FakeCloudPicsApi: ~

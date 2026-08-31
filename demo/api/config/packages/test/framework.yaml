@@ -1,0 +1,8 @@
+# Le faux CloudPics ID répond à la place du vrai.
+#
+# On n'échange aucun service de sécurité : le firewall garde son token handler « oidc »
+# et sa discovery HTTP, exactement comme en production. Seul le transport HTTP est
+# détourné, donc les tests exercent bien la configuration qui tourne sur scène.
+framework:
+    http_client:
+        mock_response_factory: App\Tests\Oidc\FakeCloudPicsId

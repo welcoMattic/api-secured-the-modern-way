@@ -1,0 +1,8 @@
+# CloudPics API répond depuis le processus de test.
+#
+# Rien du côté PhotoBook n'est remplacé : ni le contrôleur, ni PhotoApiClient, ni la
+# vue. Seul le transport HTTP sortant est détourné, ce qui laisse les tests exercer le
+# chemin complet, jusqu'au 401 du contre-exemple.
+framework:
+    http_client:
+        mock_response_factory: App\Tests\Api\FakeCloudPicsApi

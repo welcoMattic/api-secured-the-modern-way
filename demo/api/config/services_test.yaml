@@ -1,0 +1,8 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # Les classes de tests/ ne sont pas dans le périmètre de services.yaml : la fabrique
+    # de réponses HTTP doit donc être déclarée à la main pour être référençable.
+    App\Tests\Oidc\FakeCloudPicsId: ~

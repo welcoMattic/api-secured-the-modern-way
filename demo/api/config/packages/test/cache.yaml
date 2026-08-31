@@ -1,0 +1,6 @@
+# Le JWKS découvert est mis en cache par le token handler. Sur disque, il survivrait
+# d'un run de tests au suivant, alors que la paire de clés de test est régénérée à
+# chaque processus : tous les tokens tomberaient en 401 au deuxième run.
+framework:
+    cache:
+        app: cache.adapter.array
