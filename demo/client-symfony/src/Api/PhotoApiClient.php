@@ -2,8 +2,6 @@
 
 namespace App\Api;
 
-use Drenso\OidcBundle\Model\OidcTokens;
-use Drenso\OidcBundle\Security\Token\OidcToken;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -23,25 +21,24 @@ class PhotoApiClient
     }
 
     /**
-     * Les deux tokens de la session.
+     * Un des deux tokens de la session.
      *
-     * OidcToken stocke l'objet OidcTokens comme attribut, et
-     * AbstractToken::__serialize() inclut les attributs : la paire survit donc
-     * dans la session entre les requêtes.
+     * L'authenticator natif les pose comme attributs du token de sécurité, et
+     * AbstractToken::__serialize() inclut les attributs : la paire survit donc dans la
+     * session d'une requête à l'autre.
      */
-    private function tokens(): OidcTokens
+    private function token(string $attribut): string
     {
         $token = $this->tokenStorage->getToken();
 
-        if (!$token instanceof OidcToken) {
+        if (!$token?->hasAttribute($attribut)) {
             throw new \LogicException(sprintf(
-                'Token de type %s non supporté : attendu %s.',
-                get_debug_type($token),
-                OidcToken::class
+                'Aucun attribut « %s » sur le token de sécurité : la session n\'a pas été ouverte par l\'authenticator oidc_login.',
+                $attribut
             ));
         }
 
-        return $token->getAuthData();
+        return $token->getAttribute($attribut);
     }
 
     /**
@@ -49,7 +46,7 @@ class PhotoApiClient
      */
     public function list(): array
     {
-        return $this->appeler('GET', $this->tokens()->getAccessToken(), []);
+        return $this->appeler('GET', $this->token('oidc_access_token'), []);
     }
 
     /**
@@ -57,7 +54,7 @@ class PhotoApiClient
      */
     public function create(string $title, string $url): array
     {
-        return $this->appeler('POST', $this->tokens()->getAccessToken(), [
+        return $this->appeler('POST', $this->token('oidc_access_token'), [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'body' => json_encode(['title' => $title, 'url' => $url], \JSON_THROW_ON_ERROR),
         ]);
@@ -72,7 +69,7 @@ class PhotoApiClient
      */
     public function listWithIdToken(): array
     {
-        return $this->appeler('GET', $this->tokens()->getIdToken(), []);
+        return $this->appeler('GET', $this->token('oidc_id_token'), []);
     }
 
     /**

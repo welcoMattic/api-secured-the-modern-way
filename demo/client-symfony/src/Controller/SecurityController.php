@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use Drenso\OidcBundle\OidcClientInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,23 +10,16 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class SecurityController extends AbstractController
 {
+    /**
+     * Ne rend aucune page : /login est protégé, donc le point d'entrée du firewall se
+     * déclenche avant ce contrôleur et part chez CloudPics ID (direct_redirect: true).
+     * On n'arrive ici qu'une fois authentifié, quand le success handler rejoue l'URL
+     * demandée.
+     */
     #[Route('/login', name: 'app_login')]
-    public function login(OidcClientInterface $oidcClient): Response
+    public function login(): Response
     {
-        // On passe explicitement les scopes openid, profile et email.
-        // Sans ça, le bundle ne demande que 'openid' par défaut,
-        // et l'endpoint userinfo ne retourne pas l'email.
-        return $oidcClient->generateAuthorizationRedirect(scopes: ['openid', 'profile', 'email']);
-    }
-
-    #[Route('/login_check', name: 'app_login_check')]
-    public function loginCheck(): Response
-    {
-        // Cette action n'est JAMAIS atteinte.
-        // L'authentificateur (OidcAuthenticator) intercepte la requête sur /login_check
-        // dès qu'elle contient les paramètres 'code' et 'state', et gère tout le flow
-        // (échange du code contre un token, création de la session, redirection).
-        throw new \LogicException('app_login_check doit être interceptée par l\'authentificateur OIDC.');
+        return $this->redirectToRoute('app_home');
     }
 
     /**
@@ -50,7 +42,7 @@ class SecurityController extends AbstractController
     public function logout(): never
     {
         // Jamais atteinte non plus : le firewall intercepte /logout.
-        // enable_end_session_listener: true déclenche aussi la déconnexion chez Keycloak.
+        // enable_end_session: true déclenche aussi la déconnexion chez CloudPics ID.
         throw new \LogicException('app_logout doit être interceptée par le firewall.');
     }
 }

@@ -105,7 +105,7 @@ resource "clevercloud_php" "photobook" {
     API_BASE_URL        = local.api_url
     OIDC_CLIENT_ID      = "photobook"
     OIDC_CLIENT_SECRET  = var.photobook_client_secret
-    OIDC_WELL_KNOWN_URL = "${local.realm_url}/.well-known/openid-configuration"
+    OIDC_ISSUER         = local.realm_url
   }
 
   deployment {

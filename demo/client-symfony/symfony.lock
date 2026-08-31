@@ -1,14 +1,17 @@
 {
-    "drenso/symfony-oidc-bundle": {
-        "version": "4.5",
+    "phpunit/phpunit": {
+        "version": "13.3",
         "recipe": {
-            "repo": "github.com/symfony/recipes-contrib",
+            "repo": "github.com/symfony/recipes",
             "branch": "main",
-            "version": "2.0",
-            "ref": "e2b975158d940a191f48e3ff2c59108a1d7225e6"
+            "version": "11.1",
+            "ref": "ca0bc067abfb40a8de1b2561b96cbfc2b833c314"
         },
         "files": [
-            "config/packages/drenso_oidc.yaml"
+            ".env.test",
+            "phpunit.dist.xml",
+            "tests/bootstrap.php",
+            "bin/phpunit"
         ]
     },
     "symfony/apache-pack": {

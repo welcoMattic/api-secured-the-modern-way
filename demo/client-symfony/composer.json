@@ -1,26 +1,42 @@
 {
     "type": "project",
     "license": "proprietary",
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/welcoMattic/security-core"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/welcoMattic/security-http"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/welcoMattic/security-bundle"
+        }
+    ],
     "require": {
         "php": ">=8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "drenso/symfony-oidc-bundle": "^4.5",
         "symfony/apache-pack": "*",
-        "symfony/asset": "8.1.*",
-        "symfony/console": "8.1.*",
-        "symfony/dotenv": "8.1.*",
+        "symfony/asset": "8.2.*",
+        "symfony/console": "8.2.*",
+        "symfony/dotenv": "8.2.*",
         "symfony/flex": "^2",
-        "symfony/framework-bundle": "8.1.*",
-        "symfony/http-client": "8.1.*",
-        "symfony/runtime": "8.1.*",
-        "symfony/security-bundle": "8.1.*",
-        "symfony/twig-bundle": "8.1.*",
-        "symfony/yaml": "8.1.*",
+        "symfony/framework-bundle": "8.2.*",
+        "symfony/http-client": "8.2.*",
+        "symfony/runtime": "8.2.*",
+        "symfony/security-bundle": "dev-demo-apiplatformcon-2026 as 8.2.x-dev",
+        "symfony/security-core": "dev-demo-apiplatformcon-2026 as 8.2.x-dev",
+        "symfony/security-http": "dev-demo-apiplatformcon-2026 as 8.2.x-dev",
+        "symfony/twig-bundle": "8.2.*",
+        "symfony/yaml": "8.2.*",
         "twig/extra-bundle": "^2.12|^3.0",
-        "twig/twig": "^2.12|^3.0"
+        "twig/twig": "^2.12|^3.0",
+        "web-token/jwt-library": "^4.1"
     },
     "config": {
         "allow-plugins": {
@@ -54,10 +70,7 @@
         "symfony/polyfill-php84": "*"
     },
     "scripts": {
-        "auto-scripts": {
-            "cache:clear": "symfony-cmd",
-            "assets:install %PUBLIC_DIR%": "symfony-cmd"
-        },
+        "auto-scripts": [],
         "post-install-cmd": [
             "@auto-scripts"
         ],
@@ -65,13 +78,17 @@
             "@auto-scripts"
         ]
     },
+    "extra": {
+        "symfony": {
+            "allow-contrib": "true"
+        }
+    },
     "conflict": {
         "symfony/symfony": "*"
     },
-    "extra": {
-        "symfony": {
-            "allow-contrib": "true",
-            "require": "8.1.*"
-        }
+    "require-dev": {
+        "phpunit/phpunit": "^13.3",
+        "symfony/browser-kit": "8.2.*",
+        "symfony/css-selector": "8.2.*"
     }
 }

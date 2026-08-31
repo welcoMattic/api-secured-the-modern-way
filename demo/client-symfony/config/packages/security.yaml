@@ -1,8 +1,10 @@
 security:
-    # Pas de mots de passe locaux : toute l'authentification passe par Keycloak
+    # Pas de mots de passe locaux : toute l'authentification passe par CloudPics ID
     providers:
         oidc:
-            id: App\Security\OidcIdentityProvider
+            # Provider natif : il fabrique un OidcUser à partir des claims, sans base locale,
+            # et ne laisse aucun claim définir l'identité ni accorder de rôle.
+            oidc: ~
 
     firewalls:
         dev:
@@ -11,19 +13,38 @@ security:
         main:
             lazy: true
             provider: oidc
-            oidc:
-                check_path: app_login_check
-                login_path: app_login
-                client: default
-                user_identifier_property: sub
-                # RP-initiated logout : déclenche aussi la déconnexion chez Keycloak
-                enable_end_session_listener: true
+            # Le flow authorization_code, nativement, sans bundle externe.
+            oidc_login:
+                provider_uri: '%env(OIDC_ISSUER)%'
+                client_id: '%env(OIDC_CLIENT_ID)%'
+                client_secret: '%env(OIDC_CLIENT_SECRET)%'
+                # openid seul ne suffirait pas : sans profile ni email, le endpoint userinfo
+                # ne renvoie ni preferred_username ni email. Et sans photos:read ni
+                # photos:write, CloudPics ID n'inscrit aucun rôle dans l'access token :
+                # ces deux scopes sont ce que PhotoBook demande à Alice de lui déléguer.
+                scope: ['openid', 'profile', 'email', 'photos:read', 'photos:write']
+                # PKCE S256 est actif par défaut, y compris pour un client confidentiel :
+                # aucune clé à écrire, c'est la recommandation de la RFC 9700.
+                check_path: /login_check
+                login_path: /login
+                # Le bouton « Se connecter » vise /login, qui est protégé : le point d'entrée
+                # du firewall part alors droit chez CloudPics ID, sans page intermédiaire.
+                direct_redirect: true
+                # Un échec ne doit surtout pas renvoyer sur /login, qui relancerait le flow
+                # en boucle devant la salle.
+                failure_path: /
+                # RP-Initiated Logout : déconnecte aussi la session chez CloudPics ID
+                enable_end_session: true
+                post_logout_redirect_path: /
+                # Le document de découverte est mis en cache une heure
+                discovery_cache_ttl: 3600
             logout:
                 path: app_logout
                 target: app_home
 
     access_control:
-        - { path: ^/(login|logout)$, roles: PUBLIC_ACCESS }
+        - { path: ^/logout$, roles: PUBLIC_ACCESS }
         - { path: ^/session/oublier$, roles: PUBLIC_ACCESS }
         - { path: ^/$, roles: PUBLIC_ACCESS }
+        # /login n'est PAS public : c'est justement son refus qui déclenche le point d'entrée.
         - { path: ^/, roles: ROLE_USER }

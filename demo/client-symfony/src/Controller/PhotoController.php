@@ -7,13 +7,18 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class PhotoController extends AbstractController
 {
     #[Route('/', name: 'app_home')]
-    public function home(): Response
+    public function home(AuthenticationUtils $authenticationUtils): Response
     {
-        return $this->render('home.html.twig');
+        return $this->render('home.html.twig', [
+            // failure_path renvoie ici : sans cet affichage, un échec du flow serait muet et
+            // le bouton relancerait le même échec indéfiniment.
+            'erreur' => $authenticationUtils->getLastAuthenticationError(),
+        ]);
     }
 
     #[Route('/photos/list', name: 'app_photos_list', methods: ['POST'])]

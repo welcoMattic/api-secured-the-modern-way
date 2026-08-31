@@ -8,7 +8,7 @@
         <header class="topbar">
             <div>
                 <h1><span class="role__icon">📕</span> PhotoBook <span class="role-inline">client confidentiel</span></h1>
-                <p class="eyebrow">authorization_code · drenso/symfony-oidc-bundle</p>
+                <p class="eyebrow">authorization_code · authenticator natif <code>oidc_login</code></p>
             </div>
             <div class="topbar-right">
                 <span class="user-pill">{{ app.user.preferredUsername }}</span>
@@ -101,8 +101,11 @@
     <section class="hero">
         <p class="role"><span class="role__icon">📕</span> client confidentiel</p>
         <h1 class="tick">PhotoBook</h1>
-        <p class="eyebrow">authorization_code · drenso/symfony-oidc-bundle</p>
+        <p class="eyebrow">authorization_code · authenticator natif <code>oidc_login</code></p>
         <a href="{{ path('app_login') }}" class="btn-primary">Se connecter avec CloudPics ID</a>
+        {% if erreur is defined and erreur %}
+            <p class="response-hint">Connexion refusée : {{ erreur.message }}</p>
+        {% endif %}
         <p class="note">
             PhotoBook assemble des albums avec les photos d'Alice, hébergées chez <b>CloudPics</b>.<br>
             Il tourne sur son propre serveur : lui peut garder un secret.
