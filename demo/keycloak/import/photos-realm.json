@@ -116,7 +116,7 @@
       ],
       "name": "PhotoPrint",
       "description": "Client public tiers. Tourne dans le navigateur d'Alice, ne peut garder aucun secret : PKCE S256.",
-      "consentRequired": true,
+      "consentRequired": false,
       "optionalClientScopes": [
         "photos:read",
         "photos:write"
@@ -179,7 +179,7 @@
       ],
       "name": "PhotoBook",
       "description": "Client confidentiel tiers. Tourne sur son propre serveur, donc il peut garder un secret.",
-      "consentRequired": true,
+      "consentRequired": false,
       "optionalClientScopes": [
         "photos:read",
         "photos:write"

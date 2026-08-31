@@ -65,12 +65,15 @@ Connectez-vous d'abord sur PhotoPrint, puis ouvrez PhotoBook et cliquez sur « S
 **Aucun écran de login n'apparaît** : la session est déjà ouverte chez CloudPics ID. Les deux apps
 affichent alors le **même `sub`**, et chacune a reçu ses propres tokens.
 
-Un écran s'interpose quand même, et ce n'est pas le même : celui du **consentement**. Les deux clients
-portent `consentRequired`, et le realm repart vierge à chaque `castor start`, donc il apparaît une fois
-par app. Ne le subissez pas, servez-vous en : il liste « Voir vos photos » et « Déposer des photos »,
-c'est-à-dire les deux scopes que l'app demande, et c'est le moment où Alice **accorde** ce que
-CloudPics ID inscrira ensuite dans le token. Le mot de passe, lui, n'est demandé qu'une fois, et jamais
-par les apps.
+Le mot de passe n'est demandé qu'une fois, et jamais par les apps.
+
+> **Pas d'écran de consentement, et c'est volontaire.** Les deux clients portent
+> `consentRequired: false`. L'écran listait « Voir vos photos » et « Déposer des photos », les deux
+> scopes que l'app demande, et il les listait **à l'identique pour bob**, qui repart pourtant sans
+> `photos:write`. Normal : le consentement est une notion de client, le filtrage par rôle une notion
+> d'utilisateur, et Keycloak n'applique les `scopeMappings` qu'en fabriquant le token. Sauf que devant
+> une salle, un bob qui coche « Déposer des photos » puis récolte un `403` se lit comme un bug. La
+> démonstration de l'intersection vit dans les tokens projetés, pas dans cet écran : on le retire.
 
 Une authentification, un Provider, deux clients tiers. Aucune des deux apps n'a jamais vu le mot de
 passe d'Alice, et aucune ne sait que l'autre existe.
