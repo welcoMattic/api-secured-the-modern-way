@@ -10,21 +10,26 @@ layout: default
     <div><a href="https://datatracker.ietf.org/doc/html/rfc6750">RFC 6750</a> Bearer Token</div>
     <div><a href="https://datatracker.ietf.org/doc/html/rfc7636">RFC 7636</a> PKCE</div>
     <div><a href="https://datatracker.ietf.org/doc/html/rfc7519">RFC 7519</a> JWT</div>
+    <div><a href="https://datatracker.ietf.org/doc/html/rfc9068">RFC 9068</a> JWT access token</div>
+    <div><a href="https://datatracker.ietf.org/doc/html/rfc9700">RFC 9700</a> bonnes pratiques</div>
+    <div><a href="https://datatracker.ietf.org/doc/html/rfc9449">RFC 9449</a> DPoP</div>
     <div><a href="https://datatracker.ietf.org/doc/html/rfc7662">RFC 7662</a> Introspection</div>
     <div><a href="https://openid.net/connect/">OpenID Connect</a> la spéc OIDC</div>
   </Card>
   <Card :accent="4" icon="📚" title="Documentation">
     <div><a href="https://symfony.com/doc/current/security/access_token.html">Symfony Access Token</a></div>
+    <div><a href="https://github.com/symfony/symfony/pull/64954">PR 64954</a> le firewall oidc_login</div>
     <div><a href="https://api-platform.com/docs/symfony/security/">API Platform Security</a></div>
     <div><a href="https://symfony.com/doc/current/rate_limiter.html">Symfony Rate Limiter</a></div>
     <div><a href="https://github.com/thephpleague/oauth2-server-bundle">League OAuth2 Server Bundle</a></div>
-    <div><a href="https://github.com/Drenso/symfony-oidc">drenso/symfony-oidc</a></div>
-    <div><a href="https://auth0.com/blog/rs256-vs-hs256-whats-the-difference/">RS256 vs HS256</a></div>
+    <div><a href="https://github.com/Drenso/symfony-oidc">drenso/symfony-oidc</a> en attendant</div>
   </Card>
-  <Card :accent="7" icon="🛠️" title="Outils">
+  <Card :accent="7" icon="🛠️" title="Outils et démo">
+    <div><a href="https://github.com/welcoMattic/api-secured-the-modern-way">Le dépôt de ce talk</a> deck et démo</div>
     <div><a href="https://jwt.io">jwt.io</a> debugger JWT</div>
     <div><a href="https://oauth.com/playground">OAuth 2.0 Playground</a></div>
     <div><a href="https://owasp.org/API-Security/">OWASP API Security Top 10</a></div>
+    <div><a href="https://auth0.com/blog/rs256-vs-hs256-whats-the-difference/">RS256 vs HS256</a></div>
   </Card>
 </CardGrid>
 
