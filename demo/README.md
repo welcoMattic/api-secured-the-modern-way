@@ -383,6 +383,22 @@ clever deploy --alias print   # PhotoPrint
 Les trois apps facturent en continu. `clever stop --alias api|book|print` entre deux répétitions, et
 `clever restart` avant le talk.
 
+> **Renommer une variable d'environnement casse le déploiement en silence.** `clever deploy` pousse le
+> code, jamais la configuration : les variables vivent sur l'app, et ni le déploiement ni un `tofu
+> apply` sur un autre fichier ne les synchronise. Or un `%env(FOO)%` que l'app ne définit pas retombe
+> sur le `.env` du dépôt, c'est-à-dire sur `localhost`, sans lever la moindre erreur. C'est ce qui est
+> arrivé en passant de `OIDC_WELL_KNOWN_URL` à `OIDC_ISSUER` : PhotoBook cherchait son Provider sur
+> `http://localhost:8080` depuis Clever, et `/login` répondait `401` au lieu de rediriger, parce que le
+> point d'entrée du firewall n'avait aucun `authorization_endpoint` à viser. Après toute modification
+> d'un nom de variable, comparer :
+>
+> ```bash
+> clever env --alias book | grep OIDC     # ce que l'app définit
+> grep OIDC client-symfony/.env infra/main.tf   # ce que le code attend
+> ```
+>
+> Puis `clever env set NOM valeur --alias book` et `clever env rm ANCIEN_NOM --alias book`.
+
 ### Tout recréer avec OpenTofu
 
 Les commandes ci-dessus déploient sur une infra qui existe déjà. Pour la recréer de zéro, le module
