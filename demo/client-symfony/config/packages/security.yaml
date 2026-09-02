@@ -25,17 +25,16 @@ security:
                 scope: ['openid', 'profile', 'email', 'photos:read', 'photos:write']
                 # PKCE S256 est actif par défaut, y compris pour un client confidentiel :
                 # aucune clé à écrire, c'est la recommandation de la RFC 9700.
+                # Le Provider redirige ici après authentification. La route est déclarée
+                # par le route loader du bundle, importé dans config/routes/security.yaml.
                 check_path: /login_check
+                # Le bouton « Se connecter » vise /login, qui est protégé : l'authenticator
+                # est le point d'entrée du firewall, il part droit chez CloudPics ID sans
+                # page intermédiaire. login_path ne sert plus qu'aux handlers.
                 login_path: /login
-                # Le bouton « Se connecter » vise /login, qui est protégé : le point d'entrée
-                # du firewall part alors droit chez CloudPics ID, sans page intermédiaire.
-                direct_redirect: true
                 # Un échec ne doit surtout pas renvoyer sur /login, qui relancerait le flow
                 # en boucle devant la salle.
                 failure_path: /
-                # RP-Initiated Logout : déconnecte aussi la session chez CloudPics ID
-                enable_end_session: true
-                post_logout_redirect_path: /
                 # Le document de découverte est mis en cache une heure
                 discovery_cache_ttl: 3600
             logout:

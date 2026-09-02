@@ -842,7 +842,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             limiter?: scalar|Param|null, // A service id implementing "Symfony\Component\HttpFoundation\RateLimiter\RequestRateLimiterInterface".
  *             max_attempts?: int|Param, // Default: 5
  *             interval?: scalar|Param|null, // Default: "1 minute"
- *             lock_factory?: scalar|Param|null, // The service ID of the lock factory used by the login rate limiter (or null to disable locking). // Default: null
+ *             lock_factory?: scalar|Param|null, // The service ID of the lock factory used by the login rate limiter ("auto" to use the default one when the Lock component is configured, or null to disable locking). // Default: "auto"
  *             cache_pool?: string|Param, // The cache pool to use for storing the limiter state // Default: "cache.rate_limiter"
  *             storage_service?: string|Param, // The service ID of a custom storage implementation, this precedes any configured "cache_pool" // Default: null
  *         },
@@ -881,11 +881,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             remember_me?: bool|Param, // Deprecated: Setting the "security.firewalls..oidc_login.remember_me.remember_me" configuration option has no effect and is deprecated. It will be removed in Symfony 9.0. // Default: true
  *             success_handler?: scalar|Param|null,
  *             failure_handler?: scalar|Param|null,
- *             check_path?: scalar|Param|null, // The firewall path where the OIDC provider redirects after authentication. Must match a redirect URI registered with the provider. A route is declared for this path by the "security.authenticator.oidc_login.route_loader" service, which the application must import (see the OIDC login documentation), as it does for the logout routes. // Default: "/oidc/callback"
+ *             check_path?: scalar|Param|null, // The firewall path where the OIDC provider redirects after authentication. Must match a redirect URI registered with the provider. A route is declared for this path by the "security.authenticator.oidc_login.route_loader" service, which the application must import (see the OIDC login documentation), as it does for the logout routes. A route name is accepted too, in which case no route is declared for it. // Default: "/oidc/callback"
  *             use_forward?: bool|Param, // Default: false
  *             login_path?: scalar|Param|null, // Default: "/login"
- *             direct_redirect?: bool|Param, // When true (typical for a "Log in with..." button), the entry point redirects straight to the OIDC provider to start the flow. When false, it redirects to the firewall login_path instead. // Default: false
- *             user_identifier_claim?: scalar|Param|null, // Default: "sub"
  *             always_use_default_target_path?: bool|Param, // Default: false
  *             default_target_path?: scalar|Param|null, // Default: "/"
  *             target_path_parameter?: scalar|Param|null, // Default: "_target_path"
@@ -898,18 +896,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             client_secret?: scalar|Param|null, // The OIDC client secret.
  *             scope?: list<scalar|Param|null>,
  *             discovery_cache_ttl?: int|Param, // TTL in seconds for caching the OIDC discovery configuration. // Default: 3600
- *             token_endpoint_auth_method?: "client_secret_post"|"client_secret_basic"|Param, // Authentication method for the token endpoint. // Default: "client_secret_post"
- *             scopes?: list<scalar|Param|null>,
- *             pkce?: array{
- *                 enabled?: bool|Param, // Enable PKCE (Proof Key for Code Exchange). // Default: true
- *                 method?: scalar|Param|null, // PKCE code challenge method. Must match a service tagged "security.oidc.pkce_method" (builtin: "S256", "plain"). // Default: "S256"
- *             },
- *             prompt?: "none"|"login"|"consent"|"select_account"|Param, // OIDC "prompt" parameter. For multi-value combinations, use "authorization_params.prompt" instead.
- *             max_age?: int|Param, // Max seconds since last end-user authentication. Triggers re-authentication when exceeded.
- *             user_data_source?: "userinfo"|"id_token"|Param, // Source of user claims: "userinfo" fetches from the UserInfo endpoint, "id_token" decodes claims from the ID token. // Default: "userinfo"
- *             enable_end_session?: bool|Param, // Enable RP-Initiated Logout via the OIDC end_session_endpoint. // Default: false
- *             post_logout_redirect_path?: scalar|Param|null, // Path or route to redirect to after OIDC logout. // Default: "/"
- *             authorization_params?: array<string, scalar|Param|null>,
+ *             allowed_time_drift?: int|Param, // Allowed clock skew in seconds when validating ID token time claims. // Default: 0
  *         },
  *         form_login?: array{
  *             provider?: scalar|Param|null,
@@ -1071,9 +1058,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             lifetime?: int|Param, // Default: 31536000
  *             path?: scalar|Param|null, // Default: "/"
  *             domain?: scalar|Param|null, // Default: null
- *             secure?: true|false|"auto"|Param, // Default: false
+ *             secure?: true|false|"auto"|Param, // Default: "auto"
  *             httponly?: bool|Param, // Default: true
- *             samesite?: null|"lax"|"strict"|"none"|Param, // Default: null
+ *             samesite?: null|"lax"|"strict"|"none"|Param, // Default: "lax"
  *             always_remember_me?: bool|Param, // Default: false
  *             remember_me_parameter?: scalar|Param|null, // Default: "_remember_me"
  *         },

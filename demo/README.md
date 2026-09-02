@@ -20,15 +20,14 @@ ajoute deux que la bascule vers OIDC rend nécessaires.
 | 🌁 **PhotoPrint** | Client **public** : tourne chez Alice, aucun secret à garder | `client-spa/` | Vite + TypeScript + `oidc-client-ts` | http://localhost:5173 |
 | 📕 **PhotoBook** | Client **confidentiel** : tourne sur son serveur, lui peut garder un secret | `client-symfony/` | Symfony 8.2-dev + authenticator natif `oidc_login` | http://localhost:8101 |
 
-PhotoBook tourne sur Symfony 8.2 de développement, parce que l'authenticator `oidc_login` n'est pas
-encore mergé. Une application ne peut pas dépendre de `symfony/symfony` (`FrameworkExtension` lève une
-exception dès qu'il le détecte), et les dépôts splittés officiels ne portent que du code mergé.
-`composer.json` prend donc les **trois composants modifiés par la PR** dans des dépôts snapshot figés
-sur la branche `demo-apiplatformcon-2026` : [security-core](https://github.com/welcoMattic/security-core),
-[security-http](https://github.com/welcoMattic/security-http) et
-[security-bundle](https://github.com/welcoMattic/security-bundle). Tout le reste de Symfony vient de
-packagist en `8.2.x-dev`. `web-token/jwt-library` s'ajoute au passage : c'est lui qui décode l'ID token,
-ici comme dans l'API. Le jour où la PR est mergée, ces quatre lignes disparaissent.
+PhotoBook tourne sur Symfony 8.2 de développement, parce que l'authenticator `oidc_login` y est mergé
+([PR 64954](https://github.com/symfony/symfony/pull/64954)) mais que 8.2 ne sort qu'en novembre 2026.
+Tout vient de packagist en `8.2.x-dev`, y compris `symfony/security-bundle`, `symfony/security-core` et
+`symfony/security-http` : plus aucun dépôt snapshot, plus aucune entrée `repositories`.
+`web-token/jwt-library` s'ajoute au passage : c'est lui qui décode l'ID token, ici comme dans l'API.
+
+Le RP-Initiated Logout ne fait pas partie de ce qui a été mergé : `/logout` ferme la session de
+PhotoBook, pas celle de CloudPics ID.
 
 Dans la section OAuth2 du deck, **CloudPics** cumule deux rôles : serveur d'autorisation *et* resource
 server. Toute la démonstration OIDC consiste à lui retirer le premier. CloudPics garde les photos,

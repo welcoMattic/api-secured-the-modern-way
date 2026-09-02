@@ -12,9 +12,9 @@ class SecurityController extends AbstractController
 {
     /**
      * Ne rend aucune page : /login est protégé, donc le point d'entrée du firewall se
-     * déclenche avant ce contrôleur et part chez CloudPics ID (direct_redirect: true).
-     * On n'arrive ici qu'une fois authentifié, quand le success handler rejoue l'URL
-     * demandée.
+     * déclenche avant ce contrôleur. L'authenticator oidc_login est ce point d'entrée,
+     * et il part directement chez CloudPics ID. On n'arrive ici qu'une fois authentifié,
+     * quand le success handler rejoue l'URL demandée.
      */
     #[Route('/login', name: 'app_login')]
     public function login(): Response
@@ -23,11 +23,11 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * Oublie la session locale, sans passer par le endpoint de fin de session du Provider.
+     * Oublie la session locale depuis un lien, sans passer par le firewall.
      *
-     * La déconnexion normale envoie un id_token_hint. Si Keycloak a redémarré, ce token
-     * a été signé par l'instance précédente : le Provider répond 400 et l'orateur se
-     * retrouve devant une page d'erreur. Ici on jette simplement la session.
+     * Sert au rattrapage du 401 affiché sur la page d'accueil : quand CloudPics ID a
+     * redémarré, les tokens en session ne sont plus vérifiables et la seule issue est
+     * de tout jeter avant de relancer le flow.
      */
     #[Route('/session/oublier', name: 'app_session_forget')]
     public function forgetSession(Request $request, TokenStorageInterface $tokenStorage): Response
@@ -42,7 +42,8 @@ class SecurityController extends AbstractController
     public function logout(): never
     {
         // Jamais atteinte non plus : le firewall intercepte /logout.
-        // enable_end_session: true déclenche aussi la déconnexion chez CloudPics ID.
+        // Il ferme la session de PhotoBook seulement : la PR mergée dans le Core ne
+        // couvre pas le RP-Initiated Logout, la session CloudPics ID reste ouverte.
         throw new \LogicException('app_logout doit être interceptée par le firewall.');
     }
 }

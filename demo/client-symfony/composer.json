@@ -3,20 +3,6 @@
     "license": "proprietary",
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/welcoMattic/security-core"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/welcoMattic/security-http"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/welcoMattic/security-bundle"
-        }
-    ],
     "require": {
         "php": ">=8.4",
         "ext-ctype": "*",
@@ -29,9 +15,9 @@
         "symfony/framework-bundle": "8.2.*",
         "symfony/http-client": "8.2.*",
         "symfony/runtime": "8.2.*",
-        "symfony/security-bundle": "dev-demo-apiplatformcon-2026 as 8.2.x-dev",
-        "symfony/security-core": "dev-demo-apiplatformcon-2026 as 8.2.x-dev",
-        "symfony/security-http": "dev-demo-apiplatformcon-2026 as 8.2.x-dev",
+        "symfony/security-bundle": "8.2.*",
+        "symfony/security-core": "8.2.*",
+        "symfony/security-http": "8.2.*",
         "symfony/twig-bundle": "8.2.*",
         "symfony/yaml": "8.2.*",
         "twig/extra-bundle": "^2.12|^3.0",
