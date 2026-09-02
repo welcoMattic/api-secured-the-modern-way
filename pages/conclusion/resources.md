@@ -18,7 +18,7 @@ layout: default
   </Card>
   <Card :accent="4" icon="📚" title="Documentation">
     <div><a href="https://symfony.com/doc/current/security/access_token.html">Symfony Access Token</a></div>
-    <div><a href="https://github.com/symfony/symfony/pull/64954">PR 64954</a> le firewall oidc_login</div>
+    <div><a href="https://github.com/symfony/symfony/pull/64954">PR 64954</a> le firewall oidc_login (8.2)</div>
     <div><a href="https://api-platform.com/docs/symfony/security/">API Platform Security</a></div>
     <div><a href="https://symfony.com/doc/current/rate_limiter.html">Symfony Rate Limiter</a></div>
     <div><a href="https://github.com/thephpleague/oauth2-server-bundle">League OAuth2 Server Bundle</a></div>

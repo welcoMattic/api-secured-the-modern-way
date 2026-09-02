@@ -331,8 +331,8 @@ class: sec-authn
 <v-clicks>
 
 - ✅ **Vérifier** un access token : natif (`access_token`)
-- ❌ **Initier** le flow authorization_code : pas encore dans le Core
-- 🚧 Un firewall `oidc_login`, en cours de review
+- ✅ **Initier** le flow authorization_code : natif à partir de Symfony **8.2**
+- 🎉 Un firewall `oidc_login`, tout juste mergé dans le Core
 
   - 🛣️ Redirection vers l'OIDC Provider
   - 🔄 Échange de l'`authorization_code` contre la paire de tokens
@@ -345,9 +345,9 @@ layout: default
 class: sec-authn
 ---
 
-# Bientôt natif dans Symfony ?
+# C'est natif dans Symfony 8.2 !
 
-PR ouverte sur la branche **8.2**, en cours de review.
+PR mergée dans la branche **8.2**, livrée en novembre 2026.
 
 <div class="pr-shot">
   <img src="/pr-64954.png" alt="symfony/symfony PR 64954 : Add an OIDC Authorization Code Flow authenticator" />
@@ -355,7 +355,7 @@ PR ouverte sur la branche **8.2**, en cours de review.
 
 <div class="slide-note is-centered pr-link">github.com/symfony/symfony/pull/<b>64954</b></div>
 
-<div class="slide-punch">Pas de bundle dans la démo : <b>PhotoBook tourne sur cette PR</b>.</div>
+<div class="slide-punch">Pas de bundle dans la démo : <b>PhotoBook tourne déjà dessus</b>.</div>
 
 <style scoped>
 .pr-shot {
