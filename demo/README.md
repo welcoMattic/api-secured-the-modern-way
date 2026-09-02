@@ -271,7 +271,7 @@ Platform pèse 2,5 ko de chemins de vendor : projeté, ça noie la seule ligne q
 | `api/src/State/PhotoOwnerProcessor.php` | Le state processor qui impose le propriétaire côté serveur depuis l'utilisateur authentifié au POST, sans que le client ne puisse le choisir. |
 | `api/src/Doctrine/PhotoOwnerExtension.php` | L'extension Doctrine qui filtre la collection sur le propriétaire, démontrant le cloisonnement. |
 | `client-spa/src/oidc.ts` | Les quinze lignes qui font de PhotoPrint un client OIDC. PKCE S256 est le défaut de la bibliothèque, et les scopes `photos:*` sont ce que l'app demande à Alice de lui déléguer. |
-| `client-symfony/config/packages/security.yaml` | Tout PhotoBook tient là : le firewall `oidc_login` natif (issuer, client confidentiel, scopes, PKCE S256 par défaut, RP-Initiated Logout) et le provider natif `oidc`, qui ne donne que `ROLE_USER`. Les rôles restent l'affaire de l'API. |
+| `client-symfony/config/packages/security.yaml` | Tout PhotoBook tient là : le firewall `oidc_login` natif (issuer, client confidentiel, scopes, PKCE S256 par défaut) et le provider natif `oidc`, qui ne donne que `ROLE_USER`. Les rôles restent l'affaire de l'API. |
 | `client-symfony/config/routes/security.yaml` | L'import du route loader qui déclare la route du `check_path`. Sans lui, le retour du Provider tombe sur un 404 du routeur. |
 | `client-symfony/src/Api/PhotoApiClient.php` | Comment PhotoBook relaie l'access token de la session vers CloudPics API, et `listWithIdToken()` pour le contre-exemple. |
 
@@ -353,11 +353,13 @@ le meilleur compromis en production. La session SSO est elle aussi allongée (`s
 | Le navigateur se croit connecté, mais l'API répond `401` | Après un `castor restart`, Keycloak a de nouvelles clés : le token gardé par le navigateur ou par la session Symfony a été signé par l'instance précédente. | Les deux apps le disent et offrent un bouton **« Oublier la session »**. |
 | L'horloge du conteneur a dérivé après une veille | Le token handler de Symfony vérifie `iat`, `nbf` et `exp` avec `allowedTimeDrift: 0`, une valeur codée en dur. Une seconde de décalage suffit. | `castor start` et `castor smoke` comparent les deux horloges et vous préviennent. Redémarrer Docker Desktop. |
 
-« Oublier la session » n'est pas un doublon de « Se déconnecter ». La déconnexion normale est une
-déconnexion **RP-initiated** : elle envoie un `id_token_hint` au Provider pour fermer aussi la session
-SSO. Si Keycloak a redémarré, ce token a été signé par l'instance précédente, et le Provider répond
-`400`. « Oublier la session » se contente de jeter l'état local, ce qui est le seul remède sûr dans ce
-cas précis.
+Sur PhotoBook, « Oublier la session » et « Se déconnecter » font désormais la même chose : jeter
+l'état local. Le RP-Initiated Logout ne fait pas partie de ce que la PR a mergé dans le Core, donc
+aucune des deux ne ferme la session SSO chez CloudPics ID. Conséquence sur scène : après un
+« Se déconnecter » sur PhotoBook, le `/login` suivant repart chez CloudPics ID, qui reconnaît son
+cookie SSO et renvoie un code **pour le même compte, sans redemander d'identifiants**. Pour rejouer le
+flow avec bob, il faut se déconnecter côté CloudPics ID (PhotoPrint, lui, fait toujours le
+end_session via `oidc-client-ts`) ou utiliser une fenêtre privée.
 
 Dans tous les cas, `demo/api/var/log/dev.log` donne la raison exacte du rejet : le token handler `oidc`
 loggue la signature, l'audience, l'issuer ou le claim manquant.

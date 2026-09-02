@@ -7,12 +7,11 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Security\Core\User\OidcUser;
 
 /**
- * Les deux façons de quitter PhotoBook, qui ne font pas la même chose.
+ * Les deux façons de quitter PhotoBook.
  *
- * « Se déconnecter » est une déconnexion RP-initiated : elle passe par le firewall et
- * ferme aussi la session chez CloudPics ID. « Oublier la session » ne parle à personne
- * et jette l'état local, seul remède quand le Provider a redémarré et ne sait plus
- * vérifier l'id_token_hint qu'on lui enverrait.
+ * « Se déconnecter » passe par le firewall, « Oublier la session » par ce contrôleur,
+ * mais aucune des deux ne parle au Provider : le RP-Initiated Logout ne fait pas partie
+ * de ce que la PR a mergé dans le Core. La session CloudPics ID reste donc ouverte.
  */
 final class SecurityControllerTest extends WebTestCase
 {
@@ -46,8 +45,9 @@ final class SecurityControllerTest extends WebTestCase
 
     /**
      * /login n'est pas public : son refus déclenche le point d'entrée du firewall, qui
-     * part droit chez CloudPics ID sans page intermédiaire (direct_redirect: true).
-     * Sans la route du check_path, ce chemin tomberait sur un 404 du routeur.
+     * est l'authenticator lui-même et part droit chez CloudPics ID sans page
+     * intermédiaire. Sans la route du check_path, le retour du Provider tomberait sur
+     * un 404 du routeur.
      */
     public function testLaRouteDuCheckPathEstDeclaree(): void
     {
