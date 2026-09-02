@@ -19,6 +19,8 @@
     strokeColor?: string;
     thickness?: string;
     transitionDuration?: string;
+    walker?: string;
+    walkerHeight?: string;
   }>();
 
   const {
@@ -29,6 +31,8 @@
     strokeColor,
     thickness,
     transitionDuration,
+    walker,
+    walkerHeight,
   } = props;
 
   const tree = computed(() => getTree(tocTree.value));
@@ -63,9 +67,24 @@
         "--thickness": thickness,
         "--transition-duration": transitionDuration,
         "--right-margin": rightMargin.value + "px",
+        "--walker-height": walkerHeight,
         display:
             window.location.search.indexOf("print") !== -1 ? "none" : undefined,
       })
+  );
+
+  // Progress ratio shared by the bar and the walker, so the character always
+  // stands on the tip of the bar. The bar starts at -(--margin) and is 6px
+  // longer than the ratio, hence the +4px offset here.
+  const progressRatio = computed(
+      () => ((currentPage.value - 1) / total.value) * 100 + "%"
+  );
+
+  // He stands just ahead of the tip of the bar, clamped so he never walks
+  // past the right edge on the last slides.
+  const walkerLeft = computed(
+      () =>
+          `min(calc(${progressRatio.value} + 4px), calc(100% - var(--walker-width)))`
   );
 
   const lastActiveRoute = computed(() =>
@@ -138,6 +157,9 @@
 
 <style>
   .progress {
+    /* 623 x 1110 source image */
+    --walker-height: 24px;
+    --walker-width: calc(var(--walker-height) * 0.561);
     --bar-color: var(--slidev-theme-primary);
     --opacity: 0.5;
     --thickness: 2px;
@@ -158,6 +180,22 @@
     background-color: inherit;
     background-clip: content-box;
     box-sizing: content-box;
+    transition: padding var(--transition-duration),
+    height var(--transition-duration);
+  }
+
+  /* --opacity applies to the bar itself, not to the whole element, so the
+     walker standing on it can stay fully opaque. */
+  .progress__bar,
+  .progress__active,
+  .progress__part {
+    opacity: var(--opacity);
+  }
+
+  /* The mask only exists to fade out the hover tooltips hanging below the bar.
+     Without a table of contents there are none, and the mask would clip
+     anything drawn outside the bar's own box (the walker). */
+  .progress--tooltips {
     -webkit-mask-image: linear-gradient(
         to bottom,
         rgba(0, 0, 0, 1),
@@ -186,9 +224,6 @@
             var(--line-height)
         )
     );
-    opacity: var(--opacity);
-    transition: opacity var(--transition-duration),
-    padding var(--transition-duration), height var(--transition-duration);
   }
 
   .progress--bottom {
@@ -250,6 +285,21 @@
   .dark .progress__bar,
   .dark .progress__active {
     background-color: var(--bar-color, #ffffff);
+  }
+
+  /* Character walking just ahead of the tip of the bar, feet on the bottom
+     edge of the slide. The container sits --margin above that edge, hence the
+     negative offset. The width is set explicitly (from the image aspect ratio)
+     so the clamp on `left` can keep him inside the slide on the last steps. */
+  .progress__walker {
+    position: absolute;
+    bottom: calc(var(--margin) * -1);
+    height: var(--walker-height);
+    width: var(--walker-width);
+    z-index: 2;
+    pointer-events: none;
+    user-select: none;
+    transition: left var(--transition-duration);
   }
 
   .progress__part {
@@ -353,6 +403,7 @@
       class="progress"
       :class="{
       'progress--bottom': position === 'bottom',
+      'progress--tooltips': tree.length > 0,
       'progress--first': currentPage === 1,
       [`progress--${currentLayout}`]: currentLayout,
     }"
@@ -416,11 +467,17 @@
             lastActiveRoute?.no < currentPage,
         }"
           :style="{
-          width: `calc(${
-            ((currentPage - 1) / total) * 100
-          }% + 6px)`,
+          width: `calc(${progressRatio} + 6px)`,
         }"
       ></div>
+      <img
+          v-if="walker"
+          class="progress__walker"
+          :src="walker"
+          alt=""
+          aria-hidden="true"
+          :style="{ left: walkerLeft }"
+      />
     </div>
   </div>
 </template>
