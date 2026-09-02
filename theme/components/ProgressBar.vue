@@ -80,6 +80,15 @@
       () => ((currentPage.value - 1) / total.value) * 100 + "%"
   );
 
+  // Vite only rewrites static src attributes, so a bound one has to be
+  // resolved against the base URL by hand (GitHub Pages serves the deck under
+  // a sub-path).
+  const walkerSrc = computed(() =>
+      walker?.startsWith("/")
+          ? import.meta.env.BASE_URL.replace(/\/$/, "") + walker
+          : walker
+  );
+
   // He stands just ahead of the tip of the bar, clamped so he never walks
   // past the right edge on the last slides.
   const walkerLeft = computed(
@@ -473,7 +482,7 @@
       <img
           v-if="walker"
           class="progress__walker"
-          :src="walker"
+          :src="walkerSrc"
           alt=""
           aria-hidden="true"
           :style="{ left: walkerLeft }"
