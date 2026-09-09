@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
+use App\State\RateLimitedProvider;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -15,7 +16,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 // Une expression security sans « object » ne peut rien vérifier sur une collection :
 // le filtrage par propriétaire vit donc dans App\Doctrine\PhotoOwnerExtension.
 #[GetCollection(
-    openapi: new OpenApiOperation(description: "Les photos de l'utilisateur authentifié, et elles seules. Exige le rôle ROLE_PHOTOS_READ, c'est-à-dire le rôle realm PHOTOS_READ accordé via le scope photos:read."),
+    provider: RateLimitedProvider::class,
+    openapi: new OpenApiOperation(description: "Les photos de l'utilisateur authentifié, et elles seules. Exige le rôle ROLE_PHOTOS_READ, c'est-à-dire le rôle realm PHOTOS_READ accordé via le scope photos:read. Quota par utilisateur : 100 requêtes, puis 10 par seconde ; au-delà, 429."),
 )]
 // L'expression d'une opération remplace celle de la ressource : sans le is_granted
 // ici, le GET item ne vérifierait plus le rôle. Et l'ordre compte, « and »

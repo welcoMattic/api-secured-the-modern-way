@@ -2,8 +2,9 @@
 
 Démo compagnon du talk **API Secured, the Modern Way** (API Platform Con 2026).
 
-Elle montre **une seule idée** : l'API n'authentifie plus personne. Un OIDC Provider émet les tokens,
-l'API se contente de les **vérifier** avec les token handlers **natifs** de Symfony.
+Elle montre **deux idées**. La première : l'API n'authentifie plus personne. Un OIDC Provider émet les
+tokens, l'API se contente de les **vérifier** avec les token handlers **natifs** de Symfony. La seconde :
+l'API limite le débit **par utilisateur**, avec le composant Rate Limiter de Symfony.
 
 La partie « API Platform comme serveur d'autorisation OAuth2 » (`league/oauth2-server-bundle`)
 est volontairement hors périmètre.
@@ -84,6 +85,26 @@ passe d'Alice, et aucune ne sait que l'autre existe.
 > **Pourquoi 8100 / 8101 et pas 8000 / 8001 ?** Pour qu'une démo live n'entre jamais en collision
 > avec un autre serveur Symfony déjà lancé sur la machine. Les ports sont regroupés dans `castor.php`
 > et dans les fichiers `.env` de chaque app.
+
+## Rate limiting
+
+L'API limite aussi le débit par utilisateur, pour éviter qu'un client ne submerge le serveur.
+Un limiter `api` (token bucket, 100 jetons, 10 par seconde) est configuré dans
+`config/packages/rate_limiter.yaml`. Un state provider `App\State\RateLimitedProvider`
+décore le provider Doctrine de collection : il consomme un jeton par requête et lève
+`TooManyRequestsHttpException`, donc 429, quand le seau est vide.
+
+Ce provider est branché sur `GetCollection` seul via `provider:` : une opération limitée,
+l'autre non, c'est le point de la slide. La clé du quota est le `sub` du token, pas l'IP
+(derrière une gateway l'IP est celle du proxy).
+
+`castor burst` envoie 150 requêtes en parallèle sur GET /api/photos avec le token d'alice :
+au-delà du quota, l'API répond 429. En séquentiel, 10 jetons par seconde reviennent plus vite
+que curl ne les consomme, d'où le parallélisme.
+
+Pour le stockage : le pool par défaut (cache local) suffit ici parce que la démo tourne
+sur une seule instance, y compris sur Clever Cloud. Avec N instances il faut un pool partagé
+(Redis), sinon N compteurs.
 
 ## Prérequis
 

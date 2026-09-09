@@ -46,6 +46,10 @@ abstract class CloudPicsApiTestCase extends ApiTestCase
         ];
         $this->photoBob = $this->seed('Bob en lecture seule', TokenFactory::BOB, $em);
 
+        // Le quota de test est de trois requêtes et le pool est un fichier qui survit
+        // d'un test à l'autre, chaque test repart donc d'un seau plein.
+        self::getContainer()->get('cache.rate_limiter.test')->clear();
+
         // Le client rebootera le noyau : la base doit être un fichier, pas :memory:.
         self::ensureKernelShutdown();
     }

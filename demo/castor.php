@@ -279,14 +279,41 @@ function db_reset(): void
     io()->success('Base de données réinitialisée avec trois photos de démo.');
 }
 
-#[AsTask(name: 'smoke', description: 'Teste l\'API en ligne de commande sans navigateur')]
-function smoke(): void
+/**
+ * Obtient un token d'accès depuis Keycloak via le flow password.
+ * cloudpics-smoke-test existe uniquement pour le test CLI. Le flow password est déprécié
+ * par OAuth 2.1 : il n'est jamais montré dans le talk.
+ *
+ * Le token demande photos:read et photos:write, exactement comme PhotoPrint et
+ * PhotoBook : sans ces scopes, CloudPics ID n'inscrit aucun rôle dans l'access
+ * token et tout répondrait 403. Ce qui distingue alice de bob n'est pas ce que
+ * le client demande, c'est ce que le Provider accorde.
+ */
+function obtenir_token(string $username, string $password): array
 {
-    // cloudpics-smoke-test existe uniquement pour le test CLI. Le flow password est déprécié
-    // par OAuth 2.1 : il n'est jamais montré dans le talk.
     $clientId = 'cloudpics-smoke-test';
     $realm = 'photos';
     $keycloakUrl = 'https://localhost:8443';
+    $rootCAPath = __DIR__.'/keycloak/certs/rootCA.pem';
+
+    $cmd = sprintf(
+        'curl -s -X POST "%s/realms/%s/protocol/openid-connect/token" \
+         -H "Content-Type: application/x-www-form-urlencoded" \
+         -d "client_id=%s&grant_type=password&username=%s&password=%s&scope=openid+photos%%3Aread+photos%%3Awrite" \
+         --cacert %s',
+        $keycloakUrl,
+        $realm,
+        $clientId,
+        $username,
+        $password,
+        escapeshellarg($rootCAPath)
+    );
+    return json_decode(capture($cmd), true);
+}
+
+#[AsTask(name: 'smoke', description: 'Teste l\'API en ligne de commande sans navigateur')]
+function smoke(): void
+{
     $apiUrl = 'http://localhost:8100';
     $rootCAPath = __DIR__.'/keycloak/certs/rootCA.pem';
 
@@ -295,7 +322,7 @@ function smoke(): void
     verifier_horloge();
 
     // Pré-vol : sans Keycloak ni API, tous les tests échouent pour la même raison.
-    foreach (['Keycloak' => $keycloakUrl.'/realms/'.$realm.'/.well-known/openid-configuration', 'API' => $apiUrl.'/api/docs'] as $name => $url) {
+    foreach (['Keycloak' => 'https://localhost:8443/realms/photos/.well-known/openid-configuration', 'API' => $apiUrl.'/api/docs'] as $name => $url) {
         $cmd = 'curl -s -o /dev/null --max-time 5 -w "%{http_code}" '.escapeshellarg($url);
         if (str_starts_with($url, 'https://')) {
             $cmd .= ' --cacert '.escapeshellarg($rootCAPath);
@@ -305,28 +332,6 @@ function smoke(): void
             exit(1);
         }
     }
-
-    // Fonction helper pour obtenir un token.
-    //
-    // Le smoke demande photos:read et photos:write, exactement comme PhotoPrint et
-    // PhotoBook : sans ces scopes, CloudPics ID n'inscrit aucun rôle dans l'access
-    // token et tout répondrait 403. Ce qui distingue alice de bob n'est pas ce que
-    // le client demande, c'est ce que le Provider accorde.
-    $getToken = function ($username, $password) use ($clientId, $realm, $keycloakUrl, $rootCAPath) {
-        $cmd = sprintf(
-            'curl -s -X POST "%s/realms/%s/protocol/openid-connect/token" \
-             -H "Content-Type: application/x-www-form-urlencoded" \
-             -d "client_id=%s&grant_type=password&username=%s&password=%s&scope=openid+photos%%3Aread+photos%%3Awrite" \
-             --cacert %s',
-            $keycloakUrl,
-            $realm,
-            $clientId,
-            $username,
-            $password,
-            escapeshellarg($rootCAPath)
-        );
-        return json_decode(capture($cmd), true);
-    };
 
     // La commande curl commune aux deux helpers ci-dessous.
     // Un POST doit porter un corps JSON-LD, sinon l'API répond 400/415 et jamais 201/403.
@@ -414,8 +419,8 @@ function smoke(): void
     if (!$passed) $allPassed = false;
 
     // Obtenir les tokens
-    $aliceToken = $getToken('alice', 'alice');
-    $bobToken = $getToken('bob', 'bob');
+    $aliceToken = obtenir_token('alice', 'alice');
+    $bobToken = obtenir_token('bob', 'bob');
 
     if (!isset($aliceToken['access_token'], $bobToken['access_token'])) {
         io()->error('Keycloak n\'a pas délivré de token. Le realm "photos" est-il bien importé ?');
@@ -497,6 +502,47 @@ function cc(): void
     run('php bin/console cache:pool:clear cache.app', context: client_symfony_context());
 
     io()->success('Cache vidé pour les deux applications.');
+}
+
+#[AsTask(name: 'burst', description: 'Envoie 150 requêtes en parallèle sur GET /api/photos avec le token d\'alice : au-delà du quota, l\'API répond 429')]
+function burst(): void
+{
+    // En séquentiel, 10 jetons par seconde reviennent plus vite que curl ne les consomme,
+    // d'où le parallélisme ; sans le composant Lock, quelques requêtes de plus que le quota
+    // peuvent passer, c'est accepté pour une démo.
+    verifier_horloge();
+
+    $token = obtenir_token('alice', 'alice');
+    if (!isset($token['access_token'])) {
+        io()->error('Keycloak n\'a pas délivré de token pour alice. Le realm "photos" est-il bien importé ?');
+        exit(1);
+    }
+
+    $apiUrl = 'http://localhost:8100';
+    $tokenValue = escapeshellarg($token['access_token']);
+    $url = escapeshellarg($apiUrl.'/api/photos');
+
+    // Envoie 150 requêtes en parallèle avec xargs
+    $cmd = "seq 1 150 | xargs -P 30 -I{} curl -s -o /dev/null -w '%{http_code}\n' -H 'Authorization: Bearer {$tokenValue}' {$url}";
+    $output = capture($cmd);
+
+    // Compte les codes HTTP
+    $lines = explode("\n", trim($output));
+    $counts = array_count_values($lines);
+
+    // Affiche le décompte
+    io()->text('Décompte par code HTTP :');
+    foreach ($counts as $code => $count) {
+        io()->text("  $code : $count");
+    }
+
+    // Vérifie qu'on a au moins un 200 et un 429
+    if (isset($counts['200']) && $counts['200'] > 0 && isset($counts['429']) && $counts['429'] > 0) {
+        io()->success('Burst terminé : au moins un 200 et un 429 reçus.');
+    } else {
+        io()->error('Burst échoué : il faut au moins un 200 et un 429.');
+        exit(1);
+    }
 }
 
 #[AsTask(name: 'test', description: 'Lance les tests unitaires et fonctionnels de l\'API et de PhotoBook')]

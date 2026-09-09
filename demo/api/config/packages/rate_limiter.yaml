@@ -1,0 +1,27 @@
+# Le quota de la slide « Symfony Rate Limiter : une simple config » : un seau de 100 jetons,
+# rempli de 10 jetons par seconde. Un limiter par usage ; celui-ci sert GET /api/photos.
+framework:
+    rate_limiter:
+        api:
+            policy: 'token_bucket'
+            limit: 100
+            rate: { interval: '1 second', amount: 10 }
+
+when@test:
+    framework:
+        cache:
+            pools:
+                # Le pool par défaut hérite de cache.app, qui est un adaptateur array en test.
+                # Un pool array est remis à zéro entre deux requêtes du client de test (tag
+                # kernel.reset) : un compteur qui ne survit pas à la requête suivante ne
+                # limite rien. Le fichier survit, et CloudPicsApiTestCase le vide avant
+                # chaque test.
+                cache.rate_limiter.test:
+                    adapter: cache.adapter.filesystem
+        rate_limiter:
+            api:
+                # Trois requêtes, puis 429 : un quota que le test épuise en quatre appels.
+                policy: 'token_bucket'
+                limit: 3
+                rate: { interval: '1 hour', amount: 3 }
+                cache_pool: 'cache.rate_limiter.test'
