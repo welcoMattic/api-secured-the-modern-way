@@ -12,6 +12,8 @@ layout: default
   <span>11h50 - 12h10</span>
 </div>
 
+<img class="talk-shot" src="/florent-talk.png" alt="Le talk de Florent Morselli dans le programme de l'API Platform Con 2026 : jour 2, salle 1, 11h50" />
+
 <div class="slide-punch">Il couvre d'autres aspects de sécurité avec plein d'autres acronymes rigolos : CSP, CORS, COOP, COEP.</div>
 
 <style scoped>
@@ -34,6 +36,16 @@ layout: default
   gap: 0.35rem 1.5rem;
   font-size: 1.02rem;
   color: var(--c-muted);
+}
+/* The program card is the proof the room can check: framed like the PR shot. */
+.talk-shot {
+  display: block;
+  width: 100%;
+  max-width: 40rem;
+  margin: 1rem 0 1.2rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--c-border);
+  box-shadow: var(--shadow-card);
 }
 .talk-speaker {
   font-weight: 700;

@@ -18,7 +18,7 @@ class: sec-authz
 
 Le scénario **au nom de l'utilisateur** <br> (Authorization Code Flow).
 
-<span class="text-base italic opacity-60">Sans utilisateur dans la boucle, une app qui appelle une API pour son propre compte : *Client Credentials Flow*, hors focus. [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749)</span>
+<span class="text-base italic opacity-60">Sans utilisateur dans la boucle, une app qui appelle une API pour son propre compte : *Client Credentials Flow*, hors focus.</span>
 
 ---
 layout: default
@@ -126,7 +126,7 @@ class: sec-authz
 
 <v-click>
 
-<div class="slide-note">RFC 6749 §2.1 : un client <b>public</b> tourne chez l'utilisateur (SPA, mobile) et ne peut garder aucun secret. Un client <b>confidentiel</b> tourne sur son propre serveur et s'authentifie avec un <code>client_secret</code>.</div>
+<div class="slide-note">Un client <b>public</b> tourne chez l'utilisateur (SPA, mobile) et ne peut garder aucun secret. Un client <b>confidentiel</b> tourne sur son propre serveur et s'authentifie avec un <code>client_secret</code>.</div>
 
 </v-click>
 
@@ -164,7 +164,7 @@ class: sec-authz
 
 # La parade : PKCE
 
-**P**roof **K**ey for **C**ode **E**xchange ([RFC 7636](https://datatracker.ietf.org/doc/html/rfc7636))
+**P**roof **K**ey for **C**ode **E**xchange
 
 <v-clicks>
 
@@ -233,7 +233,8 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 
 - 🎫 **Bearer** = « au porteur » : aucune preuve n'est demandée au client
 - 🕵️ Volé, il est **indiscernable** d'un token légitime. L'API ne peut pas trancher
-- 🔒 D'où **TLS obligatoire**, et jamais dans une URL : historique, logs, `Referer`
+- 🔒 **TLS obligatoire** : sur le réseau, lire le token, c'est pouvoir l'utiliser
+- 🙈 **Jamais dans l'URL**, même en HTTPS : historique, logs serveur et `Referer` la conservent en clair
 
 </v-clicks>
 

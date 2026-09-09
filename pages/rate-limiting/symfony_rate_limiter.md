@@ -3,29 +3,12 @@ layout: default
 class: sec-rate
 ---
 
-# Symfony Rate Limiter
+# Symfony Rate Limiter : une simple config
 
 <v-clicks>
 
-- 🛡️ Composant **intégré** à Symfony
 - 🎯 Contre les **abus** : brute force, scraping, clients trop gourmands
-- 🔧 **3 algorithmes** : fixed / sliding window, token bucket. Et `compound` pour les combiner
-- 📦 Depuis Symfony **5.2** (2020)
-
-</v-clicks>
-
----
-layout: default
-class: sec-rate
----
-
-# Configurer un limiter
-
-<v-clicks>
-
-- 📝 Dans `config/packages/rate_limiter.yaml`
-- 🔢 Limite, intervalle, stockage
-- 🎯 Un limiter **par usage**
+- 🔧 Une limite, un intervalle, un stockage. Un limiter **par usage**
 
 </v-clicks>
 
@@ -48,17 +31,36 @@ layout: default
 class: sec-rate
 ---
 
-# API Platform n'a pas de contrôleur à décorer
+# La limite se déclare sur l'opération
 
 <v-clicks>
 
 - 🧩 Un **state provider** décoré : la limite s'applique **par opération**
-- 🏷️ Déclaré sur l'opération, exactement comme `security:`
 - 🛡️ `TooManyRequestsHttpException` → **HTTP 429** automatique
-- 🌐 Pour couvrir **toute l'API** d'un coup : un listener `kernel.request`
-- 🔑 Clé du quota : le `sub` du token, pas l'IP. Derrière une gateway, l'IP est celle du proxy sans `trusted_proxies`
+- 🔑 Clé du quota : le `sub` du token, pas l'IP
 
 </v-clicks>
+
+<div v-click>
+
+```php
+// src/Entity/Photo.php
+#[ApiResource(security: "is_granted('ROLE_PHOTOS_READ')")]
+#[GetCollection(provider: RateLimitedProvider::class)]
+#[Post(security: "is_granted('ROLE_PHOTOS_WRITE')")]
+class Photo
+{
+    // ...
+}
+```
+
+</div>
+
+<v-click>
+
+<div class="slide-punch">Une opération limitée, l'autre non.<br/>Le même style déclaratif que <code>security:</code></div>
+
+</v-click>
 
 ---
 layout: default
@@ -84,68 +86,11 @@ final class RateLimitedProvider implements ProviderInterface
         if (!$limit->isAccepted()) {
             throw new TooManyRequestsHttpException($limit->getRetryAfter()->getTimestamp() - time());
         }
-        ($context['request'] ?? null)?->attributes->set('rate_limit', $limit);
 
         return $this->inner->provide($op, $uriVariables, $context);
     }
 }
 ```
-
----
-layout: default
-class: sec-rate
----
-
-# On branche la limite sur l'opération
-
-```php
-// src/Entity/Photo.php
-#[ApiResource(security: "is_granted('ROLE_PHOTOS_READ')")]
-#[GetCollection(provider: RateLimitedProvider::class)]
-#[Post(security: "is_granted('ROLE_PHOTOS_WRITE')")]
-class Photo
-{
-    // ...
-}
-```
-
-<v-click>
-
-<div class="slide-punch">Une opération limitée, l'autre non.<br/>Le même style déclaratif que <code>security:</code></div>
-
-</v-click>
-
----
-layout: default
-class: sec-rate
----
-
-# Renvoyer les quotas au client
-
-```php
-// src/EventListener/RateLimitHeadersListener.php
-#[AsEventListener(KernelEvents::RESPONSE)]
-final class RateLimitHeadersListener
-{
-    public function __invoke(ResponseEvent $event): void
-    {
-        if (!$limit = $event->getRequest()->attributes->get('rate_limit')) {
-            return;
-        }
-
-        $event->getResponse()->headers->add([
-            'X-RateLimit-Limit' => $limit->getLimit(),
-            'X-RateLimit-Remaining' => $limit->getRemainingTokens(),
-        ]);
-    }
-}
-```
-
-<v-click>
-
-<div class="slide-note">Les bons clients lisent ces en-têtes et <b>ralentissent</b> avant le 429.</div>
-
-</v-click>
 
 ---
 layout: default

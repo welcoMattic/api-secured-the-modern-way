@@ -102,12 +102,10 @@ class: sec-authn
 
 <v-clicks>
 
-- 👉 Les **apps clientes** redirigent les utilisateurs vers l'**OIDC Provider** 
-- 🛂 L'**OIDC Provider** les authentifie et **émet les tokens**
-- 👥 Les **comptes** vivent dans l'**OIDC Provider**, plus dans votre base
-- 🧩 Votre **API** doit **vérifier** les tokens
-- 🚫 Aucun écran de login ni de consentement à coder
-- 🏦 Votre **API** se concentre sur le métier
+- 👉 Les **apps clientes** redirigent les utilisateurs vers l'**OIDC Provider**, qui les authentifie et **émet les tokens**
+- 👥 Les **comptes** vivent dans l'OIDC Provider, plus dans votre base
+- 🧩 Votre **API** ne fait que **vérifier** les tokens
+- 🏦 Aucun écran de login ni de consentement à coder : elle se concentre sur le **métier**
 
 </v-clicks>
 
@@ -123,7 +121,7 @@ class: sec-authn
 - 🔌 Authenticator **`access_token`** dans le firewall
 - 📥 Lit l'en-tête **`Authorization: Bearer`** par défaut
 - 🧩 Un **token handler** décide *comment* valider
-- 🎯 Deux handlers OIDC natifs : **`oidc`** et **`oidc_user_info`**. Et `oauth2` pour l'introspection (RFC 7662)
+- 🎯 Trois handlers natifs : **`oidc`**, **`oidc_user_info`** et **`oauth2`**
 
 </v-clicks>
 
@@ -132,70 +130,86 @@ layout: default
 class: sec-authn
 ---
 
-# Vérification offline : la signature suffit
+# Trois façons de vérifier un token
 
-```yaml
-# config/packages/security.yaml
-security:
-    firewalls:
-        api:
-            pattern: ^/api
-            stateless: true
-            access_token:
-                token_handler:
-                    oidc:
-                        algorithms: ['RS256']
-                        audience: 'cloudpics-api'
-                        issuers: ['https://id.example.com/realms/photos']
-                        discovery:
-                            base_uri: 'https://id.example.com/realms/photos/'
-                            cache: { id: cache.app }
-```
+<CardGrid :cols="3" class="handlers-grid">
+  <Card v-click :accent="4" icon="🔏" title="<code>oidc</code>">
+    <b>Offline</b><br/>
+    Vérifie la <b>signature</b> du JWT avec les clés publiques du Provider, puis ses claims (<code>exp</code>, <code>aud</code>, <code>iss</code>).
+  </Card>
+  <Card v-click :accent="5" icon="🙋" title="<code>oidc_user_info</code>">
+    <b>Online</b><br/>
+    Présente le token à l'endpoint <b>userinfo</b> du Provider, qui le valide et renvoie les claims de l'utilisateur.
+  </Card>
+  <Card v-click :accent="6" icon="🔎" title="<code>oauth2</code>">
+    <b>Online</b><br/>
+    Présente le token à l'endpoint d'<b>introspection</b> du serveur d'autorisation, qui répond <code>active</code> et les claims.
+  </Card>
+</CardGrid>
 
 <v-click>
 
-<Alert type="info">
-
-`composer require web-token/jwt-library`. <br/> Les clés publiques viennent du `.well-known` : vérification en local.
-
-</Alert>
+<div class="slide-punch">Le handler change, pas le reste : même firewall, mêmes rôles, même <code>is_granted</code>.</div>
 
 </v-click>
 
-<div class="slide-note">Symfony 8.2 : <code>RS256</code> par défaut, <code>enforce_at_jwt_type: true</code> exige le <code>typ: at+jwt</code> (RFC 9068).</div>
+<style scoped>
+.handlers-grid { margin-top: 1rem; align-items: stretch; }
+.handlers-grid :deep(.ds-card__icon) { font-size: 2.7rem; }
+</style>
 
 ---
 layout: default
 class: sec-authn
 ---
 
-# Vérification online : on interroge le Provider
+# Offline ou online : seul le token handler change
+
+<div class="grid grid-cols-2 gap-6">
+
+<div>
+
+**Offline** : la signature suffit
 
 ```yaml
-# config/packages/security.yaml
-security:
-    firewalls:
-        api:
-            pattern: ^/api
-            stateless: true
-            access_token:
-                token_handler:
-                    oidc_user_info:
-                        base_uri: 'https://id.example.com/realms/photos/'
-                        claim: sub
-                        discovery:
-                            cache: { id: cache.app }
+# security.firewalls.api.access_token
+token_handler:
+    oidc:
+        algorithms: ['RS256']
+        audience: 'cloudpics-api'
+        issuers: ['https://id.cloudpics.example']
+        discovery:
+            base_uri: 'https://id.cloudpics.example/'
+            cache: { id: cache.app }
 ```
 
-<v-click>
+<div class="slide-note">Clés publiques du Provider, découvertes via son <code>.well-known</code> : vérification <b>en local</b>.</div>
 
-<Alert type="info">
+</div>
 
-`composer require symfony/http-client`. <br/> Un appel HTTP au Provider à **chaque requête** entrante sur l'API.
+<div v-click>
 
-</Alert>
+**Online** : on interroge le Provider
 
-</v-click>
+```yaml
+# security.firewalls.api.access_token
+token_handler:
+    oidc_user_info:
+        base_uri: 'https://id.cloudpics.example/'
+        claim: sub
+        discovery:
+            cache: { id: cache.app }
+```
+
+<div class="slide-note">Un appel HTTP au Provider à <b>chaque requête</b> entrante sur l'API.</div>
+
+</div>
+
+</div>
+
+<style scoped>
+.slide-note code { white-space: nowrap; }
+</style>
 
 ---
 layout: default
@@ -204,14 +218,12 @@ class: sec-authn
 
 # Offline ou online : un arbitrage, pas un gagnant
 
-|                          | `oidc` (offline)          | `oidc_user_info` (online) |
-|--------------------------|---------------------------|---------------------------|
-| **Appel réseau**         | Aucun                     | Un par requête            |
-| **Révocation d'un token**| Visible à l'expiration    | Immédiate                 |
-| **Provider indisponible**| L'API continue de servir  | L'API ne répond plus      |
-| **Validation de `aud`**  | Oui                       | **Aucune**                |
-| **Claims lus**           | Ceux du token             | Ceux de `userinfo`        |
-| **Dépendance**           | `web-token/jwt-library`   | `symfony/http-client`     |
+|                            | `oidc` (offline)         | `oidc_user_info` (online) | `oauth2` (online)    |
+|----------------------------|--------------------------|---------------------------|----------------------|
+| **Appel réseau**           | Aucun                    | Un par requête            | Un par requête       |
+| **Révocation d'un token**  | Visible à l'expiration   | Immédiate                 | Immédiate            |
+| **Provider indisponible**  | L'API continue de servir | L'API ne répond plus      | L'API ne répond plus |
+| **Validation de `aud`**    | Oui                      | Aucune                    | Oui                  |
 
 <v-click>
 
@@ -233,94 +245,49 @@ layout: default
 class: sec-authn
 ---
 
-# OIDC ne standardise pas la notion de rôle
+# Scope, rôle, règle métier : trois questions
 
-<v-clicks>
-
-- 🪪 `OidcUser` par défaut : **`ROLE_USER`**, et rien d'autre
-- 🧾 RFC 9068 recommande `roles`, `groups`, `entitlements`. Keycloak émet `realm_access.roles`
-- 🔁 À vous de **mapper** les claims vers des rôles Symfony
-
-</v-clicks>
-
-<v-click>
-
-<Alert type="warning">
-
-Le code de Symfony le dit explicitement : les specs OIDC et OAuth n'ont **aucune** notion de rôle.
-
-</Alert>
-
-</v-click>
-
-<div class="slide-note">Les scopes <code>PHOTOS_READ</code> / <code>PHOTOS_WRITE</code> de la section OAuth2 deviennent ici des <b>rôles</b> realm, portés par les scopes <code>photos:read</code> / <code>photos:write</code>.</div>
-
----
-layout: default
-class: sec-authn
----
-
-# Deux claims, et une intersection
-
-<v-clicks>
-
-- 🧾 Les **rôles du compte** d'Alice, chez CloudPics ID : ce qu'elle a le droit de faire
-- 🎫 `scope` : ce qu'Alice a autorisé **cette app** à faire en son nom
-- 🤝 `realm_access.roles` du token : l'**intersection** des deux, rien de plus
-
-</v-clicks>
+<CardGrid :cols="3" class="authz-grid">
+  <Card v-click :accent="4" icon="🎫" title="Le scope">
+    <i>«&nbsp;Qu'est-ce qu'Alice a autorisé PhotoPrint à faire&nbsp;?&nbsp;»</i><br/>
+    Lire et ajouter : <code>photos:read photos:write</code>. Une app qui ne demande que la lecture n'écrira jamais.<br/>
+    Dans le token : claim <code>scope</code>, standard OAuth2.
+  </Card>
+  <Card v-click :accent="5" icon="🧢" title="Le rôle">
+    <i>«&nbsp;Qu'est-ce qu'Alice a le droit de faire chez CloudPics&nbsp;?&nbsp;»</i><br/>
+    Bob, offre gratuite, ne peut pas écrire.<br/>
+    Dans le token : claim du Provider (Keycloak : <code>realm_access.roles</code>).
+  </Card>
+  <Card v-click :accent="6" icon="🏠" title="La règle métier">
+    <i>«&nbsp;Cette photo est-elle à Alice&nbsp;?&nbsp;»</i><br/>
+    Le Provider n'en sait rien.<br/>
+    Dans l'API, et nulle part ailleurs.
+  </Card>
+</CardGrid>
 
 <v-click>
 
-<div class="slide-punch">C'est le Provider qui croise, pas votre API.<br/>Keycloak : <i>full scope allowed</i> off + role scope mapping. Auth0 : RBAC.</div>
+<div class="slide-punch">Le token répond aux deux premières questions.<br/>La troisième reste à <b>votre API</b>.</div>
 
 </v-click>
 
-<div class="slide-note">Bob, offre gratuite en lecture seule, demande <code>photos:write</code> comme Alice : CloudPics ID ne le lui accorde ni en scope, ni en rôle. Le resource server, lui, n'a plus qu'un claim à lire.</div>
+<style scoped>
+.authz-grid { margin-top: 1rem; align-items: stretch; }
+.authz-grid :deep(.ds-card__icon) { font-size: 2.7rem; }
+</style>
 
 ---
 layout: default
 class: sec-authn
 ---
 
-# Le mapping vit dans un UserProvider dédié
-
-```php
-// src/Security/OidcUserProvider.php
-class OidcUserProvider implements AttributesBasedUserProviderInterface
-{
-    public function loadUserByIdentifier(string $id, array $attributes = []): UserInterface
-    {
-        return new OidcUser(
-            userIdentifier: $id,
-            roles: $this->mapRoles($attributes), // claims -> ROLE_*
-            sub: $attributes['sub'],
-            email: $attributes['email'] ?? null,
-        );
-    }
-
-    private function mapRoles(array $attributes): array
-    {
-        // ...
-    }
-
-    // + refreshUser() et supportsClass(), hérités de UserProviderInterface
-}
-```
-
-<div class="slide-note"><code>$attributes</code> contient les claims du token.</div>
-
----
-layout: default
-class: sec-authn
----
-
-# La ressource API Platform ne change pas
+# Dans la démo, tout finit dans `security`
 
 ```php
 // src/Entity/Photo.php
 #[ApiResource(security: "is_granted('ROLE_PHOTOS_READ')")]
 #[GetCollection]
+#[Get(security: "is_granted('ROLE_PHOTOS_READ') and object.owner == user.getUserIdentifier()")]
 #[Post(security: "is_granted('ROLE_PHOTOS_WRITE')")]
 class Photo
 {
@@ -328,41 +295,17 @@ class Photo
 }
 ```
 
-<v-click>
-
-<div class="slide-punch">Le même <code>is_granted</code> qu'avec OAuth2, au préfixe près.<br/>Seule la <b>source des rôles</b> a changé.</div>
-
-</v-click>
-
----
-layout: default
-class: sec-authn
----
-
-# Symfony 8.2 lit le claim `scope` nativement
-
-```php
-// src/Entity/Photo.php
-#[ApiResource(security: "is_granted('OAUTH2_SCOPE(photos:read)')")]
-#[GetCollection]
-#[Post(security: "is_granted('OAUTH2_SCOPE(photos:write)')")]
-class Photo
-{
-    // ...
-}
-```
-
 <v-clicks>
 
-- 🎫 L'authenticator `access_token` pose les scopes du token dans l'attribut `oauth2_scope` (claim `scope`, ou `scp`)
-- 🗳️ `OAUTH2_SCOPE(a b)` exige **tous** les scopes listés
-- 🚫 Refus : `403` avec le challenge `insufficient_scope` de la RFC 6750 §3.1 dans `WWW-Authenticate`
+- 🧢 `ROLE_PHOTOS_*` : les claims du token, mappés en rôles par un **UserProvider**
+- 🏠 `object.owner == user` : la règle métier, connue de l'API seule
+- 🎫 Symfony **8.2** : `OAUTH2_SCOPE(photos:read)` lit le scope, sans mapping
 
 </v-clicks>
 
 <v-click>
 
-<div class="slide-punch">Le claim <code>scope</code> porte déjà l'intersection : rien à mapper.<br/>Les rôles restent pour ce qu'un scope ne dit pas.</div>
+<div class="slide-punch">Le même <code>is_granted</code> qu'avec OAuth2 : la sécurité reste <b>déclarative</b>.</div>
 
 </v-click>
 
@@ -373,51 +316,36 @@ class: sec-authn
 
 # Et si le client est lui aussi une app Symfony ?
 
-**PhotoBook**, un autre service tiers qui veut les photos d'Alice. Client **confidentiel** : il tourne sur son serveur et peut garder un `client_secret`.
+**PhotoBook**, un autre service tiers, client **confidentiel** : il tourne sur son serveur et garde un `client_secret`.
 
 <v-clicks>
 
 - ✅ **Vérifier** un access token : natif (`access_token`)
-- ✅ **Initier** le flow authorization_code : natif à partir de Symfony **8.2**
-- 🎉 Un firewall `oidc_login`, mergé dans le Core début septembre
-
-  - 🛣️ Redirection vers l'OIDC Provider, **PKCE S256** par défaut
-  - 🔄 Échange du code contre les tokens, client authentifié (`client_secret_basic`)
-  - 🔏 **Signature de l'ID token** vérifiée contre le JWKS du Provider
-  - 🪪 Authentification de l'utilisateur au sein de l'app Symfony
-  - 🚪 **RP-Initiated Logout**, renouvellement par **refresh token**
+- 🎉 **Initier** le flow : l'authenticator **`oidc_login`**, natif dans Symfony **8.2**
+- 🛣️ **PKCE**, échange du code, **signature de l'ID token** vérifiée, logout, refresh
 
 </v-clicks>
 
----
-layout: default
-class: sec-authn
----
-
-# C'est natif dans Symfony 8.2 !
-
-PR mergée dans **8.2** le 2 septembre, une dizaine de PR de suite depuis. Livrée en novembre 2026.
-
-<div class="pr-shot">
-  <img src="/pr-64954.png" alt="symfony/symfony PR 64954 : Add an OIDC Authorization Code Flow authenticator" />
+<div class="pr-row">
+  <img v-click src="/pr-64954-og.png" alt="symfony/symfony PR 64954 : Add an OIDC Authorization Code Flow authenticator, par welcoMattic" />
+  <div v-click>
+    <div class="slide-punch">Mergé le 2 septembre, une dizaine de PR de suite depuis. <b>Livré en novembre 2026</b>.</div>
+    <div class="slide-note">Pas de bundle dans la démo : <b>PhotoBook tourne déjà dessus</b>.</div>
+  </div>
 </div>
 
-<div class="slide-note is-centered pr-link">github.com/symfony/symfony/pull/<b>64954</b></div>
-
-<div class="slide-punch">Pas de bundle dans la démo : <b>PhotoBook tourne déjà dessus</b>.</div>
-
 <style scoped>
-.pr-shot {
-  margin-top: 0.4rem;
-  display: flex;
-  justify-content: center;
+.pr-row {
+  margin-top: 0.8rem;
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 1.4rem;
+  align-items: center;
 }
-.pr-shot img {
+.pr-row img {
   width: 100%;
-  max-width: 32rem;
   border-radius: var(--radius-lg);
   border: 1px solid var(--c-border);
   box-shadow: var(--shadow-card);
 }
-.pr-link { font-family: "Fira Code", monospace; }
 </style>

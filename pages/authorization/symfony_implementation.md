@@ -18,20 +18,6 @@ layout: default
 class: sec-authz
 ---
 
-# Installation
-
-```bash
-composer require league/oauth2-server-bundle
-
-# Persistance des clients et tokens
-composer require doctrine/doctrine-bundle doctrine/orm
-```
-
----
-layout: default
-class: sec-authz
----
-
 # Configuration minimale
 
 ```yaml
@@ -56,7 +42,7 @@ security:
     firewalls:
         api_token:
             pattern: ^/token$
-            security: false 
+            security: false
         main:
             pattern: ^/api
             stateless: true
@@ -99,31 +85,6 @@ php bin/console league:oauth2-server:create-client \
 <Alert type="info">
 
 Clients et tokens **persistés par le bundle**. `--public` : PhotoPrint est une SPA sans secret, le bundle lui **impose PKCE** par défaut.
-
-</Alert>
-
-</v-click>
-
----
-layout: default
-class: sec-authz
----
-
-# Restreindre les scopes du client
-
-<v-clicks>
-
-- 🎯 `--scope` à la création : le client ne peut demander **que** ceux-là
-- 🚪 `scopes.default` : ce que reçoit une requête **sans** paramètre `scope`
-- 🕳️ Client **sans scopes** : il obtient **tout ce qu'il demande**, parmi `available`
-
-</v-clicks>
-
-<v-click>
-
-<Alert type="warning">
-
-Un client créé sans `--scope` n'est restreint par **rien**. `scopes.default` ne le limite pas.
 
 </Alert>
 
@@ -182,7 +143,8 @@ class: sec-authz
 
 <v-clicks>
 
-- 👤 Le firewall de `/authorize`, les écrans de **login** et de **consentement**
+- 👤 **Login d'Alice** : `/authorize` exige un utilisateur connecté, le formulaire de login reste à coder
+- 🙋 **Consentement** : le bundle émet un événement, l'écran « Autorises-tu PhotoPrint ? » reste à coder
 - 🔑 **Rotation** des clés de signature
 - ⛓️ **MFA**, mot de passe oublié, révocation de sessions
 - 📊 **Audit** : qui a autorisé quoi, et quand

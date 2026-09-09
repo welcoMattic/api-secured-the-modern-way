@@ -136,20 +136,9 @@ class: sec-authn
 
 # Les JW* expliqués {class="!mb-4"}
 
-| Acronyme   | Nom complet                        | Rôle                                                 | Métaphore                                    | Est-ce un token ?                                              |
-|------------|------------------------------------|------------------------------------------------------|----------------------------------------------|----------------------------------------------------------------|
-| **JWT**    | **J**SON **W**eb **T**oken         | Définit la structure des claims dans le payload.     | Le courrier ou le contenu du colis           | Oui, bien qu'il ne soit jamais utilisé sans structure JWS/JWE. |
-| **JWS**    | **J**SON **W**eb **S**ignature     | Fournit l'intégrité et l'authenticité via une signature. | Une enveloppe transparente avec un sceau inviolable | Oui, un token signé.                                    |
-| **JWE**    | **J**SON **W**eb **E**ncryption    | Fournit la confidentialité via le chiffrement.       | Une boîte métallique opaque et verrouillée   | Oui, un token chiffré.                                         |
-
----
-layout: default
-class: sec-authn
----
-
-# Les JW* expliqués {class="!mb-4"}
-
-| Acronyme   | Nom complet                        | Rôle                                                 | Métaphore                                    | Est-ce un token ?                              |
-|------------|------------------------------------|------------------------------------------------------|----------------------------------------------|------------------------------------------------|
-| **JWA**    | **J**SON **W**eb **A**lgorithms    | Définit les algorithmes cryptographiques autorisés.  | La liste des types de serrures/sceaux approuvés | Non, c'est une liste de noms.               |
-| **JWK(S)** | **J**SON **W**eb **K**ey (**S**et) | Un format standard pour représenter une (un ensemble de) clé(s). | La (les) clé(s) elle(s)-même(s) et ses métadonnées | Non, c'est un format de (jeu de) clé(s). |
+| Acronyme | Nom complet                      | Rôle                                                          | Métaphore                          |
+|----------|----------------------------------|---------------------------------------------------------------|------------------------------------|
+| **JWT**  | **J**SON **W**eb **T**oken       | La structure des claims, toujours emballée en JWS ou JWE      | Le courrier                        |
+| **JWS**  | **J**SON **W**eb **S**ignature   | Intégrité et authenticité : un token **signé**                | Une enveloppe transparente scellée |
+| **JWE**  | **J**SON **W**eb **E**ncryption  | Confidentialité : un token **chiffré**                        | Une boîte opaque et verrouillée    |
+| **JWKS** | **J**SON **W**eb **K**ey **S**et | Les clés publiques du Provider, pour vérifier les signatures  | Le trousseau                       |
