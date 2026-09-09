@@ -18,9 +18,24 @@ final class FakeCloudPicsApi
     public const ACCESS_TOKEN = 'access-token-de-test';
     public const ID_TOKEN = 'id-token-de-test';
     public const SUB = '11111111-1111-4111-8111-111111111111';
+    public const END_SESSION_ENDPOINT = 'https://localhost:8443/realms/photos/protocol/openid-connect/logout';
 
     public function __invoke(string $method, string $url, array $options = []): ResponseInterface
     {
+        if (str_ends_with($url, '/.well-known/openid-configuration')) {
+            return new MockResponse(json_encode([
+                'issuer' => 'https://localhost:8443/realms/photos',
+                'authorization_endpoint' => 'https://localhost:8443/realms/photos/protocol/openid-connect/auth',
+                'token_endpoint' => 'https://localhost:8443/realms/photos/protocol/openid-connect/token',
+                'userinfo_endpoint' => 'https://localhost:8443/realms/photos/protocol/openid-connect/userinfo',
+                'jwks_uri' => 'https://localhost:8443/realms/photos/protocol/openid-connect/certs',
+                'end_session_endpoint' => self::END_SESSION_ENDPOINT,
+            ], \JSON_THROW_ON_ERROR), [
+                'http_code' => 200,
+                'response_headers' => ['content-type' => 'application/json'],
+            ]);
+        }
+
         if (!str_ends_with($url, '/api/photos')) {
             return new MockResponse('Requête inattendue vers '.$url, ['http_code' => 501]);
         }

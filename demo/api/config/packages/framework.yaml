@@ -15,6 +15,13 @@ framework:
     #esi: true
     #fragments: true
 
+when@dev:
+    framework:
+        http_client:
+            default_options:
+                # CloudPics ID local en HTTPS avec un certificat mkcert : PHP ne lit pas le trousseau macOS
+                cafile: '%kernel.project_dir%/../keycloak/certs/rootCA.pem'
+
 when@test:
     framework:
         test: true

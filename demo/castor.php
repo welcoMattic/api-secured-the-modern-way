@@ -29,9 +29,49 @@ function compose_context(): Castor\Context
     return context()->withWorkingDirectory(__DIR__);
 }
 
+#[AsTask(name: 'certs', description: 'Génère le certificat TLS de CloudPics ID avec mkcert')]
+function certs(): void
+{
+    // Symfony 8.2 exige HTTPS pour le token_endpoint, même sur localhost.
+    // PHP ne lit pas le trousseau macOS : on copie rootCA.pem pour le passer via cafile.
+    $certDir = __DIR__.'/keycloak/certs';
+    $certFile = $certDir.'/localhost.pem';
+    $keyFile = $certDir.'/localhost-key.pem';
+    $rootCAFile = $certDir.'/rootCA.pem';
+
+    if (file_exists($certFile) && file_exists($keyFile) && file_exists($rootCAFile)) {
+        io()->text('Le certificat mkcert pour localhost existe déjà.');
+        return;
+    }
+
+    // Vérifier que mkcert est installé
+    $mkcertPath = trim(capture('command -v mkcert', onFailure: ''));
+    if ('' === $mkcertPath) {
+        io()->error('mkcert est introuvable. Installez-le avec : brew install mkcert && mkcert -install');
+        throw new RuntimeException('mkcert est requis pour générer le certificat.');
+    }
+
+    io()->text('Génération du certificat mkcert pour localhost...');
+    fs()->mkdir($certDir);
+
+    // Générer le certificat
+    run('mkcert -cert-file '.escapeshellarg($certFile).' -key-file '.escapeshellarg($keyFile).' localhost 127.0.0.1 ::1');
+
+    // Copier rootCA.pem
+    $caRoot = trim(capture('mkcert -CAROOT'));
+    fs()->copy($caRoot.'/rootCA.pem', $rootCAFile);
+
+    // Mettre la clé en 0644 (Keycloak tourne avec l'utilisateur 1000)
+    fs()->chmod($keyFile, 0644);
+
+    io()->success('Certificat mkcert généré dans keycloak/certs/.');
+}
+
 #[AsTask(name: 'install', description: 'Installe les dépendances de l\'API, du client Symfony et du client SPA')]
 function install(): void
 {
+    certs();
+
     // composer install dans api/
     io()->text('Installation des dépendances de l\'API...');
     run('composer install', context: api_context());
@@ -50,6 +90,8 @@ function install(): void
 #[AsTask(name: 'start', description: 'Démarre toute la démo : Keycloak, API, client Symfony et client SPA')]
 function start(): void
 {
+    certs();
+
     // 1. docker compose up -d --wait
     io()->text('Démarrage des conteneurs Docker...');
     run('docker compose up -d --wait', context: compose_context());
@@ -58,9 +100,12 @@ function start(): void
     io()->text('Réinitialisation de la base de données API...');
     db_reset();
 
-    // 3. purge du pool cache.app de l'API
-    io()->text('Purge du cache JWKS de l\'API...');
+    // 3. purge du pool cache.app des deux apps PHP
+    io()->text('Purge du cache JWKS des deux apps PHP...');
     run('php bin/console cache:pool:clear cache.app', context: api_context());
+    // PhotoBook y garde le JWKS qui vérifie la signature de l'ID token, et Keycloak
+    // régénère ses clés à chaque démarrage.
+    run('php bin/console cache:pool:clear cache.app', context: client_symfony_context());
 
     // 4. symfony server:start pour l'API sur le port 8100
     io()->text('Démarrage du serveur de l\'API sur le port 8100...');
@@ -84,15 +129,20 @@ function start(): void
 
     // 7. Ne jamais annoncer le succès sans l'avoir vérifié : les server:start tolèrent
     //    l'échec (relance sur une stack déjà lancée), donc leur code de retour ne prouve rien.
+    $rootCAPath = __DIR__.'/keycloak/certs/rootCA.pem';
     $services = [
-        'Keycloak' => 'http://localhost:8080/realms/photos/.well-known/openid-configuration',
+        'Keycloak' => 'https://localhost:8443/realms/photos/.well-known/openid-configuration',
         'API' => 'http://localhost:8100/api/docs',
         'Client Symfony' => 'http://localhost:8101/',
         'Client SPA' => 'http://localhost:5173/',
     ];
     $morts = [];
     foreach ($services as $nom => $url) {
-        $code = trim(capture('curl -s -o /dev/null --max-time 5 -w "%{http_code}" '.escapeshellarg($url), onFailure: '000'));
+        $cmd = 'curl -s -o /dev/null --max-time 5 -w "%{http_code}" '.escapeshellarg($url);
+        if (str_starts_with($url, 'https://')) {
+            $cmd .= ' --cacert '.escapeshellarg($rootCAPath);
+        }
+        $code = trim(capture($cmd, onFailure: '000'));
         if (!str_starts_with($code, '2')) {
             $morts[] = sprintf('%s (%s a répondu %s)', $nom, $url, $code);
         }
@@ -115,7 +165,7 @@ function start(): void
     io()->table(
         ['Acteur', 'Rôle', 'URL'],
         [
-            ['CloudPics ID', 'OIDC Provider (admin / admin)', 'http://localhost:8080'],
+            ['CloudPics ID', 'OIDC Provider (admin / admin)', 'https://localhost:8443'],
             ['CloudPics API', 'Resource server', 'http://localhost:8100/api/docs'],
             ['PhotoPrint', 'Client public, PKCE', 'http://localhost:5173/'],
             ['PhotoBook', 'Client confidentiel', 'http://localhost:8101/'],
@@ -200,7 +250,7 @@ function open_urls(): void
     open('http://localhost:5173/');        // SPA
     open('http://localhost:8101/');        // Symfony client
     open('http://localhost:8100/api/docs'); // API docs
-    open('http://localhost:8080/');        // Keycloak admin
+    open('https://localhost:8443/');        // Keycloak admin
     io()->success('Les quatre URLs sont ouvertes dans le navigateur.');
 }
 
@@ -236,8 +286,9 @@ function smoke(): void
     // par OAuth 2.1 : il n'est jamais montré dans le talk.
     $clientId = 'cloudpics-smoke-test';
     $realm = 'photos';
-    $keycloakUrl = 'http://localhost:8080';
+    $keycloakUrl = 'https://localhost:8443';
     $apiUrl = 'http://localhost:8100';
+    $rootCAPath = __DIR__.'/keycloak/certs/rootCA.pem';
 
     $allPassed = true;
 
@@ -245,7 +296,11 @@ function smoke(): void
 
     // Pré-vol : sans Keycloak ni API, tous les tests échouent pour la même raison.
     foreach (['Keycloak' => $keycloakUrl.'/realms/'.$realm.'/.well-known/openid-configuration', 'API' => $apiUrl.'/api/docs'] as $name => $url) {
-        if ('000' === trim(capture('curl -s -o /dev/null --max-time 5 -w "%{http_code}" '.escapeshellarg($url), onFailure: '000'))) {
+        $cmd = 'curl -s -o /dev/null --max-time 5 -w "%{http_code}" '.escapeshellarg($url);
+        if (str_starts_with($url, 'https://')) {
+            $cmd .= ' --cacert '.escapeshellarg($rootCAPath);
+        }
+        if ('000' === trim(capture($cmd, onFailure: '000'))) {
             io()->error(sprintf('%s ne répond pas sur %s. Lancez "castor start".', $name, $url));
             exit(1);
         }
@@ -257,16 +312,18 @@ function smoke(): void
     // PhotoBook : sans ces scopes, CloudPics ID n'inscrit aucun rôle dans l'access
     // token et tout répondrait 403. Ce qui distingue alice de bob n'est pas ce que
     // le client demande, c'est ce que le Provider accorde.
-    $getToken = function ($username, $password) use ($clientId, $realm, $keycloakUrl) {
+    $getToken = function ($username, $password) use ($clientId, $realm, $keycloakUrl, $rootCAPath) {
         $cmd = sprintf(
             'curl -s -X POST "%s/realms/%s/protocol/openid-connect/token" \
              -H "Content-Type: application/x-www-form-urlencoded" \
-             -d "client_id=%s&grant_type=password&username=%s&password=%s&scope=openid+photos%%3Aread+photos%%3Awrite"',
+             -d "client_id=%s&grant_type=password&username=%s&password=%s&scope=openid+photos%%3Aread+photos%%3Awrite" \
+             --cacert %s',
             $keycloakUrl,
             $realm,
             $clientId,
             $username,
-            $password
+            $password,
+            escapeshellarg($rootCAPath)
         );
         return json_decode(capture($cmd), true);
     };

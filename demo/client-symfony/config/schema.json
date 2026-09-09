@@ -311,20 +311,10 @@
                                                         "default": "_token"
                                                     },
                                                     "field_attr": {
-                                                        "anyOf": [
-                                                            {
-                                                                "$ref": "#/$defs/types/object_null",
-                                                                "additionalProperties": {
-                                                                    "$ref": "#/$defs/types/scalar"
-                                                                }
-                                                            },
-                                                            {
-                                                                "$ref": "#/$defs/types/array_null",
-                                                                "items": {
-                                                                    "$ref": "#/$defs/types/scalar"
-                                                                }
-                                                            }
-                                                        ],
+                                                        "$ref": "#/$defs/types/object_null",
+                                                        "additionalProperties": {
+                                                            "$ref": "#/$defs/types/scalar"
+                                                        },
                                                         "default": {
                                                             "data-controller": "csrf-protection"
                                                         }
@@ -398,6 +388,10 @@
                                     },
                                     "trace_header": {
                                         "$ref": "#/$defs/types/scalar"
+                                    },
+                                    "cache_status": {
+                                        "$ref": "#/$defs/types/scalar",
+                                        "description": "Enables the RFC 9211 \"Cache-Status\" response header and names this cache in it, e.g. \"Symfony\". No header is added when null."
                                     },
                                     "default_ttl": {
                                         "$ref": "#/$defs/types/integer"
@@ -570,6 +564,67 @@
                                         "$ref": "#/$defs/types/boolean",
                                         "default": false
                                     },
+                                    "excluded_paths": {
+                                        "anyOf": [
+                                            {
+                                                "$ref": "#/$defs/types/array_null",
+                                                "items": {
+                                                    "$ref": "#/$defs/types/scalar"
+                                                }
+                                            },
+                                            {
+                                                "type": [
+                                                    "string"
+                                                ]
+                                            }
+                                        ],
+                                        "description": "Regular expressions matched against the url-decoded path info of the requests that must not be profiled. Patterns are case-sensitive and must not contain delimiters.",
+                                        "examples": [
+                                            [
+                                                "^/\\.well-known/",
+                                                "^/favicon\\.ico$"
+                                            ]
+                                        ]
+                                    },
+                                    "excluded_http_codes": {
+                                        "anyOf": [
+                                            {
+                                                "$ref": "#/$defs/types/array_null",
+                                                "items": {
+                                                    "anyOf": [
+                                                        {
+                                                            "$ref": "#/$defs/types/array_null",
+                                                            "items": {
+                                                                "$ref": "#/$defs/types/scalar"
+                                                            }
+                                                        },
+                                                        {
+                                                            "type": [
+                                                                "string"
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "description": "Regular expressions matched against the url-decoded path info that restrict the exclusion of this status code. When empty, every response having that status code is excluded."
+                                                }
+                                            },
+                                            {
+                                                "type": [
+                                                    "integer",
+                                                    "string"
+                                                ]
+                                            }
+                                        ],
+                                        "description": "Maps HTTP status codes whose responses must not be profiled to regular expressions restricting each exclusion to matching path infos.",
+                                        "examples": [
+                                            {
+                                                "404": null,
+                                                "400": [
+                                                    "^/foo",
+                                                    "^/bar"
+                                                ]
+                                            }
+                                        ]
+                                    },
                                     "dsn": {
                                         "$ref": "#/$defs/types/scalar",
                                         "default": "file:%kernel.cache_dir%/profiler"
@@ -604,6 +659,8 @@
                             "collect_parameter": null,
                             "only_exceptions": false,
                             "only_main_requests": false,
+                            "excluded_paths": [],
+                            "excluded_http_codes": [],
                             "dsn": "file:%kernel.cache_dir%/profiler",
                             "collect_serializer_data": true
                         },
@@ -747,20 +804,10 @@
                                                                         "$ref": "#/$defs/types/scalar"
                                                                     },
                                                                     "metadata": {
-                                                                        "anyOf": [
-                                                                            {
-                                                                                "$ref": "#/$defs/types/object_null",
-                                                                                "additionalProperties": {
-                                                                                    "$ref": "#/$defs/types/variable"
-                                                                                }
-                                                                            },
-                                                                            {
-                                                                                "$ref": "#/$defs/types/array_null",
-                                                                                "items": {
-                                                                                    "$ref": "#/$defs/types/variable"
-                                                                                }
-                                                                            }
-                                                                        ],
+                                                                        "$ref": "#/$defs/types/object_null",
+                                                                        "additionalProperties": {
+                                                                            "$ref": "#/$defs/types/variable"
+                                                                        },
                                                                         "examples": [
                                                                             {
                                                                                 "color": "blue",
@@ -862,20 +909,10 @@
                                                                 "default": 1
                                                             },
                                                             "metadata": {
-                                                                "anyOf": [
-                                                                    {
-                                                                        "$ref": "#/$defs/types/object_null",
-                                                                        "additionalProperties": {
-                                                                            "$ref": "#/$defs/types/variable"
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        "$ref": "#/$defs/types/array_null",
-                                                                        "items": {
-                                                                            "$ref": "#/$defs/types/variable"
-                                                                        }
-                                                                    }
-                                                                ],
+                                                                "$ref": "#/$defs/types/object_null",
+                                                                "additionalProperties": {
+                                                                    "$ref": "#/$defs/types/variable"
+                                                                },
                                                                 "examples": [
                                                                     {
                                                                         "color": "blue",
@@ -892,20 +929,10 @@
                                                     "minItems": 1
                                                 },
                                                 "metadata": {
-                                                    "anyOf": [
-                                                        {
-                                                            "$ref": "#/$defs/types/object_null",
-                                                            "additionalProperties": {
-                                                                "$ref": "#/$defs/types/variable"
-                                                            }
-                                                        },
-                                                        {
-                                                            "$ref": "#/$defs/types/array_null",
-                                                            "items": {
-                                                                "$ref": "#/$defs/types/variable"
-                                                            }
-                                                        }
-                                                    ],
+                                                    "$ref": "#/$defs/types/object_null",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/$defs/types/variable"
+                                                    },
                                                     "examples": [
                                                         {
                                                             "color": "blue",
@@ -1341,20 +1368,10 @@
                                         "description": "Behavior if an asset cannot be found when imported from JavaScript or CSS files - e.g. \"import './non-existent.js'\". \"strict\" means an exception is thrown, \"warn\" means a warning is logged, \"ignore\" means the import is left as-is."
                                     },
                                     "extensions": {
-                                        "anyOf": [
-                                            {
-                                                "$ref": "#/$defs/types/object_null",
-                                                "additionalProperties": {
-                                                    "$ref": "#/$defs/types/scalar"
-                                                }
-                                            },
-                                            {
-                                                "$ref": "#/$defs/types/array_null",
-                                                "items": {
-                                                    "$ref": "#/$defs/types/scalar"
-                                                }
-                                            }
-                                        ],
+                                        "$ref": "#/$defs/types/object_null",
+                                        "additionalProperties": {
+                                            "$ref": "#/$defs/types/scalar"
+                                        },
                                         "description": "Key-value pair of file extensions set to their mime type.",
                                         "examples": [
                                             {
@@ -1372,21 +1389,26 @@
                                         "default": "es-module-shims",
                                         "description": "The importmap name that will be used to load the polyfill. Set to false to disable."
                                     },
-                                    "importmap_script_attributes": {
+                                    "importmap_entries": {
                                         "anyOf": [
                                             {
-                                                "$ref": "#/$defs/types/object_null",
-                                                "additionalProperties": {
-                                                    "$ref": "#/$defs/types/scalar"
-                                                }
+                                                "enum": [
+                                                    "all",
+                                                    "reachable"
+                                                ]
                                             },
                                             {
-                                                "$ref": "#/$defs/types/array_null",
-                                                "items": {
-                                                    "$ref": "#/$defs/types/scalar"
-                                                }
+                                                "$ref": "#/$defs/types/param"
                                             }
                                         ],
+                                        "default": "all",
+                                        "description": "Which entries end up in the rendered importmap: \"all\" of them, or only the ones \"reachable\" from the rendered entrypoints (their eager and lazy import chains) plus the polyfill."
+                                    },
+                                    "importmap_script_attributes": {
+                                        "$ref": "#/$defs/types/object_null",
+                                        "additionalProperties": {
+                                            "$ref": "#/$defs/types/scalar"
+                                        },
                                         "description": "Key-value pair of attributes to add to script tags output for the importmap.",
                                         "examples": [
                                             {
@@ -1482,6 +1504,7 @@
                             "extensions": [],
                             "importmap_path": "%kernel.project_dir%/importmap.php",
                             "importmap_polyfill": "es-module-shims",
+                            "importmap_entries": "all",
                             "importmap_script_attributes": [],
                             "importmap_integrity_algorithms": [],
                             "vendor_dir": "%kernel.project_dir%/assets/vendor",
@@ -1601,20 +1624,10 @@
                                                     "$ref": "#/$defs/types/scalar"
                                                 },
                                                 "domains": {
-                                                    "anyOf": [
-                                                        {
-                                                            "$ref": "#/$defs/types/object_null",
-                                                            "additionalProperties": {
-                                                                "$ref": "#/$defs/types/scalar"
-                                                            }
-                                                        },
-                                                        {
-                                                            "$ref": "#/$defs/types/array_null",
-                                                            "items": {
-                                                                "$ref": "#/$defs/types/scalar"
-                                                            }
-                                                        }
-                                                    ]
+                                                    "$ref": "#/$defs/types/object_null",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/$defs/types/scalar"
+                                                    }
                                                 },
                                                 "locales": {
                                                     "$ref": "#/$defs/types/array_null",
@@ -1642,20 +1655,10 @@
                                                             "$ref": "#/$defs/types/string_null"
                                                         },
                                                         "parameters": {
-                                                            "anyOf": [
-                                                                {
-                                                                    "$ref": "#/$defs/types/object_null",
-                                                                    "additionalProperties": {
-                                                                        "$ref": "#/$defs/types/scalar"
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "$ref": "#/$defs/types/array_null",
-                                                                    "items": {
-                                                                        "$ref": "#/$defs/types/scalar"
-                                                                    }
-                                                                }
-                                                            ]
+                                                            "$ref": "#/$defs/types/object_null",
+                                                            "additionalProperties": {
+                                                                "$ref": "#/$defs/types/scalar"
+                                                            }
                                                         },
                                                         "domain": {
                                                             "$ref": "#/$defs/types/string_null"
@@ -1902,20 +1905,10 @@
                                         }
                                     },
                                     "default_context": {
-                                        "anyOf": [
-                                            {
-                                                "$ref": "#/$defs/types/object_null",
-                                                "additionalProperties": {
-                                                    "$ref": "#/$defs/types/variable"
-                                                }
-                                            },
-                                            {
-                                                "$ref": "#/$defs/types/array_null",
-                                                "items": {
-                                                    "$ref": "#/$defs/types/variable"
-                                                }
-                                            }
-                                        ]
+                                        "$ref": "#/$defs/types/object_null",
+                                        "additionalProperties": {
+                                            "$ref": "#/$defs/types/variable"
+                                        }
                                     },
                                     "named_serializers": {
                                         "$ref": "#/$defs/types/object_null",
@@ -1926,20 +1919,10 @@
                                                     "$ref": "#/$defs/types/scalar"
                                                 },
                                                 "default_context": {
-                                                    "anyOf": [
-                                                        {
-                                                            "$ref": "#/$defs/types/object_null",
-                                                            "additionalProperties": {
-                                                                "$ref": "#/$defs/types/variable"
-                                                            }
-                                                        },
-                                                        {
-                                                            "$ref": "#/$defs/types/array_null",
-                                                            "items": {
-                                                                "$ref": "#/$defs/types/variable"
-                                                            }
-                                                        }
-                                                    ]
+                                                    "$ref": "#/$defs/types/object_null",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/$defs/types/variable"
+                                                    }
                                                 },
                                                 "include_built_in_normalizers": {
                                                     "$ref": "#/$defs/types/boolean",
@@ -2003,6 +1986,11 @@
                                     "throw_exception_on_invalid_property_path": {
                                         "$ref": "#/$defs/types/boolean",
                                         "default": true
+                                    },
+                                    "wildcard_reads": {
+                                        "$ref": "#/$defs/types/boolean",
+                                        "default": false,
+                                        "description": "Enables reading every element of a collection through a \"[*]\" wildcard."
                                     }
                                 },
                                 "additionalProperties": false
@@ -2019,7 +2007,8 @@
                             "magic_get": true,
                             "magic_set": true,
                             "throw_exception_on_invalid_index": false,
-                            "throw_exception_on_invalid_property_path": true
+                            "throw_exception_on_invalid_property_path": true,
+                            "wildcard_reads": false
                         },
                         "description": "Property access configuration"
                     },
@@ -2033,20 +2022,10 @@
                                         "default": true
                                     },
                                     "aliases": {
-                                        "anyOf": [
-                                            {
-                                                "$ref": "#/$defs/types/object_null",
-                                                "additionalProperties": {
-                                                    "$ref": "#/$defs/types/scalar"
-                                                }
-                                            },
-                                            {
-                                                "$ref": "#/$defs/types/array_null",
-                                                "items": {
-                                                    "$ref": "#/$defs/types/scalar"
-                                                }
-                                            }
-                                        ],
+                                        "$ref": "#/$defs/types/object_null",
+                                        "additionalProperties": {
+                                            "$ref": "#/$defs/types/scalar"
+                                        },
                                         "description": "Additional type aliases to be used during type context creation."
                                     }
                                 },
@@ -2148,6 +2127,10 @@
                                 "$ref": "#/$defs/types/scalar",
                                 "default": null
                             },
+                            "default_mongodb_provider": {
+                                "$ref": "#/$defs/types/scalar",
+                                "default": "mongodb://localhost/app"
+                            },
                             "pools": {
                                 "$ref": "#/$defs/types/object_null",
                                 "additionalProperties": {
@@ -2217,6 +2200,7 @@
                             "default_memcached_provider": "memcached://localhost",
                             "default_doctrine_dbal_provider": "database_connection",
                             "default_pdo_provider": null,
+                            "default_mongodb_provider": "mongodb://localhost/app",
                             "pools": []
                         },
                         "description": "Cache configuration"
@@ -2448,20 +2432,10 @@
                                                         "description": "Serialization format for the messenger.transport.symfony_serializer service (which is not the serializer used by default)."
                                                     },
                                                     "context": {
-                                                        "anyOf": [
-                                                            {
-                                                                "$ref": "#/$defs/types/object_null",
-                                                                "additionalProperties": {
-                                                                    "$ref": "#/$defs/types/variable"
-                                                                }
-                                                            },
-                                                            {
-                                                                "$ref": "#/$defs/types/array_null",
-                                                                "items": {
-                                                                    "$ref": "#/$defs/types/variable"
-                                                                }
-                                                            }
-                                                        ],
+                                                        "$ref": "#/$defs/types/object_null",
+                                                        "additionalProperties": {
+                                                            "$ref": "#/$defs/types/variable"
+                                                        },
                                                         "description": "Context array for the messenger.transport.symfony_serializer service (which is not the serializer used by default)."
                                                     }
                                                 },
@@ -2496,21 +2470,30 @@
                                                             "default": null,
                                                             "description": "Service id of a custom serializer to use."
                                                         },
-                                                        "options": {
-                                                            "anyOf": [
-                                                                {
-                                                                    "$ref": "#/$defs/types/object_null",
-                                                                    "additionalProperties": {
-                                                                        "$ref": "#/$defs/types/variable"
-                                                                    }
+                                                        "claim_check": {
+                                                            "$ref": "#/$defs/types/object_null",
+                                                            "properties": {
+                                                                "cache_pool": {
+                                                                    "$ref": "#/$defs/types/scalar",
+                                                                    "description": "Service id of the dedicated cache pool used to store claims. Pools declared under \"framework.cache.pools\" must define a \"default_lifetime\"."
                                                                 },
-                                                                {
-                                                                    "$ref": "#/$defs/types/array_null",
-                                                                    "items": {
-                                                                        "$ref": "#/$defs/types/variable"
-                                                                    }
+                                                                "max_size": {
+                                                                    "$ref": "#/$defs/types/integer",
+                                                                    "minimum": 1,
+                                                                    "description": "Maximum encoded message size in bytes before using a claim check."
                                                                 }
-                                                            ]
+                                                            },
+                                                            "required": [
+                                                                "cache_pool",
+                                                                "max_size"
+                                                            ],
+                                                            "additionalProperties": false
+                                                        },
+                                                        "options": {
+                                                            "$ref": "#/$defs/types/object_null",
+                                                            "additionalProperties": {
+                                                                "$ref": "#/$defs/types/variable"
+                                                            }
                                                         },
                                                         "failure_transport": {
                                                             "$ref": "#/$defs/types/scalar",
@@ -2808,37 +2791,17 @@
                                         "$ref": "#/$defs/types/object_null",
                                         "properties": {
                                             "vars": {
-                                                "anyOf": [
-                                                    {
-                                                        "$ref": "#/$defs/types/object_null",
-                                                        "additionalProperties": {
-                                                            "$ref": "#/$defs/types/variable"
-                                                        }
-                                                    },
-                                                    {
-                                                        "$ref": "#/$defs/types/array_null",
-                                                        "items": {
-                                                            "$ref": "#/$defs/types/variable"
-                                                        }
-                                                    }
-                                                ],
+                                                "$ref": "#/$defs/types/object_null",
+                                                "additionalProperties": {
+                                                    "$ref": "#/$defs/types/variable"
+                                                },
                                                 "description": "Associative array: the default vars used to expand the templated URI."
                                             },
                                             "headers": {
-                                                "anyOf": [
-                                                    {
-                                                        "$ref": "#/$defs/types/object_null",
-                                                        "additionalProperties": {
-                                                            "$ref": "#/$defs/types/variable"
-                                                        }
-                                                    },
-                                                    {
-                                                        "$ref": "#/$defs/types/array_null",
-                                                        "items": {
-                                                            "$ref": "#/$defs/types/variable"
-                                                        }
-                                                    }
-                                                ],
+                                                "$ref": "#/$defs/types/object_null",
+                                                "additionalProperties": {
+                                                    "$ref": "#/$defs/types/variable"
+                                                },
                                                 "description": "Associative array: header => value(s)."
                                             },
                                             "max_redirects": {
@@ -2943,20 +2906,10 @@
                                                 "description": "The minimum version of TLS to accept; must be one of STREAM_CRYPTO_METHOD_TLSv*_CLIENT constants."
                                             },
                                             "extra": {
-                                                "anyOf": [
-                                                    {
-                                                        "$ref": "#/$defs/types/object_null",
-                                                        "additionalProperties": {
-                                                            "$ref": "#/$defs/types/variable"
-                                                        }
-                                                    },
-                                                    {
-                                                        "$ref": "#/$defs/types/array_null",
-                                                        "items": {
-                                                            "$ref": "#/$defs/types/variable"
-                                                        }
-                                                    }
-                                                ],
+                                                "$ref": "#/$defs/types/object_null",
+                                                "additionalProperties": {
+                                                    "$ref": "#/$defs/types/variable"
+                                                },
                                                 "description": "Extra options for specific HTTP client."
                                             },
                                             "rate_limiter": {
@@ -3182,20 +3135,10 @@
                                                             "description": "`true` to always return empty 200 responses, `false` to disable mocking, or the id of the service to use to generate mock responses (invokable or iterable)."
                                                         },
                                                         "headers": {
-                                                            "anyOf": [
-                                                                {
-                                                                    "$ref": "#/$defs/types/object_null",
-                                                                    "additionalProperties": {
-                                                                        "$ref": "#/$defs/types/variable"
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "$ref": "#/$defs/types/array_null",
-                                                                    "items": {
-                                                                        "$ref": "#/$defs/types/variable"
-                                                                    }
-                                                                }
-                                                            ],
+                                                            "$ref": "#/$defs/types/object_null",
+                                                            "additionalProperties": {
+                                                                "$ref": "#/$defs/types/variable"
+                                                            },
                                                             "description": "Associative array: header => value(s)."
                                                         },
                                                         "max_redirects": {
@@ -3300,20 +3243,10 @@
                                                             "description": "The minimum version of TLS to accept; must be one of STREAM_CRYPTO_METHOD_TLSv*_CLIENT constants."
                                                         },
                                                         "extra": {
-                                                            "anyOf": [
-                                                                {
-                                                                    "$ref": "#/$defs/types/object_null",
-                                                                    "additionalProperties": {
-                                                                        "$ref": "#/$defs/types/variable"
-                                                                    }
-                                                                },
-                                                                {
-                                                                    "$ref": "#/$defs/types/array_null",
-                                                                    "items": {
-                                                                        "$ref": "#/$defs/types/variable"
-                                                                    }
-                                                                }
-                                                            ],
+                                                            "$ref": "#/$defs/types/object_null",
+                                                            "additionalProperties": {
+                                                                "$ref": "#/$defs/types/variable"
+                                                            },
                                                             "description": "Extra options for specific HTTP client."
                                                         },
                                                         "rate_limiter": {
@@ -3620,6 +3553,47 @@
                                             ]
                                         }
                                     },
+                                    "tracking": {
+                                        "$ref": "#/$defs/types/object_null",
+                                        "properties": {
+                                            "opens": {
+                                                "anyOf": [
+                                                    {
+                                                        "enum": [
+                                                            true,
+                                                            false,
+                                                            null
+                                                        ]
+                                                    },
+                                                    {
+                                                        "$ref": "#/$defs/types/param"
+                                                    }
+                                                ],
+                                                "default": null
+                                            },
+                                            "clicks": {
+                                                "anyOf": [
+                                                    {
+                                                        "enum": [
+                                                            true,
+                                                            false,
+                                                            null
+                                                        ]
+                                                    },
+                                                    {
+                                                        "$ref": "#/$defs/types/param"
+                                                    }
+                                                ],
+                                                "default": null
+                                            }
+                                        },
+                                        "additionalProperties": false,
+                                        "default": {
+                                            "opens": null,
+                                            "clicks": null
+                                        },
+                                        "description": "Default open/click tracking for every message that does not carry an explicit \"X-Track\" header; null keeps each provider's default. An \"X-Track\" entry in the \"headers\" option wins over this one."
+                                    },
                                     "dkim_signer": {
                                         "anyOf": [
                                             {
@@ -3648,20 +3622,10 @@
                                                         "description": "The private key passphrase"
                                                     },
                                                     "options": {
-                                                        "anyOf": [
-                                                            {
-                                                                "$ref": "#/$defs/types/object_null",
-                                                                "additionalProperties": {
-                                                                    "$ref": "#/$defs/types/variable"
-                                                                }
-                                                            },
-                                                            {
-                                                                "$ref": "#/$defs/types/array_null",
-                                                                "items": {
-                                                                    "$ref": "#/$defs/types/variable"
-                                                                }
-                                                            }
-                                                        ]
+                                                        "$ref": "#/$defs/types/object_null",
+                                                        "additionalProperties": {
+                                                            "$ref": "#/$defs/types/variable"
+                                                        }
                                                     }
                                                 },
                                                 "additionalProperties": false
@@ -3748,20 +3712,10 @@
                                                         "description": "S/MIME certificate repository service. This service shall implement the `Symfony\\Component\\Mailer\\EventListener\\SmimeCertificateRepositoryInterface`."
                                                     },
                                                     "certificates": {
-                                                        "anyOf": [
-                                                            {
-                                                                "$ref": "#/$defs/types/object_null",
-                                                                "additionalProperties": {
-                                                                    "$ref": "#/$defs/types/scalar"
-                                                                }
-                                                            },
-                                                            {
-                                                                "$ref": "#/$defs/types/array_null",
-                                                                "items": {
-                                                                    "$ref": "#/$defs/types/scalar"
-                                                                }
-                                                            }
-                                                        ],
+                                                        "$ref": "#/$defs/types/object_null",
+                                                        "additionalProperties": {
+                                                            "$ref": "#/$defs/types/scalar"
+                                                        },
                                                         "description": "Recipient S/MIME certificates, as a map of email address to certificate file path. Cannot be used together with \"repository\"."
                                                     },
                                                     "on_missing_certificate": {
@@ -3890,20 +3844,10 @@
                                                         "description": "Service or class implementing `Symfony\\Component\\Mailer\\EventListener\\PgpPublicKeyRepositoryInterface` to provide recipient PGP public keys."
                                                     },
                                                     "keys": {
-                                                        "anyOf": [
-                                                            {
-                                                                "$ref": "#/$defs/types/object_null",
-                                                                "additionalProperties": {
-                                                                    "$ref": "#/$defs/types/scalar"
-                                                                }
-                                                            },
-                                                            {
-                                                                "$ref": "#/$defs/types/array_null",
-                                                                "items": {
-                                                                    "$ref": "#/$defs/types/scalar"
-                                                                }
-                                                            }
-                                                        ],
+                                                        "$ref": "#/$defs/types/object_null",
+                                                        "additionalProperties": {
+                                                            "$ref": "#/$defs/types/scalar"
+                                                        },
                                                         "description": "Recipient PGP public keys, as a map of email address to public key file path. Cannot be used together with \"repository\"."
                                                     },
                                                     "binary": {
@@ -3999,6 +3943,10 @@
                             "dsn": null,
                             "transports": [],
                             "headers": [],
+                            "tracking": {
+                                "opens": null,
+                                "clicks": null
+                            },
                             "dkim_signer": {
                                 "enabled": false,
                                 "key": "",
@@ -4097,36 +4045,16 @@
                                         "description": "The message bus to use. Defaults to the default bus if the Messenger component is installed."
                                     },
                                     "chatter_transports": {
-                                        "anyOf": [
-                                            {
-                                                "$ref": "#/$defs/types/object_null",
-                                                "additionalProperties": {
-                                                    "$ref": "#/$defs/types/scalar"
-                                                }
-                                            },
-                                            {
-                                                "$ref": "#/$defs/types/array_null",
-                                                "items": {
-                                                    "$ref": "#/$defs/types/scalar"
-                                                }
-                                            }
-                                        ]
+                                        "$ref": "#/$defs/types/object_null",
+                                        "additionalProperties": {
+                                            "$ref": "#/$defs/types/scalar"
+                                        }
                                     },
                                     "texter_transports": {
-                                        "anyOf": [
-                                            {
-                                                "$ref": "#/$defs/types/object_null",
-                                                "additionalProperties": {
-                                                    "$ref": "#/$defs/types/scalar"
-                                                }
-                                            },
-                                            {
-                                                "$ref": "#/$defs/types/array_null",
-                                                "items": {
-                                                    "$ref": "#/$defs/types/scalar"
-                                                }
-                                            }
-                                        ]
+                                        "$ref": "#/$defs/types/object_null",
+                                        "additionalProperties": {
+                                            "$ref": "#/$defs/types/scalar"
+                                        }
                                     },
                                     "notification_on_failed_messages": {
                                         "$ref": "#/$defs/types/boolean",
@@ -4195,6 +4123,33 @@
                                         "$ref": "#/$defs/types/boolean",
                                         "default": false
                                     },
+                                    "builder": {
+                                        "$ref": "#/$defs/types/object_null",
+                                        "properties": {
+                                            "lock_factory": {
+                                                "$ref": "#/$defs/types/scalar",
+                                                "default": "auto",
+                                                "description": "The service ID of the lock factory to use with the RateLimiterBuilder."
+                                            },
+                                            "cache_pool": {
+                                                "$ref": "#/$defs/types/scalar",
+                                                "default": "cache.rate_limiter",
+                                                "description": "The cache pool to use with RateLimiterBuilder."
+                                            },
+                                            "storage_service": {
+                                                "$ref": "#/$defs/types/scalar",
+                                                "default": null,
+                                                "description": "The service ID of a custom storage implementation, this precedes any configured \"cache_pool\"."
+                                            }
+                                        },
+                                        "additionalProperties": false,
+                                        "default": {
+                                            "lock_factory": "auto",
+                                            "cache_pool": "cache.rate_limiter",
+                                            "storage_service": null
+                                        },
+                                        "description": "Configuration for the RateLimiterBuilder service."
+                                    },
                                     "limiters": {
                                         "$ref": "#/$defs/types/object_null",
                                         "additionalProperties": {
@@ -4235,9 +4190,17 @@
                                                 "limiters": {
                                                     "anyOf": [
                                                         {
-                                                            "$ref": "#/$defs/types/array_null",
-                                                            "items": {
-                                                                "$ref": "#/$defs/types/scalar"
+                                                            "$ref": "#/$defs/types/object_null",
+                                                            "additionalProperties": {
+                                                                "$ref": "#/$defs/types/object_null",
+                                                                "properties": {
+                                                                    "key": {
+                                                                        "$ref": "#/$defs/types/scalar",
+                                                                        "default": null,
+                                                                        "description": "The key to pass to this limiter, instead of the one passed to the compound limiter's create() method."
+                                                                    }
+                                                                },
+                                                                "additionalProperties": false
                                                             }
                                                         },
                                                         {
@@ -4246,7 +4209,7 @@
                                                             ]
                                                         }
                                                     ],
-                                                    "description": "The limiter names to use when using the \"compound\" policy."
+                                                    "description": "The limiters to use when using the \"compound\" policy."
                                                 },
                                                 "limit": {
                                                     "$ref": "#/$defs/types/integer",
@@ -4295,6 +4258,11 @@
                         ],
                         "default": {
                             "enabled": false,
+                            "builder": {
+                                "lock_factory": "auto",
+                                "cache_pool": "cache.rate_limiter",
+                                "storage_service": null
+                            },
                             "limiters": []
                         },
                         "description": "Rate limiter configuration"
@@ -4422,20 +4390,10 @@
                                                     "description": "Allows all static elements and attributes from the W3C Sanitizer API standard."
                                                 },
                                                 "allow_elements": {
-                                                    "anyOf": [
-                                                        {
-                                                            "$ref": "#/$defs/types/object_null",
-                                                            "additionalProperties": {
-                                                                "$ref": "#/$defs/types/variable"
-                                                            }
-                                                        },
-                                                        {
-                                                            "$ref": "#/$defs/types/array_null",
-                                                            "items": {
-                                                                "$ref": "#/$defs/types/variable"
-                                                            }
-                                                        }
-                                                    ],
+                                                    "$ref": "#/$defs/types/object_null",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/$defs/types/variable"
+                                                    },
                                                     "description": "Configures the elements that the sanitizer should retain from the input. The element name is the key, the value is either a list of allowed attributes for this element or \"*\" to allow the default set of attributes (https://wicg.github.io/sanitizer-api/#default-configuration).",
                                                     "examples": [
                                                         {
@@ -4480,56 +4438,26 @@
                                                     "description": "Configures elements as dropped. Dropped elements are elements the sanitizer should remove from the input, including their children."
                                                 },
                                                 "allow_attributes": {
-                                                    "anyOf": [
-                                                        {
-                                                            "$ref": "#/$defs/types/object_null",
-                                                            "additionalProperties": {
-                                                                "$ref": "#/$defs/types/variable"
-                                                            }
-                                                        },
-                                                        {
-                                                            "$ref": "#/$defs/types/array_null",
-                                                            "items": {
-                                                                "$ref": "#/$defs/types/variable"
-                                                            }
-                                                        }
-                                                    ],
+                                                    "$ref": "#/$defs/types/object_null",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/$defs/types/variable"
+                                                    },
                                                     "description": "Configures attributes as allowed. Allowed attributes are attributes the sanitizer should retain from the input."
                                                 },
                                                 "drop_attributes": {
-                                                    "anyOf": [
-                                                        {
-                                                            "$ref": "#/$defs/types/object_null",
-                                                            "additionalProperties": {
-                                                                "$ref": "#/$defs/types/variable"
-                                                            }
-                                                        },
-                                                        {
-                                                            "$ref": "#/$defs/types/array_null",
-                                                            "items": {
-                                                                "$ref": "#/$defs/types/variable"
-                                                            }
-                                                        }
-                                                    ],
+                                                    "$ref": "#/$defs/types/object_null",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/$defs/types/variable"
+                                                    },
                                                     "description": "Configures attributes as dropped. Dropped attributes are attributes the sanitizer should remove from the input."
                                                 },
                                                 "force_attributes": {
                                                     "$ref": "#/$defs/types/object_null",
                                                     "additionalProperties": {
-                                                        "anyOf": [
-                                                            {
-                                                                "$ref": "#/$defs/types/object_null",
-                                                                "additionalProperties": {
-                                                                    "$ref": "#/$defs/types/string_null"
-                                                                }
-                                                            },
-                                                            {
-                                                                "$ref": "#/$defs/types/array_null",
-                                                                "items": {
-                                                                    "$ref": "#/$defs/types/string_null"
-                                                                }
-                                                            }
-                                                        ]
+                                                        "$ref": "#/$defs/types/object_null",
+                                                        "additionalProperties": {
+                                                            "$ref": "#/$defs/types/string_null"
+                                                        }
                                                     },
                                                     "description": "Forcefully set the values of certain attributes on certain elements."
                                                 },
@@ -4684,6 +4612,69 @@
                                         "default": "messenger.default_bus",
                                         "description": "The message bus to use."
                                     },
+                                    "http_client": {
+                                        "$ref": "#/$defs/types/scalar",
+                                        "default": "http_client",
+                                        "description": "The HTTP client to use to send webhooks."
+                                    },
+                                    "no_private_network": {
+                                        "anyOf": [
+                                            {
+                                                "$ref": "#/$defs/types/object_null",
+                                                "properties": {
+                                                    "enabled": {
+                                                        "$ref": "#/$defs/types/boolean",
+                                                        "default": false
+                                                    },
+                                                    "subnets": {
+                                                        "anyOf": [
+                                                            {
+                                                                "$ref": "#/$defs/types/array_null",
+                                                                "items": {
+                                                                    "$ref": "#/$defs/types/scalar"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": [
+                                                                    "string"
+                                                                ]
+                                                            }
+                                                        ],
+                                                        "default": null,
+                                                        "description": "Subnets in CIDR notation to consider private. Defaults to the standard private subnets."
+                                                    },
+                                                    "allow_list": {
+                                                        "anyOf": [
+                                                            {
+                                                                "$ref": "#/$defs/types/array_null",
+                                                                "items": {
+                                                                    "$ref": "#/$defs/types/scalar"
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": [
+                                                                    "string"
+                                                                ]
+                                                            }
+                                                        ],
+                                                        "description": "IPs or subnets in CIDR notation to send to even when they match the private subnets."
+                                                    }
+                                                },
+                                                "additionalProperties": false
+                                            },
+                                            {
+                                                "type": [
+                                                    "boolean"
+                                                ]
+                                            }
+                                        ],
+                                        "default": {
+                                            "enabled": false,
+                                            "subnets": null,
+                                            "allow_list": []
+                                        },
+                                        "description": "Refuse to send webhooks to URLs that resolve to a private network."
+                                    },
                                     "event_header_name": {
                                         "$ref": "#/$defs/types/scalar",
                                         "default": "Webhook-Event"
@@ -4736,7 +4727,8 @@
                                                 },
                                                 "secret": {
                                                     "$ref": "#/$defs/types/scalar",
-                                                    "default": ""
+                                                    "default": "",
+                                                    "description": "The secret used to verify incoming request signatures. It must be set in production: with an empty value, requests from any sender are accepted."
                                                 }
                                             },
                                             "required": [
@@ -4757,6 +4749,12 @@
                         "default": {
                             "enabled": false,
                             "message_bus": "messenger.default_bus",
+                            "http_client": "http_client",
+                            "no_private_network": {
+                                "enabled": false,
+                                "subnets": null,
+                                "allow_list": []
+                            },
                             "event_header_name": "Webhook-Event",
                             "id_header_name": "Webhook-Id",
                             "timestamp_header_name": "Webhook-Timestamp",
@@ -4768,7 +4766,7 @@
                         },
                         "description": "Webhook configuration"
                     },
-                    "remote-event": {
+                    "remote_event": {
                         "anyOf": [
                             {
                                 "$ref": "#/$defs/types/object_null",
@@ -5624,9 +5622,42 @@
                                             "$ref": "#/$defs/types/scalar",
                                             "description": "The OIDC client identifier."
                                         },
-                                        "client_secret": {
-                                            "$ref": "#/$defs/types/scalar",
-                                            "description": "The OIDC client secret."
+                                        "client_authentication": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/$defs/types/object_null",
+                                                    "properties": {
+                                                        "client_secret_basic": {
+                                                            "$ref": "#/$defs/types/scalar",
+                                                            "description": "Send the client secret as HTTP Basic credentials, the \"client_secret_basic\" method of RFC 6749, Section 2.3.1, which the RFC recommends. Takes the client secret."
+                                                        },
+                                                        "client_secret_post": {
+                                                            "$ref": "#/$defs/types/scalar",
+                                                            "description": "Send the client secret in the body of the token request, the \"client_secret_post\" method of RFC 6749, Section 2.3.1. Takes the client secret. Use it for the providers that support nothing else."
+                                                        },
+                                                        "none": {
+                                                            "$ref": "#/$defs/types/boolean",
+                                                            "description": "Declare a public client (a SPA, a mobile or a native application), which holds no secret and relies on PKCE to protect the code exchange. It can disable neither PKCE nor the ID token signature check."
+                                                        },
+                                                        "id": {
+                                                            "$ref": "#/$defs/types/scalar",
+                                                            "description": "The id of a service implementing \"ClientAuthenticationInterface\", for a scheme Symfony does not ship, such as the \"private_key_jwt\" of OIDC Core 1.0, Section 9. The method it reports is only known once it is built, so the rules a public client cannot bend are then checked on the first request to this firewall instead of while the container compiles."
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                },
+                                                {
+                                                    "type": [
+                                                        "string"
+                                                    ]
+                                                }
+                                            ],
+                                            "description": "How the client authenticates at the token endpoint, which RFC 7591, Section 2 names in its \"token_endpoint_auth_method\" metadata. Set the method Symfony ships with its parameters, or the id of a service implementing \"Symfony\\Component\\Security\\Http\\OAuth2\\ClientAuthentication\\ClientAuthenticationInterface\" for a scheme it does not. Exactly one of them.",
+                                            "examples": [
+                                                {
+                                                    "client_secret_basic": "%env(OIDC_CLIENT_SECRET)%"
+                                                }
+                                            ]
                                         },
                                         "scope": {
                                             "$ref": "#/$defs/types/array_null",
@@ -5638,23 +5669,164 @@
                                             ],
                                             "description": "The scopes of the authorization request, as a list or as a space-separated string. \"openid\" is always requested, as OIDC requires it; add e.g. \"profile\" or \"email\" to get the matching claims from the UserInfo endpoint, and map them onto your own user with a user provider."
                                         },
+                                        "start_path": {
+                                            "$ref": "#/$defs/types/scalar",
+                                            "default": "/oidc/start",
+                                            "description": "The path where the route loader declares a route that starts the flow by redirecting to the provider; link to it e.g. from the login page of a firewall offering several ways to log in. A route name is accepted too, in which case no route is declared for it."
+                                        },
                                         "discovery_cache_ttl": {
                                             "$ref": "#/$defs/types/integer",
                                             "minimum": 0,
                                             "default": 3600,
-                                            "description": "TTL in seconds for caching the OIDC discovery configuration."
+                                            "description": "TTL in seconds for caching the OIDC discovery configuration, and for the provider JWKS when it advertises no cache lifetime itself."
                                         },
                                         "allowed_time_drift": {
                                             "$ref": "#/$defs/types/integer",
                                             "minimum": 0,
                                             "default": 0,
                                             "description": "Allowed clock skew in seconds when validating ID token time claims."
+                                        },
+                                        "user_data_source": {
+                                            "anyOf": [
+                                                {
+                                                    "enum": [
+                                                        "userinfo",
+                                                        "id_token"
+                                                    ]
+                                                },
+                                                {
+                                                    "$ref": "#/$defs/types/param"
+                                                }
+                                            ],
+                                            "default": "userinfo",
+                                            "description": "Where the user claims are read from: \"userinfo\" (default) fetches them from the UserInfo endpoint; \"id_token\" reads them from the validated ID token instead, for providers that put the requested claims there, some of which expose no UserInfo endpoint at all, which is then not required to be announced."
+                                        },
+                                        "user_identifier_claim": {
+                                            "$ref": "#/$defs/types/scalar",
+                                            "default": "sub",
+                                            "description": "The claim the user identifier is read from. \"sub\" (default) is the only claim OIDC guarantees stable and unique for the user. Only pick another claim, e.g. \"email\", when the provider guarantees its value unique, verified and stable too: whoever controls the value of that claim at the provider owns the matching account here."
+                                        },
+                                        "id_token_signature": {
+                                            "$ref": "#/$defs/types/object_null",
+                                            "properties": {
+                                                "required": {
+                                                    "$ref": "#/$defs/types/boolean",
+                                                    "default": true,
+                                                    "description": "When true (default), the ID token signature is verified against the provider JWKS. Setting it to false decodes the ID token without verifying it, which OIDC Core 1.0, Section 3.1.3.7, item 6 only allows because the token comes from the token endpoint over TLS: it is then only as safe as the TLS verification of the HTTP client used for that request, so never turn it off with a client configured with \"verify_peer: false\" or \"verify_host: false\", nor behind a TLS-terminating proxy. A public client, whose \"client_authentication\" reports the \"none\" method, cannot turn it off at all."
+                                                },
+                                                "algorithms": {
+                                                    "$ref": "#/$defs/types/array_null",
+                                                    "items": {
+                                                        "$ref": "#/$defs/types/scalar"
+                                                    },
+                                                    "minItems": 1,
+                                                    "default": [
+                                                        "RS256"
+                                                    ],
+                                                    "description": "The signature algorithms the ID token is accepted to be signed with, among \"RS256\", \"RS384\", \"RS512\", \"ES256\", \"ES384\", \"ES512\", \"PS256\", \"PS384\" and \"PS512\". Defaults to \"RS256\", the only algorithm OIDC Core 1.0 requires providers to support; list the one your provider announces in \"id_token_signing_alg_values_supported\" when it signs with another. No HMAC algorithm is accepted, so that a public key can never be used as a shared secret."
+                                                },
+                                                "enforce_key_usage_verification": {
+                                                    "$ref": "#/$defs/types/boolean",
+                                                    "default": true,
+                                                    "description": "When enabled (default), only keys explicitly designated for signature (via \"use\":\"sig\" or a \"key_ops\" entry containing \"sign\"/\"verify\") are accepted. When disabled, keys without any usage designation are also accepted; keys explicitly restricted to encryption are still rejected."
+                                                }
+                                            },
+                                            "additionalProperties": false,
+                                            "default": {
+                                                "required": true,
+                                                "algorithms": [
+                                                    "RS256"
+                                                ],
+                                                "enforce_key_usage_verification": true
+                                            }
+                                        },
+                                        "pkce": {
+                                            "$ref": "#/$defs/types/object_null",
+                                            "properties": {
+                                                "enabled": {
+                                                    "$ref": "#/$defs/types/boolean",
+                                                    "default": true,
+                                                    "description": "Whether to use PKCE (Proof Key for Code Exchange, RFC 7636), which any current provider should support; only disable it for one that rejects the \"code_challenge\" parameter. A public client, whose \"client_authentication\" reports the \"none\" method, cannot disable it at all."
+                                                },
+                                                "method": {
+                                                    "anyOf": [
+                                                        {
+                                                            "enum": [
+                                                                "S256",
+                                                                "plain"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "$ref": "#/$defs/types/param"
+                                                        }
+                                                    ],
+                                                    "default": "S256",
+                                                    "description": "The PKCE code challenge method. RFC 7636, Section 4.2 mandates \"S256\" for every client able to compute it, so only ever pick \"plain\" for a provider that supports nothing else."
+                                                }
+                                            },
+                                            "additionalProperties": false,
+                                            "default": {
+                                                "enabled": true,
+                                                "method": "S256"
+                                            }
+                                        },
+                                        "max_age": {
+                                            "$ref": "#/$defs/types/integer",
+                                            "minimum": 0,
+                                            "description": "Maximum elapsed seconds since the end-user authentication, sent as the \"max_age\" authorization parameter; the ID token must then carry an \"auth_time\" claim, which is checked against this value, \"allowed_time_drift\" included."
+                                        },
+                                        "authorization_params": {
+                                            "$ref": "#/$defs/types/object_null",
+                                            "additionalProperties": {
+                                                "$ref": "#/$defs/types/scalar"
+                                            },
+                                            "description": "Additional parameters of the authorization request (e.g. \"prompt\", \"display\", \"ui_locales\", \"acr_values\", \"login_hint\")."
+                                        },
+                                        "refresh_access_token": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/$defs/types/object_null",
+                                                    "properties": {
+                                                        "enabled": {
+                                                            "$ref": "#/$defs/types/boolean",
+                                                            "default": false
+                                                        },
+                                                        "leeway": {
+                                                            "$ref": "#/$defs/types/integer",
+                                                            "minimum": 0,
+                                                            "default": 30,
+                                                            "description": "How many seconds before its expiry the access token is renewed, so that one handed to a call in flight does not expire on the way."
+                                                        }
+                                                    },
+                                                    "additionalProperties": false
+                                                },
+                                                {
+                                                    "type": [
+                                                        "boolean"
+                                                    ]
+                                                }
+                                            ],
+                                            "default": {
+                                                "enabled": false,
+                                                "leeway": 30
+                                            },
+                                            "description": "Renew the access token with the refresh token grant of RFC 6749, Section 6, so that it stays usable to call an API on behalf of the logged-in user. The provider only issues a refresh token when it was asked for one, e.g. with the \"offline_access\" scope, and the renewal needs the \"expires_in\" it is optional for the provider to report. Whether this is enabled or not, the tokens are held as the \"oidc_refresh_token\", \"oidc_access_token\" and \"oidc_access_token_expires_at\" attributes of the security token, and the \"security.authenticator.oidc_login.token_refresher.<firewall>\" service renews them on demand. A provider rotating refresh tokens expects the previous one never to be replayed, which a session handler locking the session guarantees, and the default one does."
+                                        },
+                                        "enable_end_session": {
+                                            "$ref": "#/$defs/types/boolean",
+                                            "default": false,
+                                            "description": "Enable RP-Initiated Logout via the OIDC end_session_endpoint."
+                                        },
+                                        "post_logout_redirect_path": {
+                                            "$ref": "#/$defs/types/scalar",
+                                            "default": "/",
+                                            "description": "Path or route to redirect to after OIDC logout."
                                         }
                                     },
                                     "required": [
                                         "provider_uri",
                                         "client_id",
-                                        "client_secret"
+                                        "client_authentication"
                                     ],
                                     "additionalProperties": false
                                 },
@@ -6134,7 +6306,11 @@
                                                                     "items": {
                                                                         "$ref": "#/$defs/types/scalar"
                                                                     },
-                                                                    "description": "Algorithms used to sign the token."
+                                                                    "minItems": 1,
+                                                                    "default": [
+                                                                        "RS256"
+                                                                    ],
+                                                                    "description": "The signature algorithms the token is accepted to be signed with, among \"RS256\", \"RS384\", \"RS512\", \"ES256\", \"ES384\", \"ES512\", \"PS256\", \"PS384\" and \"PS512\". Defaults to \"RS256\", the only algorithm OIDC Core 1.0 requires providers to support; list the one your provider announces in \"id_token_signing_alg_values_supported\" when it signs with another. Another algorithm is accepted once its service is tagged \"security.access_token_handler.oidc.signature_algorithm\". No HMAC algorithm is tagged, so that a public key can never be used as a shared secret."
                                                                 },
                                                                 "keyset": {
                                                                     "$ref": "#/$defs/types/scalar",
@@ -6190,12 +6366,16 @@
                                                                     "minimum": 0,
                                                                     "default": 0,
                                                                     "description": "Allowed time drift in seconds for token validation (iat, nbf, exp claims)."
+                                                                },
+                                                                "enforce_at_jwt_type": {
+                                                                    "$ref": "#/$defs/types/boolean_null",
+                                                                    "default": null,
+                                                                    "description": "When enabled, the \"typ\" header of the token must be \"at+jwt\" or \"application/at+jwt\", as RFC 9068 requires from a JWT access token. This rejects the ID tokens issued for the same audience. Disable it only for providers that do not follow the profile. Defaults to false in 8.2 and to true as of 9.0."
                                                                 }
                                                             },
                                                             "required": [
                                                                 "audience",
-                                                                "issuers",
-                                                                "algorithms"
+                                                                "issuers"
                                                             ],
                                                             "additionalProperties": false
                                                         },
@@ -6223,7 +6403,170 @@
                                                             "additionalProperties": false
                                                         },
                                                         "oauth2": {
-                                                            "$ref": "#/$defs/types/scalar"
+                                                            "anyOf": [
+                                                                {
+                                                                    "$ref": "#/$defs/types/object_null",
+                                                                    "properties": {
+                                                                        "http_client": {
+                                                                            "$ref": "#/$defs/types/scalar",
+                                                                            "description": "HttpClient service id the introspection endpoint is called with. Declare it as a scoped client whose \"base_uri\" is the introspection endpoint of your authorization server and whose \"auth_basic\" holds the credentials it authenticates with. Those are sent as given, where the \"client_secret_basic\" of RFC 6749 §2.3.1 form-urlencodes both halves, so encode a client id or a secret holding a colon, a plus or a space yourself."
+                                                                        },
+                                                                        "audience": {
+                                                                            "anyOf": [
+                                                                                {
+                                                                                    "$ref": "#/$defs/types/array_null",
+                                                                                    "items": {
+                                                                                        "$ref": "#/$defs/types/scalar"
+                                                                                    }
+                                                                                },
+                                                                                {
+                                                                                    "type": [
+                                                                                        "string"
+                                                                                    ]
+                                                                                }
+                                                                            ],
+                                                                            "description": "Identifiers of this resource server, one of which the \"aud\" of the introspection response must name. A single identifier may be given as a string."
+                                                                        },
+                                                                        "issuer": {
+                                                                            "$ref": "#/$defs/types/scalar",
+                                                                            "default": null,
+                                                                            "description": "Identifier of the authorization server, checked against the \"iss\" of the introspection response."
+                                                                        },
+                                                                        "claim": {
+                                                                            "$ref": "#/$defs/types/scalar",
+                                                                            "default": null,
+                                                                            "description": "Claim which contains the user identifier (e.g.: sub, username, email...). Defaults to \"sub\", falling back to \"username\"."
+                                                                        },
+                                                                        "allowed_time_drift": {
+                                                                            "$ref": "#/$defs/types/integer",
+                                                                            "minimum": 0,
+                                                                            "default": 0,
+                                                                            "description": "Allowed time drift in seconds when validating the \"iat\", \"nbf\" and \"exp\" of the introspection response."
+                                                                        },
+                                                                        "cache": {
+                                                                            "$ref": "#/$defs/types/object_null",
+                                                                            "properties": {
+                                                                                "id": {
+                                                                                    "$ref": "#/$defs/types/scalar",
+                                                                                    "description": "Cache service id to use to cache the introspection responses."
+                                                                                },
+                                                                                "ttl": {
+                                                                                    "$ref": "#/$defs/types/integer",
+                                                                                    "minimum": 1,
+                                                                                    "default": 60,
+                                                                                    "description": "Maximum lifetime in seconds of a cached introspection response. The shorter it is, the sooner a revoked token stops being accepted."
+                                                                                }
+                                                                            },
+                                                                            "required": [
+                                                                                "id"
+                                                                            ],
+                                                                            "additionalProperties": false,
+                                                                            "description": "Cache the introspection responses of active tokens, never beyond their \"exp\"."
+                                                                        },
+                                                                        "response_signature": {
+                                                                            "anyOf": [
+                                                                                {
+                                                                                    "$ref": "#/$defs/types/object_null",
+                                                                                    "properties": {
+                                                                                        "enabled": {
+                                                                                            "$ref": "#/$defs/types/boolean",
+                                                                                            "default": false
+                                                                                        },
+                                                                                        "enforce": {
+                                                                                            "$ref": "#/$defs/types/boolean",
+                                                                                            "default": true,
+                                                                                            "description": "When enabled (default), a plain JSON introspection response is refused."
+                                                                                        },
+                                                                                        "algorithms": {
+                                                                                            "$ref": "#/$defs/types/array_null",
+                                                                                            "items": {
+                                                                                                "$ref": "#/$defs/types/scalar"
+                                                                                            },
+                                                                                            "minItems": 1,
+                                                                                            "default": [
+                                                                                                "RS256"
+                                                                                            ],
+                                                                                            "description": "The signature algorithms the introspection response is accepted to be signed with, among \"RS256\", \"RS384\", \"RS512\", \"ES256\", \"ES384\", \"ES512\", \"PS256\", \"PS384\" and \"PS512\". Defaults to \"RS256\", which nearly every authorization server signs with; list the ones yours announces in \"introspection_signing_alg_values_supported\" when it signs with another. Another algorithm is accepted once its service is tagged \"security.access_token_handler.oidc.signature_algorithm\". No HMAC algorithm is tagged, so that a public key can never be used as a shared secret."
+                                                                                        },
+                                                                                        "discovery": {
+                                                                                            "anyOf": [
+                                                                                                {
+                                                                                                    "$ref": "#/$defs/types/object_null",
+                                                                                                    "properties": {
+                                                                                                        "enabled": {
+                                                                                                            "$ref": "#/$defs/types/boolean",
+                                                                                                            "default": false
+                                                                                                        },
+                                                                                                        "cache": {
+                                                                                                            "$ref": "#/$defs/types/object_null",
+                                                                                                            "properties": {
+                                                                                                                "id": {
+                                                                                                                    "$ref": "#/$defs/types/scalar",
+                                                                                                                    "default": "cache.app",
+                                                                                                                    "description": "Cache service id the metadata document and the keys it points at are stored in."
+                                                                                                                }
+                                                                                                            },
+                                                                                                            "additionalProperties": false,
+                                                                                                            "default": {
+                                                                                                                "id": "cache.app"
+                                                                                                            }
+                                                                                                        }
+                                                                                                    },
+                                                                                                    "additionalProperties": false
+                                                                                                },
+                                                                                                {
+                                                                                                    "type": [
+                                                                                                        "boolean"
+                                                                                                    ]
+                                                                                                }
+                                                                                            ],
+                                                                                            "default": {
+                                                                                                "enabled": false,
+                                                                                                "cache": {
+                                                                                                    "id": "cache.app"
+                                                                                                }
+                                                                                            },
+                                                                                            "description": "Read the keys the introspection response is verified against from the RFC 8414 metadata of the authorization server, whose URL is derived from the \"issuer\" this handler already declares. Only the \"jwks_uri\" is read from it: which algorithms are accepted stays declared here, so that an authorization server cannot widen it by announcing more."
+                                                                                        },
+                                                                                        "keyset": {
+                                                                                            "$ref": "#/$defs/types/scalar",
+                                                                                            "default": null,
+                                                                                            "description": "JSON-encoded JWKSet holding the public keys of your authorization server, the ones it announces at its \"jwks_uri\", which the introspection response is verified against."
+                                                                                        }
+                                                                                    },
+                                                                                    "additionalProperties": false
+                                                                                },
+                                                                                {
+                                                                                    "type": [
+                                                                                        "boolean"
+                                                                                    ]
+                                                                                }
+                                                                            ],
+                                                                            "default": {
+                                                                                "enabled": false,
+                                                                                "enforce": true,
+                                                                                "algorithms": [
+                                                                                    "RS256"
+                                                                                ],
+                                                                                "discovery": {
+                                                                                    "enabled": false,
+                                                                                    "cache": {
+                                                                                        "id": "cache.app"
+                                                                                    }
+                                                                                },
+                                                                                "keyset": null
+                                                                            },
+                                                                            "description": "Ask the authorization server for a signed introspection response (RFC 9701) and verify it."
+                                                                        }
+                                                                    },
+                                                                    "additionalProperties": false
+                                                                },
+                                                                {
+                                                                    "type": [
+                                                                        "string"
+                                                                    ]
+                                                                }
+                                                            ]
                                                         }
                                                     },
                                                     "additionalProperties": false
@@ -6239,6 +6582,102 @@
                                                     "id": "App\\Security\\CustomTokenHandler"
                                                 }
                                             ]
+                                        },
+                                        "resource_metadata": {
+                                            "$ref": "#/$defs/types/object_null",
+                                            "properties": {
+                                                "resource": {
+                                                    "$ref": "#/$defs/types/scalar",
+                                                    "default": null,
+                                                    "description": "The resource identifier of this firewall: an HTTPS URL, without a fragment (e.g. \"https://api.example.com\" or \"https://example.com/api\"). Its path component is inserted after the well-known path, as RFC 9728, Section 3.1 prescribes, so that one host can serve the metadata of several protected resources. Defaults to the origin the document is served from, which is what a firewall covering a whole application wants."
+                                                },
+                                                "authorization_servers": {
+                                                    "anyOf": [
+                                                        {
+                                                            "$ref": "#/$defs/types/array_null",
+                                                            "items": {
+                                                                "$ref": "#/$defs/types/scalar"
+                                                            }
+                                                        },
+                                                        {
+                                                            "type": [
+                                                                "string"
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "description": "The issuer identifiers of the authorization servers issuing the access tokens this firewall accepts (e.g. \"https://accounts.example.com\"). This is what tells a client holding no token where to go and get one."
+                                                },
+                                                "jwks_uri": {
+                                                    "$ref": "#/$defs/types/scalar",
+                                                    "default": null,
+                                                    "description": "URL of the JWK Set holding the keys this resource signs its own responses with. Unrelated to the keys the access tokens are verified against, which belong to the authorization server."
+                                                },
+                                                "scopes_supported": {
+                                                    "anyOf": [
+                                                        {
+                                                            "$ref": "#/$defs/types/array_null",
+                                                            "items": {
+                                                                "$ref": "#/$defs/types/scalar"
+                                                            }
+                                                        },
+                                                        {
+                                                            "type": [
+                                                                "string"
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "description": "The scope values this resource uses, one entry per scope."
+                                                },
+                                                "bearer_methods_supported": {
+                                                    "anyOf": [
+                                                        {
+                                                            "$ref": "#/$defs/types/array_null",
+                                                            "items": {
+                                                                "anyOf": [
+                                                                    {
+                                                                        "enum": [
+                                                                            "header",
+                                                                            "body",
+                                                                            "query"
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        "$ref": "#/$defs/types/param"
+                                                                    }
+                                                                ]
+                                                            }
+                                                        },
+                                                        {
+                                                            "type": [
+                                                                "string"
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "description": "The ways this resource accepts to be handed a bearer token, among \"header\", \"body\" and \"query\" (RFC 6750, Sections 2.1 to 2.3). Deduced from \"token_extractors\" when left empty; set it explicitly when a custom extractor makes that deduction incomplete."
+                                                },
+                                                "resource_name": {
+                                                    "$ref": "#/$defs/types/scalar",
+                                                    "default": null,
+                                                    "description": "Human-readable name of this resource, meant to be displayed to the end user."
+                                                },
+                                                "resource_documentation": {
+                                                    "$ref": "#/$defs/types/scalar",
+                                                    "default": null,
+                                                    "description": "URL of the developer documentation of this resource."
+                                                },
+                                                "resource_policy_uri": {
+                                                    "$ref": "#/$defs/types/scalar",
+                                                    "default": null,
+                                                    "description": "URL of the policy telling how the client may use the data this resource exposes."
+                                                },
+                                                "resource_tos_uri": {
+                                                    "$ref": "#/$defs/types/scalar",
+                                                    "default": null,
+                                                    "description": "URL of the terms of service of this resource."
+                                                }
+                                            },
+                                            "additionalProperties": false,
+                                            "description": "Declaring this node serves the RFC 9728 protected resource metadata document of the firewall at \"/.well-known/oauth-protected-resource\" and advertises its URL in the \"resource_metadata\" parameter of the \"WWW-Authenticate\" header, which is how a client discovers where to get a token this firewall accepts. The route is declared by the \"security.authenticator.access_token.route_loader\" service, which the application must import as it does for the logout routes; make sure it is reachable without a token."
                                         }
                                     },
                                     "required": [
@@ -6501,20 +6940,10 @@
                                     ]
                                 },
                                 "attributes": {
-                                    "anyOf": [
-                                        {
-                                            "$ref": "#/$defs/types/object_null",
-                                            "additionalProperties": {
-                                                "$ref": "#/$defs/types/scalar"
-                                            }
-                                        },
-                                        {
-                                            "$ref": "#/$defs/types/array_null",
-                                            "items": {
-                                                "$ref": "#/$defs/types/scalar"
-                                            }
-                                        }
-                                    ]
+                                    "$ref": "#/$defs/types/object_null",
+                                    "additionalProperties": {
+                                        "$ref": "#/$defs/types/scalar"
+                                    }
                                 },
                                 "route": {
                                     "$ref": "#/$defs/types/scalar",
@@ -7042,7 +7471,7 @@
     },
     "patternProperties": {
         "^when@[a-zA-Z0-9]+$": {
-            "type": "object",
+            "$ref": "#/$defs/types/object_null",
             "properties": {
                 "framework": {
                     "$ref": "#/$defs/nodes/framework"

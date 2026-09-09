@@ -16,7 +16,7 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
  */
 final class FakeCloudPicsId
 {
-    public const ISSUER = 'http://localhost:8080/realms/photos';
+    public const ISSUER = 'https://localhost:8443/realms/photos';
     public const JWKS_URI = self::ISSUER.'/protocol/openid-connect/certs';
 
     public function __invoke(string $method, string $url, array $options = []): ResponseInterface

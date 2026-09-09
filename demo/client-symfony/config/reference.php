@@ -51,6 +51,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     shared?: bool,
  *     lazy?: bool|string,
  *     public?: bool,
+ *     factory?: CallbackType,
  *     properties?: array<string, mixed>,
  *     configurator?: CallbackType,
  *     calls?: list<CallType>,
@@ -167,6 +168,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         debug?: bool|Param, // Default: "%kernel.debug%"
  *         trace_level?: "none"|"short"|"full"|Param,
  *         trace_header?: scalar|Param|null,
+ *         cache_status?: scalar|Param|null, // Enables the RFC 9211 "Cache-Status" response header and names this cache in it, e.g. "Symfony". No header is added when null.
  *         default_ttl?: int|Param,
  *         private_headers?: list<scalar|Param|null>,
  *         skip_response_headers?: list<scalar|Param|null>,
@@ -196,6 +198,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         collect_parameter?: scalar|Param|null, // The name of the parameter to use to enable or disable collection on a per request basis. // Default: null
  *         only_exceptions?: bool|Param, // Default: false
  *         only_main_requests?: bool|Param, // Default: false
+ *         excluded_paths?: Param|string|list<scalar|Param|null>,
+ *         excluded_http_codes?: Param|int|string|list<Param|string|list<scalar|Param|null>>,
  *         dsn?: scalar|Param|null, // Default: "file:%kernel.cache_dir%/profiler"
  *         collect_serializer_data?: true|Param, // Deprecated: Setting the "framework.profiler.collect_serializer_data.collect_serializer_data" configuration option is deprecated. It will be removed in version 9.0. // Default: true
  *     },
@@ -299,6 +303,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         extensions?: array<string, scalar|Param|null>,
  *         importmap_path?: scalar|Param|null, // The path of the importmap.php file. // Default: "%kernel.project_dir%/importmap.php"
  *         importmap_polyfill?: scalar|Param|null, // The importmap name that will be used to load the polyfill. Set to false to disable. // Default: "es-module-shims"
+ *         importmap_entries?: "all"|"reachable"|Param, // Which entries end up in the rendered importmap: "all" of them, or only the ones "reachable" from the rendered entrypoints (their eager and lazy import chains) plus the polyfill. // Default: "all"
  *         importmap_script_attributes?: array<string, scalar|Param|null>,
  *         importmap_integrity_algorithms?: list<"sha256"|"sha384"|"sha512"|Param>,
  *         vendor_dir?: scalar|Param|null, // The directory to store JavaScript vendors. // Default: "%kernel.project_dir%/assets/vendor"
@@ -380,6 +385,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         magic_set?: bool|Param, // Default: true
  *         throw_exception_on_invalid_index?: bool|Param, // Default: false
  *         throw_exception_on_invalid_property_path?: bool|Param, // Default: true
+ *         wildcard_reads?: bool|Param, // Enables reading every element of a collection through a "[*]" wildcard. // Default: false
  *     },
  *     type_info?: bool|array{ // Type info configuration
  *         enabled?: bool|Param, // Default: true
@@ -401,6 +407,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         default_memcached_provider?: scalar|Param|null, // Default: "memcached://localhost"
  *         default_doctrine_dbal_provider?: scalar|Param|null, // Default: "database_connection"
  *         default_pdo_provider?: scalar|Param|null, // Default: null
+ *         default_mongodb_provider?: scalar|Param|null, // Default: "mongodb://localhost/app"
  *         pools?: array<string, array{ // Default: []
  *             adapters?: Param|string|list<scalar|Param|null>,
  *             tags?: scalar|Param|null, // Default: null
@@ -445,6 +452,10 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         transports?: array<string, Param|string|array{ // Default: []
  *             dsn?: scalar|Param|null,
  *             serializer?: scalar|Param|null, // Service id of a custom serializer to use. // Default: null
+ *             claim_check?: array{
+ *                 cache_pool?: scalar|Param|null, // Service id of the dedicated cache pool used to store claims. Pools declared under "framework.cache.pools" must define a "default_lifetime".
+ *                 max_size?: int|Param, // Maximum encoded message size in bytes before using a claim check.
+ *             },
  *             options?: array<string, mixed>,
  *             failure_transport?: scalar|Param|null, // Transport name to send failed messages to (after all retries have failed). // Default: null
  *             retry_strategy?: Param|string|array{
@@ -603,6 +614,10 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         headers?: array<string, Param|string|array{ // Default: []
  *             value?: mixed,
  *         }>,
+ *         tracking?: array{ // Default open/click tracking for every message that does not carry an explicit "X-Track" header; null keeps each provider's default. An "X-Track" entry in the "headers" option wins over this one.
+ *             opens?: true|false|Param|null, // Default: null
+ *             clicks?: true|false|Param|null, // Default: null
+ *         },
  *         dkim_signer?: bool|array{ // DKIM signer configuration
  *             enabled?: bool|Param, // Default: false
  *             key?: scalar|Param|null, // Key content, or path to key (in PEM format with the `file://` prefix) // Default: ""
@@ -667,12 +682,19 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     },
  *     rate_limiter?: bool|array{ // Rate limiter configuration
  *         enabled?: bool|Param, // Default: false
+ *         builder?: array{ // Configuration for the RateLimiterBuilder service.
+ *             lock_factory?: scalar|Param|null, // The service ID of the lock factory to use with the RateLimiterBuilder. // Default: "auto"
+ *             cache_pool?: scalar|Param|null, // The cache pool to use with RateLimiterBuilder. // Default: "cache.rate_limiter"
+ *             storage_service?: scalar|Param|null, // The service ID of a custom storage implementation, this precedes any configured "cache_pool". // Default: null
+ *         },
  *         limiters?: array<string, array{ // Default: []
  *             lock_factory?: scalar|Param|null, // The service ID of the lock factory used by this limiter (or null to disable locking). // Default: "auto"
  *             cache_pool?: scalar|Param|null, // The cache pool to use for storing the current limiter state. // Default: "cache.rate_limiter"
  *             storage_service?: scalar|Param|null, // The service ID of a custom storage implementation, this precedes any configured "cache_pool". // Default: null
  *             policy?: "fixed_window"|"token_bucket"|"sliding_window"|"compound"|"no_limit"|Param, // The algorithm to be used by this limiter.
- *             limiters?: Param|string|list<scalar|Param|null>,
+ *             limiters?: Param|string|array<string, array{ // Default: []
+ *                 key?: scalar|Param|null, // The key to pass to this limiter, instead of the one passed to the compound limiter's create() method. // Default: null
+ *             }>,
  *             limit?: int|Param, // The maximum allowed hits in a fixed interval or burst.
  *             interval?: scalar|Param|null, // Configures the fixed interval if "policy" is set to "fixed_window" or "sliding_window". The value must be a number followed by "second", "minute", "hour", "day", "week" or "month" (or their plural equivalent).
  *             rate?: array{ // Configures the fill rate if "policy" is set to "token_bucket".
@@ -718,6 +740,12 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     webhook?: bool|array{ // Webhook configuration
  *         enabled?: bool|Param, // Default: false
  *         message_bus?: scalar|Param|null, // The message bus to use. // Default: "messenger.default_bus"
+ *         http_client?: scalar|Param|null, // The HTTP client to use to send webhooks. // Default: "http_client"
+ *         no_private_network?: bool|array{ // Refuse to send webhooks to URLs that resolve to a private network.
+ *             enabled?: bool|Param, // Default: false
+ *             subnets?: Param|null|string|list<scalar|Param|null>,
+ *             allow_list?: Param|string|list<scalar|Param|null>,
+ *         },
  *         event_header_name?: scalar|Param|null, // Default: "Webhook-Event"
  *         id_header_name?: scalar|Param|null, // Default: "Webhook-Id"
  *         timestamp_header_name?: scalar|Param|null, // Default: "Webhook-Timestamp"
@@ -727,10 +755,10 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         timestamp_tolerance?: int|Param, // How far, in seconds, an incoming Standard Webhooks timestamp may be from the current time before the request is rejected as a replay. Set to 0 to accept any timestamp. Legacy signatures carry no timestamp and are never bounded. // Default: 300
  *         routing?: array<string, array{ // Default: []
  *             service?: scalar|Param|null,
- *             secret?: scalar|Param|null, // Default: ""
+ *             secret?: scalar|Param|null, // The secret used to verify incoming request signatures. It must be set in production: with an empty value, requests from any sender are accepted. // Default: ""
  *         }>,
  *     },
- *     remote-event?: bool|array{ // RemoteEvent configuration
+ *     remote_event?: bool|array{ // RemoteEvent configuration
  *         enabled?: bool|Param, // Default: false
  *     },
  *     json_streamer?: bool|array{ // JSON streamer configuration
@@ -893,10 +921,35 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             failure_path_parameter?: scalar|Param|null, // Default: "_failure_path"
  *             provider_uri?: scalar|Param|null, // The OIDC Issuer URL (e.g. "https://accounts.example.com"). Used for .well-known/openid-configuration discovery.
  *             client_id?: scalar|Param|null, // The OIDC client identifier.
- *             client_secret?: scalar|Param|null, // The OIDC client secret.
+ *             client_authentication?: Param|string|array{ // How the client authenticates at the token endpoint, which RFC 7591, Section 2 names in its "token_endpoint_auth_method" metadata. Set the method Symfony ships with its parameters, or the id of a service implementing "Symfony\Component\Security\Http\OAuth2\ClientAuthentication\ClientAuthenticationInterface" for a scheme it does not. Exactly one of them.
+ *                 client_secret_basic?: scalar|Param|null, // Send the client secret as HTTP Basic credentials, the "client_secret_basic" method of RFC 6749, Section 2.3.1, which the RFC recommends. Takes the client secret.
+ *                 client_secret_post?: scalar|Param|null, // Send the client secret in the body of the token request, the "client_secret_post" method of RFC 6749, Section 2.3.1. Takes the client secret. Use it for the providers that support nothing else.
+ *                 none?: bool|Param, // Declare a public client (a SPA, a mobile or a native application), which holds no secret and relies on PKCE to protect the code exchange. It can disable neither PKCE nor the ID token signature check.
+ *                 id?: scalar|Param|null, // The id of a service implementing "ClientAuthenticationInterface", for a scheme Symfony does not ship, such as the "private_key_jwt" of OIDC Core 1.0, Section 9. The method it reports is only known once it is built, so the rules a public client cannot bend are then checked on the first request to this firewall instead of while the container compiles.
+ *             },
  *             scope?: list<scalar|Param|null>,
- *             discovery_cache_ttl?: int|Param, // TTL in seconds for caching the OIDC discovery configuration. // Default: 3600
+ *             start_path?: scalar|Param|null, // The path where the route loader declares a route that starts the flow by redirecting to the provider; link to it e.g. from the login page of a firewall offering several ways to log in. A route name is accepted too, in which case no route is declared for it. // Default: "/oidc/start"
+ *             discovery_cache_ttl?: int|Param, // TTL in seconds for caching the OIDC discovery configuration, and for the provider JWKS when it advertises no cache lifetime itself. // Default: 3600
  *             allowed_time_drift?: int|Param, // Allowed clock skew in seconds when validating ID token time claims. // Default: 0
+ *             user_data_source?: "userinfo"|"id_token"|Param, // Where the user claims are read from: "userinfo" (default) fetches them from the UserInfo endpoint; "id_token" reads them from the validated ID token instead, for providers that put the requested claims there, some of which expose no UserInfo endpoint at all, which is then not required to be announced. // Default: "userinfo"
+ *             user_identifier_claim?: scalar|Param|null, // The claim the user identifier is read from. "sub" (default) is the only claim OIDC guarantees stable and unique for the user. Only pick another claim, e.g. "email", when the provider guarantees its value unique, verified and stable too: whoever controls the value of that claim at the provider owns the matching account here. // Default: "sub"
+ *             id_token_signature?: array{
+ *                 required?: bool|Param, // When true (default), the ID token signature is verified against the provider JWKS. Setting it to false decodes the ID token without verifying it, which OIDC Core 1.0, Section 3.1.3.7, item 6 only allows because the token comes from the token endpoint over TLS: it is then only as safe as the TLS verification of the HTTP client used for that request, so never turn it off with a client configured with "verify_peer: false" or "verify_host: false", nor behind a TLS-terminating proxy. A public client, whose "client_authentication" reports the "none" method, cannot turn it off at all. // Default: true
+ *                 algorithms?: list<scalar|Param|null>,
+ *                 enforce_key_usage_verification?: bool|Param, // When enabled (default), only keys explicitly designated for signature (via "use":"sig" or a "key_ops" entry containing "sign"/"verify") are accepted. When disabled, keys without any usage designation are also accepted; keys explicitly restricted to encryption are still rejected. // Default: true
+ *             },
+ *             pkce?: array{
+ *                 enabled?: bool|Param, // Whether to use PKCE (Proof Key for Code Exchange, RFC 7636), which any current provider should support; only disable it for one that rejects the "code_challenge" parameter. A public client, whose "client_authentication" reports the "none" method, cannot disable it at all. // Default: true
+ *                 method?: "S256"|"plain"|Param, // The PKCE code challenge method. RFC 7636, Section 4.2 mandates "S256" for every client able to compute it, so only ever pick "plain" for a provider that supports nothing else. // Default: "S256"
+ *             },
+ *             max_age?: int|Param, // Maximum elapsed seconds since the end-user authentication, sent as the "max_age" authorization parameter; the ID token must then carry an "auth_time" claim, which is checked against this value, "allowed_time_drift" included.
+ *             authorization_params?: array<string, scalar|Param|null>,
+ *             refresh_access_token?: bool|array{ // Renew the access token with the refresh token grant of RFC 6749, Section 6, so that it stays usable to call an API on behalf of the logged-in user. The provider only issues a refresh token when it was asked for one, e.g. with the "offline_access" scope, and the renewal needs the "expires_in" it is optional for the provider to report. Whether this is enabled or not, the tokens are held as the "oidc_refresh_token", "oidc_access_token" and "oidc_access_token_expires_at" attributes of the security token, and the "security.authenticator.oidc_login.token_refresher.<firewall>" service renews them on demand. A provider rotating refresh tokens expects the previous one never to be replayed, which a session handler locking the session guarantees, and the default one does.
+ *                 enabled?: bool|Param, // Default: false
+ *                 leeway?: int|Param, // How many seconds before its expiry the access token is renewed, so that one handed to a call in flight does not expire on the way. // Default: 30
+ *             },
+ *             enable_end_session?: bool|Param, // Enable RP-Initiated Logout via the OIDC end_session_endpoint. // Default: false
+ *             post_logout_redirect_path?: scalar|Param|null, // Path or route to redirect to after OIDC logout. // Default: "/"
  *         },
  *         form_login?: array{
  *             provider?: scalar|Param|null,
@@ -1017,13 +1070,47 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *                         keyset?: scalar|Param|null, // JSON-encoded JWKSet used to decrypt the token (must contain a list of valid private keys).
  *                     },
  *                     allowed_time_drift?: int|Param, // Allowed time drift in seconds for token validation (iat, nbf, exp claims). // Default: 0
+ *                     enforce_at_jwt_type?: bool|Param|null, // When enabled, the "typ" header of the token must be "at+jwt" or "application/at+jwt", as RFC 9068 requires from a JWT access token. This rejects the ID tokens issued for the same audience. Disable it only for providers that do not follow the profile. Defaults to false in 8.2 and to true as of 9.0. // Default: null
  *                 },
  *                 cas?: array{
  *                     validation_url?: scalar|Param|null, // CAS server validation URL
  *                     prefix?: scalar|Param|null, // CAS prefix // Default: "cas"
  *                     http_client?: scalar|Param|null, // HTTP Client service // Default: null
  *                 },
- *                 oauth2?: scalar|Param|null,
+ *                 oauth2?: Param|string|array{
+ *                     http_client?: scalar|Param|null, // HttpClient service id the introspection endpoint is called with. Declare it as a scoped client whose "base_uri" is the introspection endpoint of your authorization server and whose "auth_basic" holds the credentials it authenticates with. Those are sent as given, where the "client_secret_basic" of RFC 6749 §2.3.1 form-urlencodes both halves, so encode a client id or a secret holding a colon, a plus or a space yourself.
+ *                     audience?: Param|string|list<scalar|Param|null>,
+ *                     issuer?: scalar|Param|null, // Identifier of the authorization server, checked against the "iss" of the introspection response. // Default: null
+ *                     claim?: scalar|Param|null, // Claim which contains the user identifier (e.g.: sub, username, email...). Defaults to "sub", falling back to "username". // Default: null
+ *                     allowed_time_drift?: int|Param, // Allowed time drift in seconds when validating the "iat", "nbf" and "exp" of the introspection response. // Default: 0
+ *                     cache?: array{ // Cache the introspection responses of active tokens, never beyond their "exp".
+ *                         id?: scalar|Param|null, // Cache service id to use to cache the introspection responses.
+ *                         ttl?: int|Param, // Maximum lifetime in seconds of a cached introspection response. The shorter it is, the sooner a revoked token stops being accepted. // Default: 60
+ *                     },
+ *                     response_signature?: bool|array{ // Ask the authorization server for a signed introspection response (RFC 9701) and verify it.
+ *                         enabled?: bool|Param, // Default: false
+ *                         enforce?: bool|Param, // When enabled (default), a plain JSON introspection response is refused. // Default: true
+ *                         algorithms?: list<scalar|Param|null>,
+ *                         discovery?: bool|array{ // Read the keys the introspection response is verified against from the RFC 8414 metadata of the authorization server, whose URL is derived from the "issuer" this handler already declares. Only the "jwks_uri" is read from it: which algorithms are accepted stays declared here, so that an authorization server cannot widen it by announcing more.
+ *                             enabled?: bool|Param, // Default: false
+ *                             cache?: array{
+ *                                 id?: scalar|Param|null, // Cache service id the metadata document and the keys it points at are stored in. // Default: "cache.app"
+ *                             },
+ *                         },
+ *                         keyset?: scalar|Param|null, // JSON-encoded JWKSet holding the public keys of your authorization server, the ones it announces at its "jwks_uri", which the introspection response is verified against. // Default: null
+ *                     },
+ *                 },
+ *             },
+ *             resource_metadata?: array{ // Declaring this node serves the RFC 9728 protected resource metadata document of the firewall at "/.well-known/oauth-protected-resource" and advertises its URL in the "resource_metadata" parameter of the "WWW-Authenticate" header, which is how a client discovers where to get a token this firewall accepts. The route is declared by the "security.authenticator.access_token.route_loader" service, which the application must import as it does for the logout routes; make sure it is reachable without a token.
+ *                 resource?: scalar|Param|null, // The resource identifier of this firewall: an HTTPS URL, without a fragment (e.g. "https://api.example.com" or "https://example.com/api"). Its path component is inserted after the well-known path, as RFC 9728, Section 3.1 prescribes, so that one host can serve the metadata of several protected resources. Defaults to the origin the document is served from, which is what a firewall covering a whole application wants. // Default: null
+ *                 authorization_servers?: Param|string|list<scalar|Param|null>,
+ *                 jwks_uri?: scalar|Param|null, // URL of the JWK Set holding the keys this resource signs its own responses with. Unrelated to the keys the access tokens are verified against, which belong to the authorization server. // Default: null
+ *                 scopes_supported?: Param|string|list<scalar|Param|null>,
+ *                 bearer_methods_supported?: Param|string|list<"header"|"body"|"query"|Param>,
+ *                 resource_name?: scalar|Param|null, // Human-readable name of this resource, meant to be displayed to the end user. // Default: null
+ *                 resource_documentation?: scalar|Param|null, // URL of the developer documentation of this resource. // Default: null
+ *                 resource_policy_uri?: scalar|Param|null, // URL of the policy telling how the client may use the data this resource exposes. // Default: null
+ *                 resource_tos_uri?: scalar|Param|null, // URL of the terms of service of this resource. // Default: null
  *             },
  *         },
  *         http_basic?: array{

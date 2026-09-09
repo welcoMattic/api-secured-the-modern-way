@@ -9,9 +9,9 @@ use Symfony\Component\Security\Core\User\OidcUser;
 /**
  * Les deux façons de quitter PhotoBook.
  *
- * « Se déconnecter » passe par le firewall, « Oublier la session » par ce contrôleur,
- * mais aucune des deux ne parle au Provider : le RP-Initiated Logout ne fait pas partie
- * de ce que la PR a mergé dans le Core. La session CloudPics ID reste donc ouverte.
+ * « Se déconnecter » passe par le firewall, « Oublier la session » par ce contrôleur.
+ * Le RP-Initiated Logout est mergé dans 8.2 et activé : « Se déconnecter » ferme aussi
+ * la session CloudPics ID, « Oublier la session » reste local.
  */
 final class SecurityControllerTest extends WebTestCase
 {
@@ -43,6 +43,29 @@ final class SecurityControllerTest extends WebTestCase
         self::assertResponseRedirects('/');
     }
 
+    public function testSeDeconnecterFermeLaSessionChezLeProvider(): void
+    {
+        $client = static::createClient();
+        $client->loginUser($this->alice(), 'main', [
+            'oidc_access_token' => FakeCloudPicsApi::ACCESS_TOKEN,
+            'oidc_id_token' => FakeCloudPicsApi::ID_TOKEN,
+        ]);
+
+        $client->request('GET', '/logout');
+
+        $response = $client->getResponse();
+        self::assertSame(302, $response->getStatusCode());
+
+        $location = $response->headers->get('location');
+        self::assertStringContainsString(FakeCloudPicsApi::END_SESSION_ENDPOINT, $location);
+        self::assertStringContainsString('id_token_hint='.FakeCloudPicsApi::ID_TOKEN, $location);
+        self::assertStringContainsString('post_logout_redirect_uri=http%3A%2F%2Flocalhost%2F', $location);
+
+        // Vérifions que la session locale est bien fermée
+        $client->request('GET', '/');
+        self::assertSelectorTextContains('body', 'Se connecter avec CloudPics ID');
+    }
+
     /**
      * /login n'est pas public : son refus déclenche le point d'entrée du firewall, qui
      * est l'authenticator lui-même et part droit chez CloudPics ID sans page
@@ -58,6 +81,11 @@ final class SecurityControllerTest extends WebTestCase
 
         self::assertNotNull($route, 'La route du check_path oidc_login est absente du routeur.');
         self::assertSame('/login_check', $route->getPath());
+
+        $route = $routes->get('_oidc_login_start_main');
+
+        self::assertNotNull($route, 'La route du start_path oidc_login est absente du routeur.');
+        self::assertSame('/oidc/start', $route->getPath());
     }
 
     private function alice(): OidcUser

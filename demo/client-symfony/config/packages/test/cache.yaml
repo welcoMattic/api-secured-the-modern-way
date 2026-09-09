@@ -1,0 +1,5 @@
+# La discovery et le JWKS sont mis en cache dans cache.app : un cache sur disque
+# survivrait d'un run de tests au suivant.
+framework:
+    cache:
+        app: cache.adapter.array

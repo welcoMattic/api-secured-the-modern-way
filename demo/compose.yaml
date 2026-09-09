@@ -1,17 +1,21 @@
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.7.1
-    command: start-dev --import-realm
+    command: start-dev --import-realm --https-certificate-file=/opt/keycloak/certs/localhost.pem --https-certificate-key-file=/opt/keycloak/certs/localhost-key.pem
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HEALTH_ENABLED: true
+      # Le healthcheck parle en clair au port 9000 (interface de management)
+      KC_HTTP_MANAGEMENT_SCHEME: http
     ports:
-      - "8080:8080"
+      - "8443:8443"
     volumes:
       - ./keycloak/import:/opt/keycloak/data/import:ro
       # Thème de login qui neutralise le mode sombre : voir keycloak/themes/photos.
       - ./keycloak/themes:/opt/keycloak/themes:ro
+      # Certificat mkcert généré par `castor certs`
+      - ./keycloak/certs:/opt/keycloak/certs:ro
     healthcheck:
       test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3; grep -q '\"status\": \"UP\"' <&3"]
       interval: 5s

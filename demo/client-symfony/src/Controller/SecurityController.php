@@ -25,9 +25,9 @@ class SecurityController extends AbstractController
     /**
      * Oublie la session locale depuis un lien, sans passer par le firewall.
      *
-     * Sert au rattrapage du 401 affiché sur la page d'accueil : quand CloudPics ID a
-     * redémarré, les tokens en session ne sont plus vérifiables et la seule issue est
-     * de tout jeter avant de relancer le flow.
+     * Reste local : après un redémarrage de CloudPics ID, l'ID token en session est signé
+     * par une clé que le Provider ne connaît plus, donc on jette tout sans lui parler.
+     * Sert au rattrapage du 401 affiché sur la page d'accueil.
      */
     #[Route('/session/oublier', name: 'app_session_forget')]
     public function forgetSession(Request $request, TokenStorageInterface $tokenStorage): Response
@@ -38,12 +38,15 @@ class SecurityController extends AbstractController
         return $this->redirectToRoute('app_home');
     }
 
+    /**
+     * Le firewall intercepte /logout ; grâce à enable_end_session, OidcEndSessionListener
+     * redirige vers le end_session_endpoint de CloudPics ID avec id_token_hint et
+     * post_logout_redirect_uri, puis CloudPics ID renvoie sur app_home.
+     */
     #[Route('/logout', name: 'app_logout')]
     public function logout(): never
     {
-        // Jamais atteinte non plus : le firewall intercepte /logout.
-        // Il ferme la session de PhotoBook seulement : la PR mergée dans le Core ne
-        // couvre pas le RP-Initiated Logout, la session CloudPics ID reste ouverte.
+        // Jamais atteinte : le firewall intercepte /logout.
         throw new \LogicException('app_logout doit être interceptée par le firewall.');
     }
 }

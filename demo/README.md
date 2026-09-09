@@ -16,25 +16,28 @@ ajoute deux que la bascule vers OIDC rend nécessaires.
 | Acteur | Rôle | Dossier | Techno | URL |
 |---|---|---|---|---|
 | ☁️ **CloudPics API** | Resource server : les photos d'Alice vivent ici | `api/` | API Platform 4 / Symfony 8.1 | http://localhost:8100 |
-| 🛂 **CloudPics ID** | OIDC Provider : comptes, login, émission des tokens | `keycloak/` | Keycloak 26 (Docker) | http://localhost:8080 |
+| 🛂 **CloudPics ID** | OIDC Provider : comptes, login, émission des tokens | `keycloak/` | Keycloak 26 (Docker) | https://localhost:8443 |
 | 🌁 **PhotoPrint** | Client **public** : tourne chez Alice, aucun secret à garder | `client-spa/` | Vite + TypeScript + `oidc-client-ts` | http://localhost:5173 |
 | 📕 **PhotoBook** | Client **confidentiel** : tourne sur son serveur, lui peut garder un secret | `client-symfony/` | Symfony 8.2-dev + authenticator natif `oidc_login` | http://localhost:8101 |
 
 PhotoBook tourne sur Symfony 8.2 de développement, parce que l'authenticator `oidc_login` y est mergé
-([PR 64954](https://github.com/symfony/symfony/pull/64954)) mais que 8.2 ne sort qu'en novembre 2026.
-Tout vient de packagist en `8.2.x-dev`, y compris `symfony/security-bundle`, `symfony/security-core` et
-`symfony/security-http` : plus aucun dépôt snapshot, plus aucune entrée `repositories`.
-`web-token/jwt-library` s'ajoute au passage : c'est lui qui décode l'ID token, ici comme dans l'API.
+([PR 64954](https://github.com/symfony/symfony/pull/64954), le 2 septembre 2026), et neuf PR de suite l'ont
+complété la semaine suivante : le `composer.lock` suit la tête de la branche, état du 8 septembre 2026. Tout vient de packagist en `8.2.x-dev`, y compris `symfony/security-bundle`,
+`symfony/security-core` et `symfony/security-http` : plus aucun dépôt snapshot, plus aucune entrée `repositories`.
+`web-token/jwt-library` s'ajoute au passage : c'est lui qui décode l'ID token, ici comme dans l'API. Ces suites
+apportent `client_authentication` (obligatoire, remplace `client_secret`), la vérification de la signature de
+l'ID token par le JWKS du Provider, la route de départ `/oidc/start`, PKCE S256, le RP-Initiated Logout et le
+renouvellement par refresh token.
 
-Le RP-Initiated Logout ne fait pas partie de ce qui a été mergé : `/logout` ferme la session de
-PhotoBook, pas celle de CloudPics ID.
+Le RP-Initiated Logout est mergé et activé : « Se déconnecter » ferme la session de PhotoBook et celle de
+CloudPics ID, « Oublier la session » reste local.
 
 Dans la section OAuth2 du deck, **CloudPics** cumule deux rôles : serveur d'autorisation *et* resource
 server. Toute la démonstration OIDC consiste à lui retirer le premier. CloudPics garde les photos,
 **CloudPics ID** prend l'identité. C'est pour ça que la démo compte quatre acteurs là où l'histoire
 d'origine en comptait trois.
 
-**PhotoPrint** garde le rôle que la slide « Rien ne prouve que c'est PhotoPrint » lui donne : une app
+**PhotoPrint** garde le rôle que la slide « La première faiblesse » lui donne : une app
 qui tourne chez Alice, donc incapable de garder un secret, donc PKCE. **PhotoBook** est son pendant
 confidentiel : un autre service tiers qui veut les photos d'Alice, mais qui tourne sur son propre
 serveur. Les deux passent par le même Provider, et l'API ne fait aucune différence entre eux.
@@ -51,8 +54,8 @@ serveur. Les deux passent par le même Provider, et l'API ne fait aucune différ
 |---|---|---|
 | **Où tourne le client ?** | Chez Alice, dans son navigateur | Sur le serveur de PhotoBook |
 | **Qui initie le flow ?** | Le navigateur, via `oidc-client-ts` | Le serveur, via l'authenticator natif `oidc_login` |
-| **Client OIDC** | Public + PKCE S256 | Confidentiel (`client_secret`) + PKCE |
-| **Ce que Symfony fournit nativement** | Rien côté client : c'est du JS | Le flow `authorization_code` complet, via `oidc_login` ([PR #64954](https://github.com/symfony/symfony/pull/64954), pas encore mergée) |
+| **Client OIDC** | Public + PKCE S256 | Confidentiel (`client_authentication: client_secret_basic`) + PKCE |
+| **Ce que Symfony fournit nativement** | Rien côté client : c'est du JS | Le flow `authorization_code` complet, via `oidc_login` ([PR #64954](https://github.com/symfony/symfony/pull/64954), mergée dans 8.2, livrée en novembre 2026), avec RP-Initiated Logout |
 | **Côté API** | `access_token` + token handler `oidc` (natif) | Identique : le même firewall, le même handler |
 
 Le point clé : **côté CloudPics API, rien ne change**. Le resource server ne sait pas quel type de
@@ -88,17 +91,26 @@ passe d'Alice, et aucune ne sait que l'autre existe.
 - [Castor](https://castor.jolicode.com/)
 - Docker + Docker Compose
 - [Bun](https://bun.sh/)
+- `mkcert` : `brew install mkcert && mkcert -install`
 
 ## Démarrage
 
 ```bash
-castor install   # composer install x2 + bun install
-castor start     # CloudPics ID + CloudPics API + PhotoBook + PhotoPrint
+castor install   # composer install x2 + bun install + certificat mkcert (castor certs)
+castor start     # CloudPics ID + CloudPics API + PhotoBook + PhotoPrint (regénère le certificat s'il manque)
 castor open      # ouvre les 3 apps et la console de CloudPics ID
 ```
 
 `castor stop` arrête tout. `castor smoke` vérifie l'API en ligne de commande, sans navigateur, et
 `castor test` lance les suites PHPUnit des deux applications PHP, sans rien démarrer du tout.
+
+### CloudPics ID en HTTPS, même en local
+
+Symfony 8.2 refuse un token_endpoint en HTTP, même sur localhost (l'échange du code, le verifier PKCE
+et les tokens ne sont confidentiels que sous TLS). `castor certs` génère un certificat mkcert pour localhost
+dans keycloak/certs/ (ignoré par git) et y copie rootCA.pem. Les navigateurs font confiance au CA mkcert
+installé dans le trousseau, mais PHP non, d'où `cafile` dans le http_client des deux apps PHP, en dev seulement.
+Clever Cloud n'est pas concerné.
 
 ## Comptes de démo
 
@@ -125,7 +137,7 @@ est la démonstration du cloisonnement. Les deux sont visibles depuis PhotoPrint
 l'**autorisation** et le **cloisonnement** vivent dans CloudPics API, l'**authentification** vit dans CloudPics ID.
 Changer de client ne change rien à ces règles.
 
-Console d'admin de CloudPics ID : http://localhost:8080 (`admin` / `admin`).
+Console d'admin de CloudPics ID : https://localhost:8443 (`admin` / `admin`).
 
 ## Rôles et scopes : c'est le Provider qui croise, pas l'API
 
@@ -164,6 +176,10 @@ endpoint `userinfo` ne renvoie aucun claim `scope`.
 
 Effet de bord bienvenu : sans les rôles par défaut du realm, `aud` ne vaut plus que `cloudpics-api`,
 sans le `account` que Keycloak y ajoutait. La carte de token projetée y gagne.
+
+Symfony 8.2 ajoute un voter natif `OAUTH2_SCOPE(photos:write)` qui lit le claim `scope` de l'access token
+et répond au refus par le challenge `insufficient_scope` de la RFC 6750 ; l'API de la démo reste en
+Symfony 8.1 et garde le mapping en rôles, qui reste nécessaire pour tout ce qu'un scope ne dit pas.
 
 ## La doc OpenAPI décrit aussi l'authentification
 
@@ -271,8 +287,8 @@ Platform pèse 2,5 ko de chemins de vendor : projeté, ça noie la seule ligne q
 | `api/src/State/PhotoOwnerProcessor.php` | Le state processor qui impose le propriétaire côté serveur depuis l'utilisateur authentifié au POST, sans que le client ne puisse le choisir. |
 | `api/src/Doctrine/PhotoOwnerExtension.php` | L'extension Doctrine qui filtre la collection sur le propriétaire, démontrant le cloisonnement. |
 | `client-spa/src/oidc.ts` | Les quinze lignes qui font de PhotoPrint un client OIDC. PKCE S256 est le défaut de la bibliothèque, et les scopes `photos:*` sont ce que l'app demande à Alice de lui déléguer. |
-| `client-symfony/config/packages/security.yaml` | Tout PhotoBook tient là : le firewall `oidc_login` natif (issuer, client confidentiel, scopes, PKCE S256 par défaut) et le provider natif `oidc`, qui ne donne que `ROLE_USER`. Les rôles restent l'affaire de l'API. |
-| `client-symfony/config/routes/security.yaml` | L'import du route loader qui déclare la route du `check_path`. Sans lui, le retour du Provider tombe sur un 404 du routeur. |
+| `client-symfony/config/packages/security.yaml` | Le firewall `oidc_login` natif (issuer, `client_authentication` avec `client_secret_basic`, scopes, PKCE S256 et signature de l'ID token vérifiés par défaut), RP-Initiated Logout ; et le provider natif `oidc`, qui ne donne que `ROLE_USER`. |
+| `client-symfony/config/routes/security.yaml` | L'import du route loader qui déclare la route du `check_path` et celle de `start_path`. |
 | `client-symfony/src/Api/PhotoApiClient.php` | Comment PhotoBook relaie l'access token de la session vers CloudPics API, et `listWithIdToken()` pour le contre-exemple. |
 
 ## Les tests
@@ -288,14 +304,11 @@ remplacé : le firewall, le token handler `oidc` et sa discovery sont ceux qui t
 | `api/tests/Security/OidcUserProviderTest.php` | Le mapping des claims vers des `ROLE_*`, y compris le cas « aucun rôle accordé » et celui d'un rôle realm que l'API ne connaît pas. |
 | `client-symfony/tests/Api/PhotoApiClientTest.php` | Le jeton que PhotoBook envoie vraiment (access token, puis ID token sur le contre-exemple), le retrait de la `trace` PHP, la remontée du `WWW-Authenticate`, et une API injoignable qui ne lève aucune exception. |
 | `client-symfony/tests/Controller/PhotoControllerTest.php` | Les trois boutons, du clic à l'affichage, contre-exemple compris : la vue explique l'audience au lieu de proposer d'oublier la session. |
-| `client-symfony/tests/Controller/SecurityControllerTest.php` | « Oublier la session » face à « Se déconnecter », et la présence de la route du `check_path`. |
+| `client-symfony/tests/Controller/SecurityControllerTest.php` | La redirection de « Se déconnecter » vers le `end_session_endpoint` de CloudPics ID (`id_token_hint`, `post_logout_redirect_uri`), « Oublier la session » face à « Se déconnecter », et la présence des deux routes déclarées par le route loader (`_oidc_login_callback_main`, `_oidc_login_start_main`). |
 
 Deux détails qui évitent des faux échecs, et qui sont documentés là où ils vivent :
 
-- `api/config/packages/test/cache.yaml` met `cache.app` en mémoire. Sur disque, le JWKS découvert
-  survivrait d'un run au suivant, alors que la paire de clés de test est régénérée à chaque processus :
-  tous les tokens tomberaient en `401` au deuxième run. C'est le même piège que celui de la bascule
-  offline / online, en plus discret.
+- `api/config/packages/test/cache.yaml` met `cache.app` en mémoire. PhotoBook met lui aussi `cache.app` en mémoire en test (`config/packages/test/cache.yaml`), parce que la discovery et le JWKS y sont mis en cache. Sur disque, le JWKS découvert survivrait d'un run au suivant, alors que la paire de clés de test est régénérée à chaque processus : tous les tokens tomberaient en `401` au deuxième run. C'est le même piège que celui de la bascule offline / online, en plus discret.
 - Aucune clé privée n'est commitée. `api/tests/Oidc/TestKeys.php` génère la paire RS256 du faux
   Provider au premier appel, et une seconde paire « imposteur » pour le seul test qui doit échouer.
 
@@ -348,18 +361,18 @@ le meilleur compromis en production. La session SSO est elle aussi allongée (`s
 
 | Symptôme | Cause | Remède |
 |---|---|---|
-| Tout répond `401` après un `castor stop` / `castor start` | Keycloak tourne en `start-dev` : il **régénère ses clés de signature** à chaque démarrage, mais l'API garde l'ancien JWKS dans `cache.app`. | `castor start` purge `cache.app` automatiquement. À la main : `php bin/console cache:pool:clear cache.app`. |
+| Tout répond `401` après un `castor stop` / `castor start` | Keycloak tourne en `start-dev` : il **régénère ses clés de signature** à chaque démarrage, mais l'API garde l'ancien JWKS dans `cache.app`. | `castor start` purge `cache.app` des deux apps PHP (l'API y garde le JWKS des access tokens, PhotoBook celui des ID tokens). À la main : `php bin/console cache:pool:clear cache.app` dans chaque app. |
 | Tout répond `401` juste après avoir basculé offline / online | Les deux token handlers partagent la clé de cache de discovery mais n'y stockent pas la même chose. | `castor cc`. |
 | Le navigateur se croit connecté, mais l'API répond `401` | Après un `castor restart`, Keycloak a de nouvelles clés : le token gardé par le navigateur ou par la session Symfony a été signé par l'instance précédente. | Les deux apps le disent et offrent un bouton **« Oublier la session »**. |
 | L'horloge du conteneur a dérivé après une veille | Le token handler de Symfony vérifie `iat`, `nbf` et `exp` avec `allowedTimeDrift: 0`, une valeur codée en dur. Une seconde de décalage suffit. | `castor start` et `castor smoke` comparent les deux horloges et vous préviennent. Redémarrer Docker Desktop. |
 
-Sur PhotoBook, « Oublier la session » et « Se déconnecter » font désormais la même chose : jeter
-l'état local. Le RP-Initiated Logout ne fait pas partie de ce que la PR a mergé dans le Core, donc
-aucune des deux ne ferme la session SSO chez CloudPics ID. Conséquence sur scène : après un
-« Se déconnecter » sur PhotoBook, le `/login` suivant repart chez CloudPics ID, qui reconnaît son
-cookie SSO et renvoie un code **pour le même compte, sans redemander d'identifiants**. Pour rejouer le
-flow avec bob, il faut se déconnecter côté CloudPics ID (PhotoPrint, lui, fait toujours le
-end_session via `oidc-client-ts`) ou utiliser une fenêtre privée.
+« Se déconnecter » est un RP-Initiated Logout, PhotoBook redirige vers le `end_session_endpoint` de
+CloudPics ID avec `id_token_hint` et `post_logout_redirect_uri`, CloudPics ID ferme la session SSO et
+renvoie sur la page d'accueil ; le `/login` suivant redemande des identifiants, ce qui permet de rejouer
+le flow avec bob sans fenêtre privée. « Oublier la session » ne parle pas au Provider : c'est le rattrapage
+après un redémarrage de CloudPics ID, quand l'ID token en session est signé par une clé que le Provider
+ne connaît plus. PhotoPrint fait la même chose via `oidc-client-ts` (end_session), donc les deux clients
+ferment la session SSO.
 
 Dans tous les cas, `demo/api/var/log/dev.log` donne la raison exacte du rejet : le token handler `oidc`
 loggue la signature, l'audience, l'issuer ou le claim manquant.
@@ -391,8 +404,8 @@ Les trois apps facturent en continu. `clever stop --alias api|book|print` entre 
 > code, jamais la configuration : les variables vivent sur l'app, et ni le déploiement ni un `tofu
 > apply` sur un autre fichier ne les synchronise. Or un `%env(FOO)%` que l'app ne définit pas retombe
 > sur le `.env` du dépôt, c'est-à-dire sur `localhost`, sans lever la moindre erreur. C'est ce qui est
-> arrivé en passant de `OIDC_WELL_KNOWN_URL` à `OIDC_ISSUER` : PhotoBook cherchait son Provider sur
-> `http://localhost:8080` depuis Clever, et `/login` répondait `401` au lieu de rediriger, parce que le
+> arrive en passant de `OIDC_WELL_KNOWN_URL` à `OIDC_ISSUER` : PhotoBook cherchait son Provider sur
+> `https://localhost:8443` depuis Clever, et `/login` répondait `401` au lieu de rediriger, parce que le
 > point d'entrée du firewall n'avait aucun `authorization_endpoint` à viser. Après toute modification
 > d'un nom de variable, comparer :
 >
