@@ -18,7 +18,7 @@ class: sec-authz
 
 Le scénario **au nom de l'utilisateur** <br> (Authorization Code Flow).
 
-<span class="text-base italic opacity-60">OAuth2 gère aussi les *Client Credentials Flow*, sans utilisateur. [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749)</span>
+<span class="text-base italic opacity-60">Sans utilisateur dans la boucle, une app qui appelle une API pour son propre compte : *Client Credentials Flow*, hors focus. [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749)</span>
 
 ---
 layout: default
@@ -32,8 +32,8 @@ class: sec-authz
 <div class="beat" v-click>
   <div class="beat__label">Le décor</div>
   <div class="beat__body">
-    👩‍🦰 Alice utilise <b>PhotoPrint</b> et <b>CloudPics</b>.<br/>
-    📸 PhotoPrint veut <b>les photos d'Alice</b>, hébergées sur CloudPics.
+    👩‍🦰 Alice héberge ses photos sur <b>CloudPics</b>.<br/>
+    📸 Depuis <b>PhotoPrint</b>, une app web tierce, elle veut <b>faire imprimer ses photos CloudPics</b>.
   </div>
 </div>
 
@@ -48,7 +48,7 @@ class: sec-authz
   <div class="beat__label">Le flow</div>
   <div class="beat__body">
     🔗 PhotoPrint <b>redirige</b> Alice vers CloudPics, qui lui demande son accord.<br/>
-    <blockquote class="mt-2 mb-4 !text-base">Autorises-tu PhotoPrint a accéder à tes photos CloudPics ?</blockquote>
+    <blockquote class="mt-2 mb-4 !text-base">Autorises-tu PhotoPrint à accéder à tes photos CloudPics ?</blockquote>
     🔢 Alice <b>autorise</b> : CloudPics émet un <b>code</b> à usage unique.<br/>
     🔄 PhotoPrint <b>échange</b> ce code contre un <b>access token</b><br/>
     🌁 PhotoPrint <b>accède</b> aux photos d'Alice grâce à l'access token
@@ -115,14 +115,20 @@ class: sec-authz
     Elle seule peut accorder l'accès à ses photos.
   </Card>
   <Card v-click :accent="2" icon="🌁" title="PhotoPrint">
-    <b>Client</b><br/>
-    Demande les photos <b>pour le compte</b> d'Alice, avec son autorisation.
+    <b>Client public</b><br/>
+    Une SPA qui tourne chez Alice, sans secret possible. Demande les photos <b>pour le compte</b> d'Alice.
   </Card>
   <Card v-click :accent="3" icon="☁️" title="CloudPics">
     <b>Authorization server<br/>+ Resource server</b><br/>
     Émet les access tokens, et héberge les photos.
   </Card>
 </CardGrid>
+
+<v-click>
+
+<div class="slide-note">RFC 6749 §2.1 : un client <b>public</b> tourne chez l'utilisateur (SPA, mobile) et ne peut garder aucun secret. Un client <b>confidentiel</b> tourne sur son propre serveur et s'authentifie avec un <code>client_secret</code>.</div>
+
+</v-click>
 
 <style scoped>
 .oauth-roles { margin-top: 1rem; align-items: stretch; }
@@ -136,18 +142,18 @@ class: sec-authz
 
 # La première faiblesse 
 
-Le code d'autorisation passe en clair vers le client
+Le code d'autorisation transite par le navigateur, dans l'URL de redirection
 
 <v-clicks>
 
 - 🌐 **Web** : code dans l'**URL de redirection** → historique, logs, `Referer`
-- 📱 **Mobile** : une app malveillante prend le **même URL scheme** (`photoprint://`) → capte le code
+- 📱 **Mobile** : une app malveillante prend le **même URL scheme** (`monapp://`) → capte le code
 
 </v-clicks>
 
 <v-click>
 
-<div class="slide-punch">Le code d'autorisation peut être <b>volé</b>.</div>
+<div class="slide-punch">Le code d'autorisation peut être <b>volé</b>.<br/>Et un client public n'a aucun secret pour compenser.</div>
 
 </v-click>
 
@@ -204,7 +210,7 @@ sequenceDiagram
 
 <Alert type="info">
 
-**OAuth 2.1** : PKCE obligatoire.
+**OAuth 2.1** (toujours un draft IETF) : PKCE obligatoire pour **tous** les clients.
 
 </Alert>
 
@@ -238,8 +244,8 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 </v-click>
 
 <!--
-Le mot à ne pas lâcher : « au porteur ». C'est un ticket de métro, pas une carte
-d'identité. Le contrôleur vérifie le ticket, jamais qui le présente.
+Le mot à ne pas lâcher : « au porteur ». C'est un billet de concert, pas une carte
+d'identité. Le contrôleur vérifie le billet, jamais qui le présente.
 
 C'est exactement la faiblesse que PKCE corrigeait pour le code d'autorisation,
 sauf qu'ici elle reste. D'où l'enchaînement sur les durées de vie et le refresh.

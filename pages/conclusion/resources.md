@@ -14,7 +14,7 @@ layout: default
     <div><a href="https://datatracker.ietf.org/doc/html/rfc9700">RFC 9700</a> bonnes pratiques</div>
     <div><a href="https://datatracker.ietf.org/doc/html/rfc9449">RFC 9449</a> DPoP</div>
     <div><a href="https://datatracker.ietf.org/doc/html/rfc7662">RFC 7662</a> Introspection</div>
-    <div><a href="https://openid.net/connect/">OpenID Connect</a> la spéc OIDC</div>
+    <div><a href="https://openid.net/connect/">OpenID Connect</a> la spec OIDC</div>
   </Card>
   <Card :accent="4" icon="📚" title="Documentation">
     <div><a href="https://symfony.com/doc/current/security/access_token.html">Symfony Access Token</a></div>

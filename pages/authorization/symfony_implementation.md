@@ -40,9 +40,10 @@ league_oauth2_server:
     authorization_server:
         private_key: '%kernel.project_dir%/var/oauth/private.key'
         encryption_key: 'def00000examplekey1234567890ab'
-    
     resource_server:
         public_key: '%kernel.project_dir%/var/oauth/public.key'
+    scopes: { available: [PHOTOS_READ, PHOTOS_WRITE], default: [PHOTOS_READ] }
+    persistence: { doctrine: ~ }
 ```
 
 <div class="mb-4"></div>
@@ -58,7 +59,6 @@ security:
             security: false 
         main:
             pattern: ^/api
-            security: true
             stateless: true
             oauth2: true
 ```
@@ -90,6 +90,7 @@ php bin/console league:oauth2-server:create-client \
     --grant-type authorization_code \
     --redirect-uri https://photoprint.example/callback \
     --scope PHOTOS_READ \
+    --public \
     PhotoPrint
 ```
 
@@ -97,7 +98,7 @@ php bin/console league:oauth2-server:create-client \
 
 <Alert type="info">
 
-Clients et tokens **persistés par le bundle**.
+Clients et tokens **persistés par le bundle**. `--public` : PhotoPrint est une SPA sans secret, le bundle lui **impose PKCE** par défaut.
 
 </Alert>
 
@@ -108,21 +109,21 @@ layout: default
 class: sec-authz
 ---
 
-# Déclarer les scopes
+# Restreindre les scopes du client
 
-```yaml
-# config/packages/league_oauth2_server.yaml
-league_oauth2_server:
-    scopes:
-        available: [PHOTOS_READ, PHOTOS_WRITE]
-        default: [PHOTOS_READ]
-```
+<v-clicks>
+
+- 🎯 `--scope` à la création : le client ne peut demander **que** ceux-là
+- 🚪 `scopes.default` : ce que reçoit une requête **sans** paramètre `scope`
+- 🕳️ Client **sans scopes** : il obtient **tout ce qu'il demande**, parmi `available`
+
+</v-clicks>
 
 <v-click>
 
 <Alert type="warning">
 
-Client **sans scope = accès à tout**. Toujours des scopes par défaut.
+Un client créé sans `--scope` n'est restreint par **rien**. `scopes.default` ne le limite pas.
 
 </Alert>
 
@@ -181,7 +182,7 @@ class: sec-authz
 
 <v-clicks>
 
-- 👤 Écrans de **login** et de **consentement**
+- 👤 Le firewall de `/authorize`, les écrans de **login** et de **consentement**
 - 🔑 **Rotation** des clés de signature
 - ⛓️ **MFA**, mot de passe oublié, révocation de sessions
 - 📊 **Audit** : qui a autorisé quoi, et quand

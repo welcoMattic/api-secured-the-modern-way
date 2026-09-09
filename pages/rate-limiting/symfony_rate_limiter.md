@@ -8,8 +8,8 @@ class: sec-rate
 <v-clicks>
 
 - 🛡️ Composant **intégré** à Symfony
-- 🎯 Contre **brute force et DoS**
-- 🔧 **3 stratégies** : fixed / sliding window, token bucket
+- 🎯 Contre les **abus** : brute force, scraping, clients trop gourmands
+- 🔧 **3 algorithmes** : fixed / sliding window, token bucket. Et `compound` pour les combiner
 - 📦 Depuis Symfony **5.2** (2020)
 
 </v-clicks>
@@ -56,6 +56,7 @@ class: sec-rate
 - 🏷️ Déclaré sur l'opération, exactement comme `security:`
 - 🛡️ `TooManyRequestsHttpException` → **HTTP 429** automatique
 - 🌐 Pour couvrir **toute l'API** d'un coup : un listener `kernel.request`
+- 🔑 Clé du quota : le `sub` du token, pas l'IP. Derrière une gateway, l'IP est celle du proxy sans `trusted_proxies`
 
 </v-clicks>
 
@@ -74,15 +75,16 @@ final class RateLimitedProvider implements ProviderInterface
         #[Autowire(service: 'api_platform.doctrine.orm.state.collection_provider')]
         private ProviderInterface $inner,
         private RateLimiterFactoryInterface $apiLimiter,
+        private Security $security,
     ) {}
 
     public function provide(Operation $op, array $uriVariables = [], array $context = []): object|array|null {
-        $request = $context['request'] ?? null;
-        $limit = $this->apiLimiter->create($request?->getClientIp())->consume();
+        $key = $this->security->getUser()?->getUserIdentifier(); // le sub du token
+        $limit = $this->apiLimiter->create($key)->consume();
         if (!$limit->isAccepted()) {
             throw new TooManyRequestsHttpException($limit->getRetryAfter()->getTimestamp() - time());
         }
-        $request?->attributes->set('rate_limit', $limit);
+        ($context['request'] ?? null)?->attributes->set('rate_limit', $limit);
 
         return $this->inner->provide($op, $uriVariables, $context);
     }
@@ -98,7 +100,7 @@ class: sec-rate
 
 ```php
 // src/Entity/Photo.php
-#[ApiResource]
+#[ApiResource(security: "is_granted('ROLE_PHOTOS_READ')")]
 #[GetCollection(provider: RateLimitedProvider::class)]
 #[Post(security: "is_granted('ROLE_PHOTOS_WRITE')")]
 class Photo

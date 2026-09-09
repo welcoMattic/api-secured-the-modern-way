@@ -13,7 +13,7 @@ class: sec-authn
 
 # OIDC Providers (OP) Open Source
 
-<ServiceGroup europe label="Europe" :cols="4" class="mt-3">
+<ServiceGroup europe label="Origine européenne" :cols="4" class="mt-3">
   <Logo :size="2.4" src="/authelia.png" label="Authelia" />
   <Logo :size="2.4" src="/goauthentik.png" label="Authentik" />
   <Logo :size="2.4" src="/ferriskey.png" label="FerrisKey" />
@@ -42,7 +42,7 @@ class: sec-authn
 
 # OIDC Providers SaaS
 
-<ServiceGroup europe label="Europe" :cols="5" class="mt-3">
+<ServiceGroup europe label="Origine européenne" :cols="5" class="mt-3">
   <Logo :size="2.4" src="/cidaas.png" label="Cidaas" />
   <Logo :size="2.4" src="/cloud-iam.png" label="Cloud-IAM" />
   <Logo :size="2.4" src="/gravitee.webp" label="Gravitee AM" />
@@ -54,7 +54,7 @@ class: sec-authn
   <Logo :size="2.4" src="/auth0.png" label="Auth0" />
   <Logo :size="2.4" src="/aws-cognito.png" label="AWS Cognito" />
   <Logo :size="2.4" src="/clerk.png" label="Clerk" />
-  <Logo :size="2.4" src="/entra_id.png" label="Microsoft Entra ID <br/> <small>(formerly Azure AD)</small>" />
+  <Logo :size="2.4" src="/entra_id.png" label="Microsoft Entra ID <br/> <small>(ex-Azure AD)</small>" />
   <Logo :size="2.4" src="/firebase.png" label="Firebase Auth" />
   <Logo :size="2.4" src="/kinde.png" label="Kinde" />
   <Logo :size="2.4" src="/loginradius.png" label="LoginRadius" />
@@ -79,7 +79,7 @@ Quelques client credentials à configurer, et c'est branché.
 <LogoGrid :cols="4" :gapY="2.4" class="sso-grid">
   <Logo :size="4.2" src="/google.svg" label="Google" />
   <Logo :size="4.2" src="/microsoft.svg" label="Microsoft" />
-  <Logo :size="4.2" src="/apple.svg" label="Apple" />
+  <Logo :size="4.2" src="/paypal.svg" label="PayPal" />
   <Logo :size="4.2" src="/facebook.svg" label="Facebook" />
   <Logo :size="4.2" src="/github.png" label="GitHub" />
   <Logo :size="4.2" src="/gitlab.svg" label="GitLab" />
@@ -123,7 +123,7 @@ class: sec-authn
 - 🔌 Authenticator **`access_token`** dans le firewall
 - 📥 Lit l'en-tête **`Authorization: Bearer`** par défaut
 - 🧩 Un **token handler** décide *comment* valider
-- 🎯 Deux handlers OIDC natifs : **`oidc`** et **`oidc_user_info`**
+- 🎯 Deux handlers OIDC natifs : **`oidc`** et **`oidc_user_info`**. Et `oauth2` pour l'introspection (RFC 7662)
 
 </v-clicks>
 
@@ -161,6 +161,8 @@ security:
 </Alert>
 
 </v-click>
+
+<div class="slide-note">Symfony 8.2 : <code>RS256</code> par défaut, <code>enforce_at_jwt_type: true</code> exige le <code>typ: at+jwt</code> (RFC 9068).</div>
 
 ---
 layout: default
@@ -218,6 +220,15 @@ class: sec-authn
 </v-click>
 
 ---
+layout: statement
+class: sec-authn
+---
+
+# Authentifié n'est pas autorisé
+
+Le token dit **qui** appelle. <br> Reste à décider **ce qu'il peut faire** : retour à l'autorisation.
+
+---
 layout: default
 class: sec-authn
 ---
@@ -242,6 +253,8 @@ Le code de Symfony le dit explicitement : les specs OIDC et OAuth n'ont **aucune
 
 </v-click>
 
+<div class="slide-note">Les scopes <code>PHOTOS_READ</code> / <code>PHOTOS_WRITE</code> de la section OAuth2 deviennent ici des <b>rôles</b> realm, portés par les scopes <code>photos:read</code> / <code>photos:write</code>.</div>
+
 ---
 layout: default
 class: sec-authn
@@ -251,9 +264,9 @@ class: sec-authn
 
 <v-clicks>
 
-- 🧾 `realm_access.roles` : ce qu'Alice a le droit de faire
+- 🧾 Les **rôles du compte** d'Alice, chez CloudPics ID : ce qu'elle a le droit de faire
 - 🎫 `scope` : ce qu'Alice a autorisé **cette app** à faire en son nom
-- 🤝 Un access token ne porte que l'**intersection** des deux
+- 🤝 `realm_access.roles` du token : l'**intersection** des deux, rien de plus
 
 </v-clicks>
 
@@ -263,7 +276,7 @@ class: sec-authn
 
 </v-click>
 
-<div class="slide-note">Bob demande <code>photos:write</code> : CloudPics ID ne le lui accorde ni en scope, ni en rôle. Le resource server, lui, n'a plus qu'un claim à lire.</div>
+<div class="slide-note">Bob, offre gratuite en lecture seule, demande <code>photos:write</code> comme Alice : CloudPics ID ne le lui accorde ni en scope, ni en rôle. Le resource server, lui, n'a plus qu'un claim à lire.</div>
 
 ---
 layout: default
@@ -326,17 +339,53 @@ layout: default
 class: sec-authn
 ---
 
+# Symfony 8.2 lit le claim `scope` nativement
+
+```php
+// src/Entity/Photo.php
+#[ApiResource(security: "is_granted('OAUTH2_SCOPE(photos:read)')")]
+#[GetCollection]
+#[Post(security: "is_granted('OAUTH2_SCOPE(photos:write)')")]
+class Photo
+{
+    // ...
+}
+```
+
+<v-clicks>
+
+- 🎫 L'authenticator `access_token` pose les scopes du token dans l'attribut `oauth2_scope` (claim `scope`, ou `scp`)
+- 🗳️ `OAUTH2_SCOPE(a b)` exige **tous** les scopes listés
+- 🚫 Refus : `403` avec le challenge `insufficient_scope` de la RFC 6750 §3.1 dans `WWW-Authenticate`
+
+</v-clicks>
+
+<v-click>
+
+<div class="slide-punch">Le claim <code>scope</code> porte déjà l'intersection : rien à mapper.<br/>Les rôles restent pour ce qu'un scope ne dit pas.</div>
+
+</v-click>
+
+---
+layout: default
+class: sec-authn
+---
+
 # Et si le client est lui aussi une app Symfony ?
+
+**PhotoBook**, un autre service tiers qui veut les photos d'Alice. Client **confidentiel** : il tourne sur son serveur et peut garder un `client_secret`.
 
 <v-clicks>
 
 - ✅ **Vérifier** un access token : natif (`access_token`)
 - ✅ **Initier** le flow authorization_code : natif à partir de Symfony **8.2**
-- 🎉 Un firewall `oidc_login`, tout juste mergé dans le Core
+- 🎉 Un firewall `oidc_login`, mergé dans le Core début septembre
 
-  - 🛣️ Redirection vers l'OIDC Provider
-  - 🔄 Échange de l'`authorization_code` contre la paire de tokens
+  - 🛣️ Redirection vers l'OIDC Provider, **PKCE S256** par défaut
+  - 🔄 Échange du code contre les tokens, client authentifié (`client_secret_basic`)
+  - 🔏 **Signature de l'ID token** vérifiée contre le JWKS du Provider
   - 🪪 Authentification de l'utilisateur au sein de l'app Symfony
+  - 🚪 **RP-Initiated Logout**, renouvellement par **refresh token**
 
 </v-clicks>
 
@@ -347,7 +396,7 @@ class: sec-authn
 
 # C'est natif dans Symfony 8.2 !
 
-PR mergée dans la branche **8.2**, livrée en novembre 2026.
+PR mergée dans **8.2** le 2 septembre, neuf PR de suite depuis. Livrée en novembre 2026.
 
 <div class="pr-shot">
   <img src="/pr-64954.png" alt="symfony/symfony PR 64954 : Add an OIDC Authorization Code Flow authenticator" />

@@ -33,7 +33,7 @@ class: sec-gw
 
 Open source ou commerciale, auto-hébergée ou SaaS, le choix est vaste !
 
-<ServiceGroup europe label="Europe" :cols="4" class="mt-4">
+<ServiceGroup europe label="Origine européenne" :cols="4" class="mt-4">
   <Logo :size="3" src="/gravitee.webp" label="Gravitee" />
   <Logo :size="3" src="/krakend.svg" label="KrakenD" />
   <Logo :size="3" src="/otoroshi.png" label="Otoroshi" />
@@ -58,8 +58,8 @@ Trois domaines entiers que votre API n'a plus à porter.
 
 <CardGrid :cols="3" class="gw-grid">
   <Card v-click :accent="1" icon="🔐" title="Accès">
-    Authentification<br/>
-    Autorisation<br/>
+    Vérification des tokens<br/>
+    Autorisation grossière : scopes, routes<br/>
     CORS (préflight + en-têtes)
   </Card>
   <Card v-click :accent="4" icon="🛡️" title="Protection">
@@ -77,6 +77,12 @@ Trois domaines entiers que votre API n'a plus à porter.
 <v-click>
 
 <div class="slide-punch is-centered">Tout ça <b>en amont</b> de votre API<br/> et sans <b>"polluer"</b> votre code applicatif.</div>
+
+</v-click>
+
+<v-click>
+
+<div class="slide-note is-centered">L'API garde <code>is_granted</code> et le contrôle du propriétaire, et revérifie le JWT : en offline, ça ne coûte rien.</div>
 
 </v-click>
 

@@ -8,11 +8,11 @@ class: pillars
 <CardGrid :cols="3" class="pillars-grid">
   <Pillar v-click :accent="1" icon="🛡️" title="Autorisation" tag="OAuth2"
           question="Que" lead="puis-je faire ?">
-    Rôles, permissions, contrôle d'accès
+    Déléguer l'accès : scopes, permissions
   </Pillar>
   <Pillar v-click :accent="4" icon="🔐" title="Authentification" tag="OIDC"
           question="Qui" lead="êtes-vous ?">
-    user/password ou client_id/secret → tokens
+    Alice prouve qui elle est, l'app reçoit des tokens
   </Pillar>
   <Pillar v-click :accent="7" icon="⏱️" title="Rate Limiting" tag="Quota"
           question="Combien" lead="puis-je faire ?">

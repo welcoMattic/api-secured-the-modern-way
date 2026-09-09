@@ -24,6 +24,8 @@ class: sec-authn
 Un **Provider dédié** émet les tokens et fournit les identités. <br/>
 **Indépendamment** de votre API.
 
+<span class="text-base italic opacity-60">Dans notre histoire : CloudPics confie l'identité à <b>CloudPics ID</b>. Son API ne garde que les photos.</span>
+
 ---
 layout: default
 class: sec-authn
@@ -33,12 +35,12 @@ class: sec-authn
 
 ```mermaid
 sequenceDiagram
-    participant C as App web (client)
-    participant P as OIDC Provider
-    participant A as API Platform
+    participant C as 🌁 PhotoPrint (client)
+    participant P as 🛂 CloudPics ID (OIDC Provider)
+    participant A as ☁️ CloudPics API
 
     C->>P: redirection + demande d'autorisation (PKCE)
-    Note over P: Alice s'authentifie et consent
+    Note over P: Alice s'authentifie (SSO)
     P-->>C: authorization code,<br/>échangé contre id_token + access_token
     C->>A: GET /api/photos + Bearer access_token
     A<<-->>P: vérifie l'access token
@@ -57,11 +59,11 @@ class: sec-authn
     <b>End-User</b><br/>
     Utilisateur humain
   </Card>
-  <Card v-click :accent="5" icon="🖥️" title="App web">
+  <Card v-click :accent="5" icon="🌁" title="PhotoPrint">
     <b>Relying Party (RP)</b><br/>
     Le client qui réclame l'authentification et les claims.
   </Card>
-  <Card v-click :accent="6" icon="🛂" title="OIDC Provider">
+  <Card v-click :accent="6" icon="🛂" title="CloudPics ID">
     <b>OpenID Provider (OP)</b><br/>
     Authentifie Alice, puis fournit les claims au RP.
   </Card>
@@ -72,7 +74,7 @@ class: sec-authn
 <div class="oidc-outsider">
   <span class="oidc-outsider__icon">🧩</span>
   <span>
-    Et <b>votre API Platform</b> ?<br/> Un <b>Resource Server</b> : une dénomination OAuth2, que la spec OIDC ne change pas.
+    Et <b>CloudPics API</b>, votre API Platform ?<br/> Un <b>Resource Server</b> : une dénomination OAuth2, que la spec OIDC ne change pas.
   </span>
 </div>
 

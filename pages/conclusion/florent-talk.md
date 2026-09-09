@@ -4,10 +4,11 @@ layout: default
 
 # Allez voir Florent demain midi !
 
-<div class="talk-title">HTTP Headers: The First Line of Defense for APIs and Frontends</div>
+<div class="talk-title">Les en-têtes HTTP comme première ligne de défense des APIs et du front</div>
 
 <div class="talk-meta">
   <span class="talk-speaker">Florent Morselli</span>
+  <span>Salle 1</span>
   <span>11h50 - 12h10</span>
 </div>
 
