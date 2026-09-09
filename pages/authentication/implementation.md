@@ -396,7 +396,7 @@ class: sec-authn
 
 # C'est natif dans Symfony 8.2 !
 
-PR mergée dans **8.2** le 2 septembre, neuf PR de suite depuis. Livrée en novembre 2026.
+PR mergée dans **8.2** le 2 septembre, une dizaine de PR de suite depuis. Livrée en novembre 2026.
 
 <div class="pr-shot">
   <img src="/pr-64954.png" alt="symfony/symfony PR 64954 : Add an OIDC Authorization Code Flow authenticator" />

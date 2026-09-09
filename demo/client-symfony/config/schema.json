@@ -5618,6 +5618,11 @@
                                             "$ref": "#/$defs/types/scalar",
                                             "description": "The OIDC Issuer URL (e.g. \"https://accounts.example.com\"). Used for .well-known/openid-configuration discovery."
                                         },
+                                        "http_client": {
+                                            "$ref": "#/$defs/types/scalar",
+                                            "default": null,
+                                            "description": "The id of the HttpClient service every call to the provider is made with: discovery, JWKS, token and UserInfo endpoints. Defaults to \"http_client\". A scoped client must scope every host the provider announces, not only the issuer."
+                                        },
                                         "client_id": {
                                             "$ref": "#/$defs/types/scalar",
                                             "description": "The OIDC client identifier."
@@ -6291,8 +6296,21 @@
                                                                     "description": "Claim which contains the user identifier (e.g.: sub, email..)."
                                                                 },
                                                                 "audience": {
-                                                                    "$ref": "#/$defs/types/scalar",
-                                                                    "description": "Audience set in the token, for validation purpose."
+                                                                    "anyOf": [
+                                                                        {
+                                                                            "$ref": "#/$defs/types/array_null",
+                                                                            "items": {
+                                                                                "$ref": "#/$defs/types/scalar"
+                                                                            },
+                                                                            "minItems": 1
+                                                                        },
+                                                                        {
+                                                                            "type": [
+                                                                                "string"
+                                                                            ]
+                                                                        }
+                                                                    ],
+                                                                    "description": "Identifiers of this resource server, one of which the \"aud\" of the token must name. A single identifier may be given as a string."
                                                                 },
                                                                 "issuers": {
                                                                     "$ref": "#/$defs/types/array_null",

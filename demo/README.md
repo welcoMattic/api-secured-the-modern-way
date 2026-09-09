@@ -21,13 +21,14 @@ ajoute deux que la bascule vers OIDC rend nécessaires.
 | 📕 **PhotoBook** | Client **confidentiel** : tourne sur son serveur, lui peut garder un secret | `client-symfony/` | Symfony 8.2-dev + authenticator natif `oidc_login` | http://localhost:8101 |
 
 PhotoBook tourne sur Symfony 8.2 de développement, parce que l'authenticator `oidc_login` y est mergé
-([PR 64954](https://github.com/symfony/symfony/pull/64954), le 2 septembre 2026), et neuf PR de suite l'ont
-complété la semaine suivante : le `composer.lock` suit la tête de la branche, état du 8 septembre 2026. Tout vient de packagist en `8.2.x-dev`, y compris `symfony/security-bundle`,
-`symfony/security-core` et `symfony/security-http` : plus aucun dépôt snapshot, plus aucune entrée `repositories`.
-`web-token/jwt-library` s'ajoute au passage : c'est lui qui décode l'ID token, ici comme dans l'API. Ces suites
-apportent `client_authentication` (obligatoire, remplace `client_secret`), la vérification de la signature de
-l'ID token par le JWKS du Provider, la route de départ `/oidc/start`, PKCE S256, le RP-Initiated Logout et le
-renouvellement par refresh token.
+([PR 64954](https://github.com/symfony/symfony/pull/64954), le 2 septembre 2026), et une dizaine de PR de suite l'ont
+complété la semaine suivante : le `composer.lock` suit la tête de la branche, état du 8 septembre 2026.
+Tout vient de packagist en `8.2.x-dev`, y compris `symfony/security-bundle`,
+`symfony/security-core` et `symfony/security-http` : plus aucun dépôt snapshot, plus aucune entrée
+`repositories`. `web-token/jwt-library` s'ajoute au passage : c'est lui qui décode l'ID token, ici comme dans l'API.
+Ces suites apportent `client_authentication` (obligatoire, remplace `client_secret`),
+la vérification de la signature de l'ID token par le JWKS du Provider, la route de départ `/oidc/start`,
+PKCE S256, le RP-Initiated Logout et le renouvellement par refresh token.
 
 Le RP-Initiated Logout est mergé et activé : « Se déconnecter » ferme la session de PhotoBook et celle de
 CloudPics ID, « Oublier la session » reste local.

@@ -920,6 +920,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             failure_forward?: bool|Param, // Default: false
  *             failure_path_parameter?: scalar|Param|null, // Default: "_failure_path"
  *             provider_uri?: scalar|Param|null, // The OIDC Issuer URL (e.g. "https://accounts.example.com"). Used for .well-known/openid-configuration discovery.
+ *             http_client?: scalar|Param|null, // The id of the HttpClient service every call to the provider is made with: discovery, JWKS, token and UserInfo endpoints. Defaults to "http_client". A scoped client must scope every host the provider announces, not only the issuer. // Default: null
  *             client_id?: scalar|Param|null, // The OIDC client identifier.
  *             client_authentication?: Param|string|array{ // How the client authenticates at the token endpoint, which RFC 7591, Section 2 names in its "token_endpoint_auth_method" metadata. Set the method Symfony ships with its parameters, or the id of a service implementing "Symfony\Component\Security\Http\OAuth2\ClientAuthentication\ClientAuthenticationInterface" for a scheme it does not. Exactly one of them.
  *                 client_secret_basic?: scalar|Param|null, // Send the client secret as HTTP Basic credentials, the "client_secret_basic" method of RFC 6749, Section 2.3.1, which the RFC recommends. Takes the client secret.
@@ -1059,7 +1060,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *                         enforce_key_usage_verification?: bool|Param, // When enabled (default), only keys explicitly designated for signature (via "use":"sig" or a "key_ops" entry containing "sign"/"verify") are accepted. When disabled, keys without any usage designation are also accepted; keys explicitly restricted to encryption are still rejected. // Default: true
  *                     },
  *                     claim?: scalar|Param|null, // Claim which contains the user identifier (e.g.: sub, email..). // Default: "sub"
- *                     audience?: scalar|Param|null, // Audience set in the token, for validation purpose.
+ *                     audience?: Param|string|list<scalar|Param|null>,
  *                     issuers?: list<scalar|Param|null>,
  *                     algorithms?: list<scalar|Param|null>,
  *                     keyset?: scalar|Param|null, // JSON-encoded JWKSet used to sign the token (must contain a list of valid public keys).
