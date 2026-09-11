@@ -11,61 +11,64 @@ layout: default
 class: sec-authn
 ---
 
-# OIDC Providers (OP) Open Source
+# Open source ou SaaS : tous parlent OIDC
 
-<ServiceGroup europe label="Origine européenne" :cols="4" class="mt-3">
-  <Logo :size="2.4" src="/authelia.png" label="Authelia" />
-  <Logo :size="2.4" src="/goauthentik.png" label="Authentik" />
-  <Logo :size="2.4" src="/ferriskey.png" label="FerrisKey" />
-  <Logo :size="2.4" src="/gravitee.webp" label="Gravitee AM" />
-  <Logo :size="2.4" src="/ory-hydra.png" label="Ory Hydra" />
-  <Logo :size="2.4" src="/pocketid.png" label="PocketID" />
-  <Logo :size="2.4" src="/rauthy.png" label="Rauthy" />
-  <Logo :size="2.4" src="/zitadel.png" label="Zitadel" />
+<div class="providers">
+
+<ServiceGroup label="Open source" :cols="3">
+  <Logo :size="1.9" eu src="/authelia.png" label="Authelia" />
+  <Logo :size="1.9" eu src="/goauthentik.png" label="Authentik" />
+  <Logo :size="1.9" eu src="/ferriskey.png" label="FerrisKey" />
+  <Logo :size="1.9" eu src="/ory-hydra.png" label="Ory Hydra" />
+  <Logo :size="1.9" eu src="/pocketid.png" label="PocketID" />
+  <Logo :size="1.9" eu src="/rauthy.png" label="Rauthy" />
+  <Logo :size="1.9" src="/casdoor.png" label="Casdoor" />
+  <Logo :size="1.9" src="/dex.svg" label="Dex" />
+  <Logo :size="1.9" src="/keycloak.png" label="Keycloak" />
 </ServiceGroup>
 
-<ServiceGroup label="Reste du monde" :cols="4" class="mt-3">
-  <Logo :size="2.4" src="/casdoor.png" label="Casdoor" />
-  <Logo :size="2.4" src="/dex.svg" label="Dex" />
-  <Logo :size="2.4" src="/keycloak.png" label="Keycloak" />
-  <Logo :size="2.4" src="/supertokens.png" label="SuperTokens" />
+<ServiceGroup label="Les deux" :cols="1">
+  <Logo :size="1.9" eu src="/gravitee.webp" label="Gravitee AM" />
+  <Logo :size="1.9" eu src="/zitadel.png" label="Zitadel" />
+  <Logo :size="1.9" src="/supertokens.png" label="SuperTokens" />
 </ServiceGroup>
 
-<div class="text-center text-sm mt-4" style="color:var(--c-muted)">
-  <strong style="color:var(--c-fg)">Ils parlent tous la même langue :</strong> le protocole OIDC
+<ServiceGroup label="SaaS" :cols="4">
+  <Logo :size="1.9" eu src="/cidaas.png" label="Cidaas" />
+  <Logo :size="1.9" eu src="/cloud-iam.png" label="Cloud-IAM" />
+  <Logo :size="1.9" eu src="/please-open-it.svg" badge="/clevercloud.svg" badgeAlt="Clever Cloud" label="Please Open It" />
+  <Logo :size="1.9" src="/auth0.png" label="Auth0" />
+  <Logo :size="1.9" src="/aws-cognito.png" label="AWS Cognito" />
+  <Logo :size="1.9" src="/clerk.png" label="Clerk" />
+  <Logo :size="1.9" src="/entra_id.png" label="Microsoft Entra ID" />
+  <Logo :size="1.9" src="/firebase.png" label="Firebase Auth" />
+  <Logo :size="1.9" src="/kinde.png" label="Kinde" />
+  <Logo :size="1.9" src="/loginradius.png" label="LoginRadius" />
+  <Logo :size="1.9" src="/okta.png" label="Okta" />
+  <Logo :size="1.9" src="/pingone.svg" label="PingOne" />
+</ServiceGroup>
+
 </div>
 
----
-layout: default
-class: sec-authn
----
+<div class="slide-note is-centered">🇪🇺 origine européenne. Au milieu, ceux qui existent <b>dans les deux modèles</b>.</div>
 
-# OIDC Providers SaaS
-
-<ServiceGroup europe label="Origine européenne" :cols="5" class="mt-3">
-  <Logo :size="2.4" src="/cidaas.png" label="Cidaas" />
-  <Logo :size="2.4" src="/cloud-iam.png" label="Cloud-IAM" />
-  <Logo :size="2.4" src="/gravitee.webp" label="Gravitee AM" />
-  <Logo :size="2.4" src="/please-open-it.svg" badge="/clevercloud.svg" badgeAlt="Clever Cloud" label="Please Open It <br/> <small>(le Keycloak managé de Clever Cloud)</small>" />
-  <Logo :size="2.4" src="/zitadel.png" label="Zitadel" />
-</ServiceGroup>
-
-<ServiceGroup label="Reste du monde" :cols="5" class="mt-3">
-  <Logo :size="2.4" src="/auth0.png" label="Auth0" />
-  <Logo :size="2.4" src="/aws-cognito.png" label="AWS Cognito" />
-  <Logo :size="2.4" src="/clerk.png" label="Clerk" />
-  <Logo :size="2.4" src="/entra_id.png" label="Microsoft Entra ID <br/> <small>(ex-Azure AD)</small>" />
-  <Logo :size="2.4" src="/firebase.png" label="Firebase Auth" />
-  <Logo :size="2.4" src="/kinde.png" label="Kinde" />
-  <Logo :size="2.4" src="/loginradius.png" label="LoginRadius" />
-  <Logo :size="2.4" src="/okta.png" label="Okta" />
-  <Logo :size="2.4" src="/pingone.svg" label="PingOne" />
-  <Logo :size="2.4" src="/supertokens.png" label="SuperTokens" />
-</ServiceGroup>
-
-<div class="text-center text-sm mt-4" style="color:var(--c-muted)">
-  <strong style="color:var(--c-fg)">Ils parlent tous la même langue :</strong> le protocole OIDC
-</div>
+<style scoped>
+/* Deux familles et leur intersection, côte à côte : la colonne du milieu montre que
+   la frontière open source / SaaS n'est pas une frontière de protocole. */
+.providers {
+  margin-top: 0.6rem;
+  display: grid;
+  grid-template-columns: 3fr 1.3fr 4fr;
+  gap: 0.8rem;
+  align-items: stretch;
+}
+.providers :deep(.ds-sgroup) { border-color: var(--c-border); }
+.providers :deep(.ds-sgroup:nth-child(2)) {
+  background: rgba(var(--a-4-rgb), 0.07);
+  border-color: rgba(var(--a-4-rgb), 0.3);
+}
+.providers :deep(.ds-logo__label) { font-size: 0.8rem; }
+</style>
 
 ---
 layout: default
@@ -163,59 +166,6 @@ layout: default
 class: sec-authn
 ---
 
-# Offline ou online : seul le token handler change
-
-<div class="grid grid-cols-2 gap-6">
-
-<div>
-
-**Offline** : la signature suffit
-
-```yaml
-# security.firewalls.api.access_token
-token_handler:
-    oidc:
-        algorithms: ['RS256']
-        audience: 'cloudpics-api'
-        issuers: ['https://id.cloudpics.example']
-        discovery:
-            base_uri: 'https://id.cloudpics.example/'
-            cache: { id: cache.app }
-```
-
-<div class="slide-note">Clés publiques du Provider, découvertes via son <code>.well-known</code> : vérification <b>en local</b>.</div>
-
-</div>
-
-<div v-click>
-
-**Online** : on interroge le Provider
-
-```yaml
-# security.firewalls.api.access_token
-token_handler:
-    oidc_user_info:
-        base_uri: 'https://id.cloudpics.example/'
-        claim: sub
-        discovery:
-            cache: { id: cache.app }
-```
-
-<div class="slide-note">Un appel HTTP au Provider à <b>chaque requête</b> entrante sur l'API.</div>
-
-</div>
-
-</div>
-
-<style scoped>
-.slide-note code { white-space: nowrap; }
-</style>
-
----
-layout: default
-class: sec-authn
----
-
 # Offline ou online : un arbitrage, pas un gagnant
 
 |                            | `oidc` (offline)         | `oidc_user_info` (online) | `oauth2` (online)    |
@@ -232,51 +182,6 @@ class: sec-authn
 </v-click>
 
 ---
-layout: statement
-class: sec-authn
----
-
-# Authentifié n'est pas autorisé
-
-Le token dit **qui** appelle. <br> Reste à décider **ce qu'il peut faire** : retour à l'autorisation.
-
----
-layout: default
-class: sec-authn
----
-
-# Scope, rôle, règle métier : trois questions
-
-<CardGrid :cols="3" class="authz-grid">
-  <Card v-click :accent="4" icon="🎫" title="Le scope">
-    <i>«&nbsp;Qu'est-ce qu'Alice a autorisé PhotoPrint à faire&nbsp;?&nbsp;»</i><br/>
-    Lire et ajouter : <code>photos:read photos:write</code>. Une app qui ne demande que la lecture n'écrira jamais.<br/>
-    Dans le token : claim <code>scope</code>, standard OAuth2.
-  </Card>
-  <Card v-click :accent="5" icon="🧢" title="Le rôle">
-    <i>«&nbsp;Qu'est-ce qu'Alice a le droit de faire chez CloudPics&nbsp;?&nbsp;»</i><br/>
-    Bob, offre gratuite, ne peut pas écrire.<br/>
-    Dans le token : claim du Provider (Keycloak : <code>realm_access.roles</code>).
-  </Card>
-  <Card v-click :accent="6" icon="🏠" title="La règle métier">
-    <i>«&nbsp;Cette photo est-elle à Alice&nbsp;?&nbsp;»</i><br/>
-    Le Provider n'en sait rien.<br/>
-    Dans l'API, et nulle part ailleurs.
-  </Card>
-</CardGrid>
-
-<v-click>
-
-<div class="slide-punch">Le token répond aux deux premières questions.<br/>La troisième reste à <b>votre API</b>.</div>
-
-</v-click>
-
-<style scoped>
-.authz-grid { margin-top: 1rem; align-items: stretch; }
-.authz-grid :deep(.ds-card__icon) { font-size: 2.7rem; }
-</style>
-
----
 layout: default
 class: sec-authn
 ---
@@ -289,15 +194,13 @@ class: sec-authn
 #[GetCollection]
 #[Get(security: "is_granted('ROLE_PHOTOS_READ') and object.owner == user.getUserIdentifier()")]
 #[Post(security: "is_granted('ROLE_PHOTOS_WRITE')")]
-class Photo
-{
-    // ...
-}
+class Photo { /* ... */ }
 ```
 
 <v-clicks>
 
-- 🧢 `ROLE_PHOTOS_*` : les claims du token, mappés en rôles par un **UserProvider**
+- 🧢 Rôles du Provider ≠ rôles Symfony : `OidcUser` n'arrive qu'avec `ROLE_USER`
+- 🔁 Les mapper vers `ROLE_PHOTOS_*` : un **UserProvider** écrit à la main, **obligatoire**
 - 🏠 `object.owner == user` : la règle métier, connue de l'API seule
 - 🎫 Symfony **8.2** : `OAUTH2_SCOPE(photos:read)` lit le scope, sans mapping
 
@@ -305,7 +208,7 @@ class Photo
 
 <v-click>
 
-<div class="slide-punch">Le même <code>is_granted</code> qu'avec OAuth2 : la sécurité reste <b>déclarative</b>.</div>
+<div class="slide-punch">Un access token dit ce que son porteur <b>peut faire</b>. L'API l'applique ici, en <b>déclaratif</b>.</div>
 
 </v-click>
 

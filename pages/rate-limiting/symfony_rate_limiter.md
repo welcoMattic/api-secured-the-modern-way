@@ -26,6 +26,12 @@ framework:
 
 </div>
 
+<v-click>
+
+<div class="slide-note">En prod, N instances = N compteurs : un pool de cache <b>partagé</b> (Redis) via <code>cache_pool</code>.</div>
+
+</v-click>
+
 ---
 layout: default
 class: sec-rate
@@ -92,35 +98,4 @@ final class RateLimitedProvider implements ProviderInterface
 }
 ```
 
----
-layout: default
-class: sec-rate
----
 
-# En prod : stockage partagé
-
-<v-clicks>
-
-- ⚠️ Défaut : **cache local** (`cache.rate_limiter`)
-- 🤹 N instances = **N compteurs** → limite multipliée
-- ✅ **Redis** pour partager
-
-</v-clicks>
-
-<div v-click>
-
-```yaml
-# config/packages/cache.yaml
-framework:
-    cache:
-        pools:
-            cache.rate_limiter.redis:
-                adapter: cache.adapter.redis
-                provider: 'redis://localhost'
-    rate_limiter:
-        api:
-            # ...
-            cache_pool: 'cache.rate_limiter.redis'
-```
-
-</div>
