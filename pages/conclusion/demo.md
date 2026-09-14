@@ -6,6 +6,8 @@ layout: default
 
 <div class="demo-url">github.com/welcoMattic/api-secured-the-modern-way</div>
 
+<img src="/qrcode.png" alt="QR code vers le dépôt de démo" class="demo-qr" />
+
 ```bash
 cd demo
 
@@ -28,5 +30,23 @@ cd infra && tofu apply # les mêmes, sur Clever Cloud
   color: var(--c-accent);
   white-space: nowrap;
   letter-spacing: -0.02em;
+}
+
+/* Le QR code doit rester scannable depuis le fond de la salle, d'où sa taille.
+   Hors flux, sous l'URL, pour ne pas repousser le bloc de commandes vers le bas. */
+.demo-qr {
+  position: absolute;
+  top: 13rem;
+  right: 3rem;
+  width: 13rem;
+  height: auto;
+}
+
+/* La colonne de droite appartient au QR code : sans ça le bloc de code, qui a
+   un fond, passe par dessus, et la glose vient se lire sous les modules. */
+:deep(pre),
+.slide-punch,
+.slide-note {
+  max-width: 68%;
 }
 </style>
