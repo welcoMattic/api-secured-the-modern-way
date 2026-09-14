@@ -18,7 +18,7 @@ class: sec-authz
 
 Le scénario **au nom de l'utilisateur** <br> (Authorization Code Flow).
 
-<span class="text-base italic opacity-60">Sans utilisateur dans la boucle, une app qui appelle une API pour son propre compte : *Client Credentials Flow*, hors focus.</span>
+<span class="text-base italic opacity-60">Sans utilisateur dans la boucle, une app qui appelle une API pour son propre compte : <br> *Client Credentials Flow*, hors focus.</span>
 
 ---
 layout: default
@@ -33,7 +33,7 @@ class: sec-authz
   <div class="beat__label">Le décor</div>
   <div class="beat__body">
     👩‍🦰 Alice héberge ses photos sur <b>CloudPics</b>.<br/>
-    📸 Depuis <b>PhotoPrint</b>, une app web tierce, elle veut <b>faire imprimer ses photos CloudPics</b>.
+    📸 Depuis <b>PhotoPrint</b>, une app web tierce, <br> elle veut <b>faire imprimer ses photos CloudPics</b>.
   </div>
 </div>
 
@@ -293,16 +293,14 @@ class: sec-authz
 
 <v-clicks>
 
-- 🎲 **code_verifier** (secret) + empreinte SHA-256 **code_challenge**
-- 🔗 Autorisation → envoie le **challenge** et l'algorithme utilisé (SHA-256)
-- 🤝 Échange → envoie le **verifier** (requête directe, TLS)
-- ✅ `SHA-256(verifier) == challenge` → token
+- 🎲 **code_verifier** : un secret aléatoire, connu du seul client
+- 🔒 **code_challenge** : son empreinte SHA-256, envoyée en premier
 
 </v-clicks>
 
 <v-click>
 
-<div class="slide-punch">Le challenge est <b>irréversible</b>, sans le verifier le code ne vaut rien.<br/>On prouve à l'échange qu'on est bien l'initiateur du flow.</div>
+<div class="slide-punch">Le challenge est <b>irréversible</b> : sans le verifier, un code volé ne vaut rien.</div>
 
 </v-click>
 
