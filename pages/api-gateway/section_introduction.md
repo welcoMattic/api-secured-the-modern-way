@@ -5,22 +5,22 @@ class: sec-gw
 
 <div class="section-index">🎁</div>
 
-# L'API Gateway
+# The API Gateway
 
-La surprise !
+The surprise!
 
 ---
 layout: default
 class: sec-gw
 ---
 
-# Est-ce vraiment le job de votre API ?
+# Is this really your API's job?
 
 <v-clicks>
 
-- 🔐 Auth, autorisation, rate limiting, protection...
-- ⏳ Un **travail à plein temps**
-- 🛎️ **API Gateway / API Management** : c'est leur métier
+- 🔐 Auth, authorization, rate limiting, protection...
+- ⏳ A **full-time job**
+- 🛎️ **API Gateway / API Management**: that is their whole business
 
 </v-clicks>
 
@@ -29,18 +29,18 @@ layout: default
 class: sec-gw
 ---
 
-# Choisissez votre préférée !
+# Pick your favourite!
 
-Open source ou commerciale, auto-hébergée ou SaaS, le choix est vaste !
+Open source or commercial, self-hosted or SaaS, there is plenty to choose from!
 
-<ServiceGroup europe label="Origine européenne" :cols="4" class="mt-4">
+<ServiceGroup europe label="European origin" :cols="4" class="mt-4">
   <Logo :size="3" src="/gravitee.webp" label="Gravitee" />
   <Logo :size="3" src="/krakend.svg" label="KrakenD" />
   <Logo :size="3" src="/otoroshi.png" label="Otoroshi" />
   <Logo :size="3" src="/traefik.png" label="Traefik" />
 </ServiceGroup>
 
-<ServiceGroup label="Reste du monde" :cols="4" class="mt-4">
+<ServiceGroup label="Rest of the world" :cols="4" class="mt-4">
   <Logo :size="3" src="/aws-api-gateway.svg" label="Amazon API Gateway" />
   <Logo :size="3" src="/apigee.png" label="Apigee" />
   <Logo :size="3" src="/apisix.svg" label="Apisix" />
@@ -52,22 +52,22 @@ layout: default
 class: sec-gw
 ---
 
-# Déléguez !
+# Delegate!
 
-Trois domaines entiers que votre API n'a plus à porter.
+Three entire domains your API no longer has to carry.
 
 <CardGrid :cols="3" class="gw-grid">
-  <Card v-click :accent="1" icon="🔐" title="Accès">
-    Vérification des tokens<br/>
-    Autorisation grossière : scopes, routes<br/>
-    CORS (préflight + en-têtes)
+  <Card v-click :accent="1" icon="🔐" title="Access">
+    Token verification<br/>
+    Coarse-grained authorization: scopes, routes<br/>
+    CORS (preflight + headers)
   </Card>
   <Card v-click :accent="4" icon="🛡️" title="Protection">
-    WAF : SQLi, XSS, OWASP<br/>
-    Détection de bots<br/>
-    IP allow/deny, géo-blocage
+    WAF: SQLi, XSS, OWASP<br/>
+    Bot detection<br/>
+    IP allow/deny, geo-blocking
   </Card>
-  <Card v-click :accent="7" icon="📊" title="Exploitation">
+  <Card v-click :accent="7" icon="📊" title="Operations">
     Rate limiting<br/>
     Logging<br/>
     Monitoring
@@ -76,13 +76,13 @@ Trois domaines entiers que votre API n'a plus à porter.
 
 <v-click>
 
-<div class="slide-punch is-centered">Tout ça <b>en amont</b> de votre API<br/> et sans <b>"polluer"</b> votre code applicatif.</div>
+<div class="slide-punch is-centered">All of it <b>upstream</b> of your API<br/> and without <b>"polluting"</b> your application code.</div>
 
 </v-click>
 
 <v-click>
 
-<div class="slide-note is-centered">L'API garde <code>is_granted</code> et le contrôle du propriétaire, et revérifie le JWT : en offline, ça ne coûte rien.</div>
+<div class="slide-note is-centered">The API keeps <code>is_granted</code> and the ownership check, and re-verifies the JWT: offline, that costs nothing.</div>
 
 </v-click>
 
@@ -96,9 +96,9 @@ Trois domaines entiers que votre API n'a plus à porter.
 </style>
 
 <!--
-Liste non exhaustive : la plupart des gateways couvrent bien plus.
+Non-exhaustive list: most gateways cover far more than this.
 
-CORS, à ne pas survoler : c'est le navigateur qui applique la Same-Origin Policy, pas votre API. La gateway répond aux requêtes préflight (OPTIONS) et ajoute les en-têtes Access-Control-Allow-*. L'intérêt : une politique cross-origin centralisée et cohérente sur tout le parc, au lieu de reconfigurer nelmio/cors-bundle dans chaque service Symfony.
+CORS, not to be glossed over: it is the browser that enforces the Same-Origin Policy, not your API. The gateway answers preflight requests (OPTIONS) and adds the Access-Control-Allow-* headers. The benefit: one centralized, consistent cross-origin policy across the whole estate, instead of reconfiguring nelmio/cors-bundle in every Symfony service.
 
-Message clé : trois domaines entiers sortent de votre code applicatif. C'est le take away de la section.
+Key message: three entire domains leave your application code. That is the takeaway of this section.
 -->

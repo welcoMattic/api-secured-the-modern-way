@@ -3,14 +3,14 @@ layout: default
 class: sec-authn
 ---
 
-# OIDC ajoute une couche d'identité à OAuth2
+# OIDC adds an identity layer on top of OAuth2
 
 <v-clicks>
 
-- 🆔 **ID Token** : JWT avec les claims d'identité
-- 📋 **Claims standards** : sub, aud, iss, exp...
-- 🔗 **Discovery** : endpoint `.well-known`
-- 🔐 **UserInfo** : données utilisateur supplémentaires
+- 🆔 **ID Token**: a JWT carrying the identity claims
+- 📋 **Standard claims**: sub, aud, iss, exp...
+- 🔗 **Discovery**: the `.well-known` endpoint
+- 🔐 **UserInfo**: additional user data
 
 </v-clicks>
 
@@ -21,17 +21,17 @@ class: sec-authn
 
 # OIDC Provider
 
-Un **Provider dédié** émet les tokens et fournit les identités. <br/>
-**Indépendamment** de votre API.
+A **dedicated Provider** issues the tokens and serves the identities. <br/>
+**Independently** of your API.
 
-<span class="text-base italic opacity-60">Dans notre histoire : CloudPics confie l'identité à <b>CloudPics ID</b>. Son API ne garde que les photos.</span>
+<span class="text-base italic opacity-60">In our story: CloudPics hands identity over to <b>CloudPics ID</b>. Its API only keeps the photos.</span>
 
 ---
 layout: default
 class: sec-authn
 ---
 
-# Le client obtient les tokens, l'API les vérifie
+# The client gets the tokens, the API verifies them
 
 ```mermaid
 sequenceDiagram
@@ -39,11 +39,11 @@ sequenceDiagram
     participant P as 🛂 CloudPics ID (OIDC Provider)
     participant A as ☁️ CloudPics API
 
-    C->>P: redirection + demande d'autorisation (PKCE)
-    Note over P: Alice s'authentifie (SSO)
-    P-->>C: authorization code,<br/>échangé contre id_token + access_token
+    C->>P: redirect + authorization request (PKCE)
+    Note over P: Alice authenticates (SSO)
+    P-->>C: authorization code,<br/>exchanged for id_token + access_token
     C->>A: GET /api/photos + Bearer access_token
-    A<<-->>P: vérifie l'access token
+    A<<-->>P: verifies the access token
     A-->>C: 200 OK
 ```
 
@@ -52,20 +52,20 @@ layout: default
 class: sec-authn
 ---
 
-# Les parties prenantes
+# The stakeholders
 
 <CardGrid :cols="3" class="oidc-roles">
   <Card v-click :accent="4" icon="👩‍🦰" title="Alice">
     <b>End-User</b><br/>
-    Utilisateur humain
+    A human user
   </Card>
   <Card v-click :accent="5" icon="🌁" title="PhotoPrint">
     <b>Relying Party (RP)</b><br/>
-    Le client qui réclame l'authentification et les claims.
+    The client asking for the authentication and the claims.
   </Card>
   <Card v-click :accent="6" icon="🛂" title="CloudPics ID">
     <b>OpenID Provider (OP)</b><br/>
-    Authentifie Alice, puis fournit les claims au RP.
+    Authenticates Alice, then serves the claims to the RP.
   </Card>
 </CardGrid>
 
@@ -74,7 +74,7 @@ class: sec-authn
 <div class="oidc-outsider">
   <span class="oidc-outsider__icon">🧩</span>
   <span>
-    Et <b>CloudPics API</b>, votre API Platform ?<br/> Un <b>Resource Server</b> : une dénomination OAuth2, que la spec OIDC ne change pas.
+    And <b>CloudPics API</b>, your API Platform app?<br/> A <b>Resource Server</b>: an OAuth2 name, left unchanged by the OIDC spec.
   </span>
 </div>
 
@@ -104,18 +104,18 @@ layout: default
 class: sec-authn
 ---
 
-# Deux tokens, deux destinataires
+# Two tokens, two recipients
 
 <CardGrid :cols="2" class="mt-8">
   <Card v-click :accent="4" icon="🪪" title="ID token">
-    Pour l'<b>application cliente</b>.<br/>
-    Qui est l'utilisateur, et comment il s'est authentifié. <br/>
-    > Carte d'identité
+    For the <b>client application</b>.<br/>
+    Who the user is, and how they authenticated. <br/>
+    > An ID card
   </Card>
   <Card v-click :accent="6" icon="🎫" title="Access token">
-    Pour l'<b>API</b>.<br/>
-    Ce que le porteur a le droit de faire. <br/>
-    > Billet de concert
+    For the <b>API</b>.<br/>
+    What the bearer is allowed to do. <br/>
+    > A concert ticket
   </Card>
 </CardGrid>
 
@@ -123,7 +123,7 @@ class: sec-authn
 
 <Alert type="warning">
 
-L'ID token n'est **pas** une clé d'accès à l'API. Seul l'**access token** l'est.
+The ID token is **not** a key to the API. Only the **access token** is.
 
 </Alert>
 

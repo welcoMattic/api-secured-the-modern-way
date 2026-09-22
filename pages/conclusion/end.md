@@ -5,9 +5,9 @@ hideInToc: true
 
 <div class="closing-eyebrow">API SECURED, THE MODERN WAY</div>
 
-# <span class="accent">Merci !</span>
+# <span class="accent">Thank you!</span>
 
-## Des questions ?
+## Any questions?
 
 <div class="closing-contact">
   <span><img src="/bluesky.svg" alt="Bluesky"/> @welcomattic.com</span>

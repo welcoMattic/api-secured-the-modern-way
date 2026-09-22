@@ -2,22 +2,22 @@
 layout: default
 ---
 
-# La démo est à vous
+# The demo is yours
 
 <div class="demo-url">github.com/welcoMattic/api-secured-the-modern-way</div>
 
-<img src="/qrcode.png" alt="QR code vers le dépôt de démo" class="demo-qr" />
+<img src="/qrcode.png" alt="QR code to the demo repository" class="demo-qr" />
 
 ```bash
 cd demo
 
-castor start           # les 4 acteurs, en local
-cd infra && tofu apply # les mêmes, sur Clever Cloud
+castor start           # the 4 actors, locally
+cd infra && tofu apply # the same ones, on Clever Cloud
 ```
 
-<div class="slide-punch">Un client public, un client confidentiel, <b>le même Provider</b>.</div>
+<div class="slide-punch">One public client, one confidential client, <b>the same Provider</b>.</div>
 
-<div class="slide-note">L'apply crée l'add-on Keycloak, les trois apps et leurs variables, puis déploie le code. Clever attribue les domaines, il n'y a rien à réserver. Seul l'import du realm reste un script.</div>
+<div class="slide-note">The apply creates the Keycloak add-on, the three apps and their variables, then deploys the code. Clever assigns the domains, there is nothing to reserve. Only the realm import stays a script.</div>
 
 <style scoped>
 /* The URL is what the room writes down, so it outranks the title's own weight.

@@ -8,7 +8,7 @@
 
   <div>
     <p class="!m-0 !text-sm !font-semibold" style="color:#8b93a7;letter-spacing:0.28em">API SECURED, THE MODERN WAY</p>
-    <h1 class="!border-b-0 !mt-4 !mb-7 !leading-[1.1]" style="color:#F9F9F9">Des APIs <span style="color:#44FFD2">sécurisées</span><br/>sans perdre la tête</h1>
+    <h1 class="!border-b-0 !mt-4 !mb-7 !leading-[1.1]" style="color:#F9F9F9"><span style="color:#44FFD2">Secured</span> APIs<br/>without losing your mind</h1>
     <div class="flex flex-wrap gap-3 text-sm font-semibold">
       <span class="px-4 py-1.5 rounded-full border" style="background:rgba(68,255,210,0.13);border-color:rgba(68,255,210,0.55);color:#8bf3e2">OAuth2</span>
       <span class="px-4 py-1.5 rounded-full border" style="background:rgba(64,220,235,0.13);border-color:rgba(64,220,235,0.55);color:#85e9f2">OIDC</span>

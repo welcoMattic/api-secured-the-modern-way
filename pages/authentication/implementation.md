@@ -3,15 +3,15 @@ layout: fact
 class: sec-authn
 ---
 
-## Nous n'implémentons pas notre propre OIDC Provider.
-<div class="slide-punch is-centered">C'est un métier à part entière.</div>
+## We are not implementing our own OIDC Provider.
+<div class="slide-punch is-centered">It is a full-time job of its own.</div>
 
 ---
 layout: default
 class: sec-authn
 ---
 
-# Open source ou SaaS : tous parlent OIDC
+# Open source or SaaS: they all speak OIDC
 
 <div class="providers">
 
@@ -27,7 +27,7 @@ class: sec-authn
   <Logo :size="1.9" src="/keycloak.png" label="Keycloak" />
 </ServiceGroup>
 
-<ServiceGroup label="Les deux" :cols="1">
+<ServiceGroup label="Both" :cols="1">
   <Logo :size="1.9" eu src="/gravitee.webp" label="Gravitee AM" />
   <Logo :size="1.9" eu src="/zitadel.png" label="Zitadel" />
   <Logo :size="1.9" src="/supertokens.png" label="SuperTokens" />
@@ -50,7 +50,7 @@ class: sec-authn
 
 </div>
 
-<div class="slide-note is-centered">🇪🇺 origine européenne. Au milieu, ceux qui existent <b>dans les deux modèles</b>.</div>
+<div class="slide-note is-centered">🇪🇺 European origin. In the middle, those that exist <b>in both models</b>.</div>
 
 <style scoped>
 /* Deux familles et leur intersection, côte à côte : la colonne du milieu montre que
@@ -75,9 +75,9 @@ layout: default
 class: sec-authn
 ---
 
-# Besoin de SSO social ?
+# Need social SSO?
 
-Quelques client credentials à configurer, et c'est branché.
+A few client credentials to configure, and it is plugged in.
 
 <LogoGrid :cols="4" :gapY="2.4" class="sso-grid">
   <Logo :size="4.2" src="/google.svg" label="Google" />
@@ -90,7 +90,7 @@ Quelques client credentials à configurer, et c'est branché.
   <Logo :size="4.2" src="/bitbucket.svg" label="Bitbucket" />
 </LogoGrid>
 
-<div class="slide-note is-centered">Pas une ligne de code, <b>que de la configuration</b>. Keycloak fournit douze connecteurs en standard.</div>
+<div class="slide-note is-centered">Not a single line of code, <b>configuration only</b>. Keycloak ships twelve connectors out of the box.</div>
 
 <style scoped>
 .sso-grid { margin-top: 0.2rem; }
@@ -101,14 +101,14 @@ layout: default
 class: sec-authn
 ---
 
-# Votre API redevient un simple resource server
+# Your API goes back to being a plain resource server
 
 <v-clicks>
 
-- 👉 Les **apps clientes** redirigent les utilisateurs vers l'**OIDC Provider**, qui les authentifie et **émet les tokens**
-- 👥 Les **comptes** vivent dans l'OIDC Provider, plus dans votre base
-- 🧩 Votre **API** ne fait que **vérifier** les tokens
-- 🏦 Aucun écran de login ni de consentement à coder : elle se concentre sur le **métier**
+- 👉 **Client apps** redirect users to the **OIDC Provider**, which authenticates them and **issues the tokens**
+- 👥 **Accounts** live in the OIDC Provider, no longer in your database
+- 🧩 Your **API** only **verifies** the tokens
+- 🏦 No login or consent screen to write: it focuses on the **business logic**
 
 </v-clicks>
 
@@ -117,14 +117,14 @@ layout: default
 class: sec-authn
 ---
 
-# Symfony vérifie les access tokens nativement
+# Symfony verifies access tokens natively
 
 <v-clicks>
 
-- 🔌 Authenticator **`access_token`** dans le firewall
-- 📥 Lit l'en-tête **`Authorization: Bearer`** par défaut
-- 🧩 Un **token handler** décide *comment* valider
-- 🎯 Trois handlers natifs : **`oidc`**, **`oidc_user_info`** et **`oauth2`**
+- 🔌 The **`access_token`** authenticator in the firewall
+- 📥 Reads the **`Authorization: Bearer`** header by default
+- 🧩 A **token handler** decides *how* to validate
+- 🎯 Three built-in handlers: **`oidc`**, **`oidc_user_info`** and **`oauth2`**
 
 </v-clicks>
 
@@ -133,26 +133,26 @@ layout: default
 class: sec-authn
 ---
 
-# Trois façons de vérifier un token
+# Three ways to verify a token
 
 <CardGrid :cols="3" class="handlers-grid">
   <Card v-click :accent="4" icon="🔏" title="<code>oidc</code>">
     <b>Offline</b><br/>
-    Vérifie la <b>signature</b> du JWT avec les clés publiques du Provider, puis ses claims (<code>exp</code>, <code>aud</code>, <code>iss</code>).
+    Checks the JWT <b>signature</b> against the Provider's public keys, then its claims (<code>exp</code>, <code>aud</code>, <code>iss</code>).
   </Card>
   <Card v-click :accent="5" icon="🙋" title="<code>oidc_user_info</code>">
     <b>Online</b><br/>
-    Présente le token à l'endpoint <b>userinfo</b> du Provider, qui le valide et renvoie les claims de l'utilisateur.
+    Presents the token to the Provider's <b>userinfo</b> endpoint, which validates it and returns the user's claims.
   </Card>
   <Card v-click :accent="6" icon="🔎" title="<code>oauth2</code>">
     <b>Online</b><br/>
-    Présente le token à l'endpoint d'<b>introspection</b> du serveur d'autorisation, qui répond <code>active</code> et les claims.
+    Presents the token to the authorization server's <b>introspection</b> endpoint, which answers <code>active</code> plus the claims.
   </Card>
 </CardGrid>
 
 <v-click>
 
-<div class="slide-punch">Le handler change, pas le reste : même firewall, mêmes rôles, même <code>is_granted</code>.</div>
+<div class="slide-punch">The handler changes, nothing else does: same firewall, same roles, same <code>is_granted</code>.</div>
 
 </v-click>
 
@@ -166,18 +166,18 @@ layout: default
 class: sec-authn
 ---
 
-# Offline ou online : un arbitrage, pas un gagnant
+# Offline or online: a trade-off, not a winner
 
-|                            | `oidc` (offline)         | `oidc_user_info` (online) | `oauth2` (online)    |
-|----------------------------|--------------------------|---------------------------|----------------------|
-| **Appel réseau**           | Aucun                    | Un par requête            | Un par requête       |
-| **Révocation d'un token**  | Visible à l'expiration   | Immédiate                 | Immédiate            |
-| **Provider indisponible**  | L'API continue de servir | L'API ne répond plus      | L'API ne répond plus |
-| **Validation de `aud`**    | Oui                      | Aucune                    | Oui                  |
+|                           | `oidc` (offline)        | `oidc_user_info` (online) | `oauth2` (online)     |
+|---------------------------|-------------------------|---------------------------|-----------------------|
+| **Network call**          | None                    | One per request           | One per request       |
+| **Token revocation**      | Visible at expiry       | Immediate                 | Immediate             |
+| **Provider unavailable**  | The API keeps serving   | The API stops answering   | The API stops answering |
+| **`aud` validation**      | Yes                     | None                      | Yes                   |
 
 <v-click>
 
-<div class="slide-punch">Access tokens courts + offline : le meilleur compromis dans la majorité des cas.</div>
+<div class="slide-punch">Short access tokens + offline: the best trade-off in most cases.</div>
 
 </v-click>
 
@@ -186,7 +186,7 @@ layout: default
 class: sec-authn
 ---
 
-# Dans la démo, tout finit dans `security`
+# In the demo, it all ends up in `security`
 
 ```php
 // src/Entity/Photo.php
@@ -199,16 +199,16 @@ class Photo { /* ... */ }
 
 <v-clicks>
 
-- 🧢 Rôles du Provider ≠ rôles Symfony : `OidcUser` n'arrive qu'avec `ROLE_USER`
-- 🔁 Les mapper vers `ROLE_PHOTOS_*` : un **UserProvider** écrit à la main, **obligatoire**
-- 🏠 `object.owner == user` : la règle métier, connue de l'API seule
-- 🎫 Symfony **8.2** : `OAUTH2_SCOPE(photos:read)` lit le scope, sans mapping
+- 🧢 Provider roles ≠ Symfony roles: `OidcUser` only comes with `ROLE_USER`
+- 🔁 Mapping them to `ROLE_PHOTOS_*`: a hand-written **UserProvider**, **mandatory**
+- 🏠 `object.owner == user`: the business rule, known to the API alone
+- 🎫 Symfony **8.2**: `OAUTH2_SCOPE(photos:read)` reads the scope, no mapping needed
 
 </v-clicks>
 
 <v-click>
 
-<div class="slide-punch">Un access token dit ce que son porteur <b>peut faire</b>. L'API l'applique ici, en <b>déclaratif</b>.</div>
+<div class="slide-punch">An access token states what its bearer <b>may do</b>. The API enforces it right here, <b>declaratively</b>.</div>
 
 </v-click>
 
@@ -217,23 +217,23 @@ layout: default
 class: sec-authn
 ---
 
-# Et si le client est lui aussi une app Symfony ?
+# What if the client is a Symfony app too?
 
-**PhotoBook**, un autre service tiers, client **confidentiel** : il tourne sur son serveur et garde un `client_secret`.
+**PhotoBook**, another third-party service, a **confidential** client: it runs on its own server and keeps a `client_secret`.
 
 <v-clicks>
 
-- ✅ **Vérifier** un access token : natif (`access_token`)
-- 🎉 **Initier** le flow : l'authenticator **`oidc_login`**, natif dans Symfony **8.2**
-- 🛣️ **PKCE**, échange du code, **signature de l'ID token** vérifiée, logout, refresh
+- ✅ **Verifying** an access token: built in (`access_token`)
+- 🎉 **Starting** the flow: the **`oidc_login`** authenticator, built into Symfony **8.2**
+- 🛣️ **PKCE**, code exchange, **ID token signature** verified, logout, refresh
 
 </v-clicks>
 
 <div class="pr-row">
-  <img v-click src="/pr-64954-og.png" alt="symfony/symfony PR 64954 : Add an OIDC Authorization Code Flow authenticator, par welcoMattic" />
+  <img v-click src="/pr-64954-og.png" alt="symfony/symfony PR 64954: Add an OIDC Authorization Code Flow authenticator, by welcoMattic" />
   <div v-click>
-    <div class="slide-punch">Mergé le 2 septembre, une dizaine de PR de suite depuis. <b>Livré en novembre 2026</b>.</div>
-    <div class="slide-note">Pas de bundle dans la démo : <b>PhotoBook tourne déjà dessus</b>.</div>
+    <div class="slide-punch">Merged on September 2nd, with about a dozen follow-up PRs since. <b>Shipping in November 2026</b>.</div>
+    <div class="slide-note">No bundle in the demo: <b>PhotoBook already runs on it</b>.</div>
   </div>
 </div>
 

@@ -2,19 +2,19 @@
 layout: default
 ---
 
-# Allez voir Florent demain midi !
+# Go see Florent tomorrow at noon!
 
-<div class="talk-title">Les en-têtes HTTP comme première ligne de défense des APIs et du front</div>
+<div class="talk-title">HTTP headers as the first line of defence for APIs and front ends</div>
 
 <div class="talk-meta">
   <span class="talk-speaker">Florent Morselli</span>
-  <span>Salle 1</span>
-  <span>11h50 - 12h10</span>
+  <span>Room 1</span>
+  <span>11:50 - 12:10</span>
 </div>
 
-<img class="talk-shot" src="/florent-talk.png" alt="Le talk de Florent Morselli dans le programme de l'API Platform Con 2026 : jour 2, salle 1, 11h50" />
+<img class="talk-shot" src="/florent-talk.png" alt="Florent Morselli's talk in the API Platform Con 2026 schedule: day 2, room 1, 11:50" />
 
-<div class="slide-punch">Il couvre d'autres aspects de sécurité avec plein d'autres acronymes rigolos : CSP, CORS, COOP, COEP.</div>
+<div class="slide-punch">He covers other sides of security, with plenty of other funny acronyms: CSP, CORS, COOP, COEP.</div>
 
 <style scoped>
 /* A talk title is prose, not a path: unlike .demo-url it has to wrap,

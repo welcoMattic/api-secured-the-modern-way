@@ -1,7 +1,7 @@
 ---
 layout: about-me
 
-helloMsg: Salut !
+helloMsg: Hi there!
 name: Mathieu Santostefano
 imageSrc: https://blog.welcomattic.com/img/profile_image.jpg
 position: left

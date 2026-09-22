@@ -3,23 +3,23 @@ layout: default
 class: pillars
 ---
 
-# Une API "Sécurisée" ?
+# A "Secured" API?
 
 <CardGrid :cols="2" class="pillars-grid">
-  <Pillar v-click="1" :accent="1" icon="🛡️" title="Autorisation" tag="OAuth2"
-          question="Que" lead="puis-je faire ?">
-    Déléguer l'accès : scopes, permissions
+  <Pillar v-click="1" :accent="1" icon="🛡️" title="Authorization" tag="OAuth2"
+          question="What" lead="can I do?">
+    Delegating access: scopes, permissions
   </Pillar>
-  <Pillar v-click="2" :accent="4" icon="🔐" title="Authentification" tag="OIDC"
-          question="Qui" lead="êtes-vous ?">
-    Alice prouve qui elle est, l'app reçoit des tokens
+  <Pillar v-click="2" :accent="4" icon="🔐" title="Authentication" tag="OIDC"
+          question="Who" lead="are you?">
+    Alice proves who she is, the app receives tokens
   </Pillar>
 </CardGrid>
 
 <div class="rest">
   <span class="chip" v-click="4">WAF</span>
   <span class="chip" v-click="4">OWASP API Top 10</span>
-  <span class="chip is-near" v-click="4">Détection de bots</span>
+  <span class="chip is-near" v-click="4">Bot detection</span>
   <span class="chip chip--focus" v-click="3">⏱️ Rate limiting</span>
   <span class="chip is-near" v-click="4">Anti-DDoS</span>
   <span class="chip" v-click="4">IP / Geo blocking</span>
@@ -27,7 +27,7 @@ class: pillars
   <span class="chip" v-click="4">CORS</span>
 </div>
 
-<div class="slide-punch is-centered" v-click="4">Et bien plus…</div>
+<div class="slide-punch is-centered" v-click="4">And much more…</div>
 
 <style scoped>
 /* Two pillars now carry the talk: same card size as before, narrower row so the

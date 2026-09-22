@@ -5,7 +5,7 @@ class: sec-authz
 
 # OAuth2
 
-**Déléguer l'accès** à ses ressources, <br> **sans partager ses identifiants**.
+**Delegating access** to your resources, <br> **without sharing your credentials**.
 
 ---
 layout: statement
@@ -14,44 +14,44 @@ class: sec-authz
 
 ## 👀 {.!text-7xl .mb-6}
 
-# Focus du jour
+# Today's focus
 
-Le scénario **au nom de l'utilisateur** <br> (Authorization Code Flow).
+The **on behalf of the user** scenario <br> (Authorization Code Flow).
 
-<span class="text-base italic opacity-60">Sans utilisateur dans la boucle, une app qui appelle une API pour son propre compte : <br> *Client Credentials Flow*, hors focus.</span>
+<span class="text-base italic opacity-60">With no user in the loop, an app calling an API on its own behalf: <br> *Client Credentials Flow*, out of scope today.</span>
 
 ---
 layout: default
 class: sec-authz
 ---
 
-# Alice, PhotoPrint et CloudPics
+# Alice, PhotoPrint and CloudPics
 
 <div class="story">
 
 <div class="beat" v-click>
-  <div class="beat__label">Le décor</div>
+  <div class="beat__label">The setting</div>
   <div class="beat__body">
-    👩‍🦰 Alice héberge ses photos sur <b>CloudPics</b>.<br/>
-    📸 Depuis <b>PhotoPrint</b>, une app web tierce, <br> elle veut <b>faire imprimer ses photos CloudPics</b>.
+    👩‍🦰 Alice stores her photos on <b>CloudPics</b>.<br/>
+    📸 From <b>PhotoPrint</b>, a third-party web app, <br> she wants to <b>get her CloudPics photos printed</b>.
   </div>
 </div>
 
 <div class="beat" v-click>
-  <div class="beat__label">La contrainte</div>
+  <div class="beat__label">The constraint</div>
   <div class="beat__body">
-    🔐 Sans jamais lui demander son <b>mot de passe CloudPics</b>.
+    🔐 Without ever asking her for her <b>CloudPics password</b>.
   </div>
 </div>
 
 <div class="beat" v-click>
-  <div class="beat__label">Le flow</div>
+  <div class="beat__label">The flow</div>
   <div class="beat__body">
-    🔗 PhotoPrint <b>redirige</b> Alice vers CloudPics, qui lui demande son accord.<br/>
-    <blockquote class="mt-2 mb-4 !text-base">Autorises-tu PhotoPrint à accéder à tes photos CloudPics ?</blockquote>
-    🔢 Alice <b>autorise</b> : CloudPics émet un <b>code</b> à usage unique.<br/>
-    🔄 PhotoPrint <b>échange</b> ce code contre un <b>access token</b><br/>
-    🌁 PhotoPrint <b>accède</b> aux photos d'Alice grâce à l'access token
+    🔗 PhotoPrint <b>redirects</b> Alice to CloudPics, which asks for her approval.<br/>
+    <blockquote class="mt-2 mb-4 !text-base">Do you allow PhotoPrint to access your CloudPics photos?</blockquote>
+    🔢 Alice <b>approves</b>: CloudPics issues a single-use <b>code</b>.<br/>
+    🔄 PhotoPrint <b>exchanges</b> that code for an <b>access token</b><br/>
+    🌁 PhotoPrint <b>accesses</b> Alice's photos with the access token
   </div>
 </div>
 
@@ -61,7 +61,7 @@ class: sec-authz
 
 <Alert type="info">
 
-**CloudPics** joue le rôle de serveur OAuth2, et **PhotoPrint** d'application cliente
+**CloudPics** plays the OAuth2 server, and **PhotoPrint** the client application
 
 </Alert>
 
@@ -102,28 +102,28 @@ layout: default
 class: sec-authz
 ---
 
-# Le flow, étape par étape
+# The flow, step by step
 
 <div class="seq">
   <div class="seq__actors">
     <div class="seq__actor">🌁 PhotoPrint <small>client</small></div>
-    <div class="seq__actor">👩‍🦰 Alice <small>navigateur</small></div>
-    <div class="seq__actor">☁️ CloudPics <small>serveur OAuth2</small></div>
+    <div class="seq__actor">👩‍🦰 Alice <small>browser</small></div>
+    <div class="seq__actor">☁️ CloudPics <small>OAuth2 server</small></div>
   </div>
   <div class="seq__body">
     <div class="seq__life" style="--lane: 0"></div>
     <div class="seq__life" style="--lane: 1"></div>
     <div class="seq__life" style="--lane: 2"></div>
-    <div v-click="1" class="seq__msg seq__msg--back" style="--row: 0; --left: 0; --span: 1">« Imprime mes photos CloudPics »</div>
-    <div v-click="1" class="seq__msg" style="--row: 1; --left: 0; --span: 1">Redirection vers CloudPics</div>
-    <div v-click="2" class="seq__msg" style="--row: 2; --left: 1; --span: 1">Demande d'autorisation</div>
-    <div v-click="2" class="seq__note" style="--row: 3; --lane: 2">Alice s'authentifie et consent</div>
-    <div v-click="3" class="seq__msg seq__msg--back seq__msg--dashed" style="--row: 4; --left: 1; --span: 1">Redirection retour + code à usage unique</div>
+    <div v-click="1" class="seq__msg seq__msg--back" style="--row: 0; --left: 0; --span: 1">"Print my CloudPics photos"</div>
+    <div v-click="1" class="seq__msg" style="--row: 1; --left: 0; --span: 1">Redirect to CloudPics</div>
+    <div v-click="2" class="seq__msg" style="--row: 2; --left: 1; --span: 1">Authorization request</div>
+    <div v-click="2" class="seq__note" style="--row: 3; --lane: 2">Alice authenticates and consents</div>
+    <div v-click="3" class="seq__msg seq__msg--back seq__msg--dashed" style="--row: 4; --left: 1; --span: 1">Redirect back + single-use code</div>
     <div v-click="3" class="seq__msg seq__msg--back seq__msg--dashed" style="--row: 5; --left: 0; --span: 1">code</div>
     <div v-click="4" class="seq__msg" style="--row: 6; --left: 0; --span: 2">code</div>
     <div v-click="4" class="seq__msg seq__msg--back seq__msg--dashed" style="--row: 7; --left: 0; --span: 2">✅ access token</div>
     <div v-click="5" class="seq__msg" style="--row: 8; --left: 0; --span: 2">GET /photos + access token</div>
-    <div v-click="5" class="seq__msg seq__msg--back seq__msg--dashed" style="--row: 9; --left: 0; --span: 2">🌁 Les photos d'Alice</div>
+    <div v-click="5" class="seq__msg seq__msg--back seq__msg--dashed" style="--row: 9; --left: 0; --span: 2">🌁 Alice's photos</div>
   </div>
 </div>
 
@@ -232,26 +232,26 @@ layout: default
 class: sec-authz
 ---
 
-# Les parties prenantes
+# The stakeholders
 
 <CardGrid :cols="3" class="oauth-roles">
   <Card v-click :accent="1" icon="👩‍🦰" title="Alice">
     <b>Resource owner</b><br/>
-    Elle seule peut accorder l'accès à ses photos.
+    She alone can grant access to her photos.
   </Card>
   <Card v-click :accent="2" icon="🌁" title="PhotoPrint">
-    <b>Client public</b><br/>
-    Une SPA qui tourne chez Alice, sans secret possible. Demande les photos <b>pour le compte</b> d'Alice.
+    <b>Public client</b><br/>
+    An SPA running on Alice's device, with no way to keep a secret. Asks for the photos <b>on behalf of</b> Alice.
   </Card>
   <Card v-click :accent="3" icon="☁️" title="CloudPics">
     <b>Authorization server<br/>+ Resource server</b><br/>
-    Émet les access tokens, et héberge les photos.
+    Issues the access tokens, and stores the photos.
   </Card>
 </CardGrid>
 
 <v-click>
 
-<div class="slide-note">Un client <b>public</b> tourne chez l'utilisateur (SPA, mobile) et ne peut garder aucun secret. Un client <b>confidentiel</b> tourne sur son propre serveur et s'authentifie avec un <code>client_secret</code>.</div>
+<div class="slide-note">A <b>public</b> client runs on the user's device (SPA, mobile) and cannot keep any secret. A <b>confidential</b> client runs on its own server and authenticates with a <code>client_secret</code>.</div>
 
 </v-click>
 
@@ -265,20 +265,20 @@ layout: default
 class: sec-authz
 ---
 
-# La première faiblesse 
+# The first weakness 
 
-Le code d'autorisation transite par le navigateur, dans l'URL de redirection
+The authorization code travels through the browser, in the redirect URL
 
 <v-clicks>
 
-- 🌐 **Web** : code dans l'**URL de redirection** → historique, logs, `Referer`
-- 📱 **Mobile** : une app malveillante prend le **même URL scheme** (`monapp://`) → capte le code
+- 🌐 **Web**: code in the **redirect URL** → history, logs, `Referer`
+- 📱 **Mobile**: a malicious app claims the **same URL scheme** (`myapp://`) → captures the code
 
 </v-clicks>
 
 <v-click>
 
-<div class="slide-punch">Le code d'autorisation peut être <b>volé</b>.<br/>Et un client public n'a aucun secret pour compenser.</div>
+<div class="slide-punch">The authorization code can be <b>stolen</b>.<br/>And a public client has no secret to make up for it.</div>
 
 </v-click>
 
@@ -287,20 +287,20 @@ layout: default
 class: sec-authz
 ---
 
-# La parade : PKCE
+# The countermeasure: PKCE
 
 **P**roof **K**ey for **C**ode **E**xchange
 
 <v-clicks>
 
-- 🎲 **code_verifier** : un secret aléatoire, connu du seul client
-- 🔒 **code_challenge** : son empreinte SHA-256, envoyée en premier
+- 🎲 **code_verifier**: a random secret, known only to the client
+- 🔒 **code_challenge**: its SHA-256 digest, sent first
 
 </v-clicks>
 
 <v-click>
 
-<div class="slide-punch">Le challenge est <b>irréversible</b> : sans le verifier, un code volé ne vaut rien.</div>
+<div class="slide-punch">The challenge is <b>irreversible</b>: without the verifier, a stolen code is worthless.</div>
 
 </v-click>
 
@@ -309,23 +309,23 @@ layout: default
 class: sec-authz
 ---
 
-# PKCE en séquence
+# PKCE as a sequence
 
 ```mermaid
 %%{init: {"sequence": {"messageMargin": 16, "boxMargin": 4, "noteMargin": 4, "diagramMarginY": 0}}}%%
 sequenceDiagram
     participant P as 🌁 PhotoPrint (client)
-    participant A as 👩‍🦰 Alice (navigateur)
+    participant A as 👩‍🦰 Alice (browser)
     participant C as ☁️ CloudPics (authZ server)
 
-    Note over P: Génère code_verifier<br/>code_challenge = SHA-256(verifier)
-    P->>A: Redirection vers CloudPics
-    A->>C: Demande d'autorisation + code_challenge + algo
-    Note over C: Alice s'authentifie et consent<br/>authorization code émis, lié au challenge
-    C-->>A: Redirection retour + authorization code
+    Note over P: Generates code_verifier<br/>code_challenge = SHA-256(verifier)
+    P->>A: Redirect to CloudPics
+    A->>C: Authorization request + code_challenge + algorithm
+    Note over C: Alice authenticates and consents<br/>authorization code issued, bound to the challenge
+    C-->>A: Redirect back + authorization code
     A-->>P: authorization code
-    P->>C: authorization code + code_verifier (requête directe, TLS)
-    Note over C: SHA-256(verifier) = challenge ?
+    P->>C: authorization code + code_verifier (direct request, TLS)
+    Note over C: SHA-256(verifier) = challenge?
     C-->>P: ✅ access token
 ```
 
@@ -333,7 +333,7 @@ sequenceDiagram
 
 <Alert type="info">
 
-**OAuth 2.1** (toujours un draft IETF) : PKCE obligatoire pour **tous** les clients.
+**OAuth 2.1** (still an IETF draft): PKCE mandatory for **every** client.
 
 </Alert>
 
@@ -344,7 +344,7 @@ layout: default
 class: sec-authz
 ---
 
-# Le token ne prouve rien : le détenir suffit
+# The token proves nothing: holding it is enough
 
 ```http
 GET /api/photos HTTP/1.1
@@ -354,28 +354,28 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 
 <v-clicks>
 
-- 🎫 **Bearer** = « au porteur » : aucune preuve n'est demandée au client
-- 🕵️ Volé, il est **indiscernable** d'un token légitime. L'API ne peut pas trancher
-- 🔒 **TLS obligatoire** : sur le réseau, lire le token, c'est pouvoir l'utiliser
-- 🙈 **Jamais dans l'URL**, même en HTTPS : historique, logs serveur et `Referer` la conservent en clair
+- 🎫 **Bearer** = "to whoever holds it": no proof is ever asked of the client
+- 🕵️ Once stolen, it is **indistinguishable** from a legitimate token. The API cannot tell
+- 🔒 **TLS is mandatory**: on the wire, reading the token means being able to use it
+- 🙈 **Never in the URL**, even over HTTPS: history, server logs and `Referer` keep it in the clear
 
 </v-clicks>
 
 <v-click>
 
-<div class="slide-punch">Par défaut, rien n'empêche l'usage d'un token volé.<br/>On ne corrige pas ça, on <b>limite sa durée de validité</b>.</div>
+<div class="slide-punch">By default, nothing stops a stolen token from being used.<br/>You don't fix that, you <b>keep its lifetime short</b>.</div>
 
 </v-click>
 
 <!--
-Le mot à ne pas lâcher : « au porteur ». C'est un billet de concert, pas une carte
-d'identité. Le contrôleur vérifie le billet, jamais qui le présente.
+The word to land: "bearer". It is a concert ticket, not an ID card. The usher
+checks the ticket, never who is holding it.
 
-C'est exactement la faiblesse que PKCE corrigeait pour le code d'autorisation,
-sauf qu'ici elle reste. D'où l'enchaînement sur les durées de vie et le refresh.
+This is exactly the weakness PKCE fixed for the authorization code, except here
+it stays. Hence the move to token lifetimes and refresh.
 
-Si on demande comment faire mieux : DPoP (RFC 9449, Standards Track) lie le token
-à une clé cryptographique du client, ce qui rend un token volé inutilisable.
-Même idée que PKCE, appliquée au token. Ce n'est pas le comportement par défaut,
-et Symfony ne le gère pas nativement.
+If someone asks how to do better: DPoP (RFC 9449, Standards Track) binds the token
+to a cryptographic key held by the client, which makes a stolen token useless.
+Same idea as PKCE, applied to the token. It is not the default behaviour, and
+Symfony has no native support for it.
 -->

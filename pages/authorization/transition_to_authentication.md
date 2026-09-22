@@ -3,10 +3,10 @@ layout: statement
 class: sec-authz
 ---
 
-# Déléguer le serveur, pas la sécurité
+# Delegate the server, not the security
 
-Des acteurs dont c'est le **seul métier** émettent les tokens. <br>
-Votre API se contente de les **vérifier**.
+Players whose **only job** this is issue the tokens. <br>
+Your API just **verifies** them.
 
 ---
 layout: statement
@@ -15,5 +15,5 @@ class: sec-authz
 
 # O<u>ID</u>C
 
-OAuth2 seul : données utilisateur **non standardisées**. <br>
-OIDC ajoute l'**ID token** : l'identité dans un **format cohérent**.
+OAuth2 alone: **non-standardized** user data. <br>
+OIDC adds the **ID token**: identity in a **consistent format**.

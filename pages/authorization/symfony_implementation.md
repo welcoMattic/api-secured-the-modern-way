@@ -3,19 +3,19 @@ layout: default
 class: sec-authz
 ---
 
-# Votre API peut être son propre serveur OAuth2
+# Your API can be its own OAuth2 server
 
 <v-clicks>
 
 - 📦 `league/oauth2-server-bundle`
-- 🏛️ Votre API = **authorization server + resource server**
-- 🎫 Émission + validation des tokens, contrôle des **scopes**
+- 🏛️ Your API = **authorization server + resource server**
+- 🎫 Issuing + validating tokens, enforcing **scopes**
 
 </v-clicks>
 
 <v-click>
 
-<div class="slide-punch">Possible. Pas ce que je recommande.</div>
+<div class="slide-punch">Doable. Not what I recommend.</div>
 
 </v-click>
 
@@ -24,15 +24,15 @@ layout: default
 class: sec-authz
 ---
 
-# Le bundle ne fait pas tout à votre place
+# The bundle does not do it all for you
 
 <v-clicks>
 
-- 👤 **Login d'Alice** : `/authorize` exige un utilisateur connecté, le formulaire de login reste à coder
-- 🙋 **Consentement** : le bundle émet un événement, l'écran « Autorises-tu PhotoPrint ? » reste à coder
-- 🔑 **Rotation** des clés de signature
-- ⛓️ **MFA**, mot de passe oublié, révocation de sessions
-- 📊 **Audit** : qui a autorisé quoi, et quand
+- 👤 **Alice's login**: `/authorize` requires an authenticated user, the login form is still yours to write
+- 🙋 **Consent**: the bundle dispatches an event, the "Do you allow PhotoPrint?" screen is still yours to write
+- 🔑 **Rotating** the signing keys
+- ⛓️ **MFA**, forgotten password, session revocation
+- 📊 **Audit**: who authorized what, and when
 
 </v-clicks>
 
@@ -41,7 +41,7 @@ layout: statement
 class: sec-authz
 ---
 
-# Vous maintenez un serveur d'autorisation
+# You are maintaining an authorization server
 
-C'est un **produit à part entière**. <br>
-Trop lié à votre API : l'un **peut faire tomber** l'autre
+It is a **product of its own**. <br>
+Too tightly coupled to your API: one **can take down** the other

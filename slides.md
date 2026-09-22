@@ -5,7 +5,7 @@ titleTemplate: '%s - API Platform Con 2026'
 author: Mathieu Santostefano
 info: |
   ## API Secured, the Modern Way
-  Apprenez à sécuriser vos APIs avec des protocoles standardisés et des outils modernes.
+  Learn how to secure your APIs with standardized protocols and modern tooling.
 
   API Platform Con 2026
 download: true
