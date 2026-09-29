@@ -41,8 +41,13 @@ jobs:
 
       # Le site est servi depuis https://<user>.github.io/<repo>/, donc il faut
       # un base path. Il est dérivé du nom du dépôt, rien à coder en dur.
-      - name: Construire le site
+      # Le deck français est à la racine, l'anglais sous /en/. Le build français
+      # passe en premier : il vide dist, ce qui effacerait dist/en sinon.
+      - name: Construire le deck français
         run: bun run slidev build --base /${{ github.event.repository.name }}/
+
+      - name: Construire le deck anglais
+        run: bun run slidev build slides.en.md --base /${{ github.event.repository.name }}/en/ --out dist/en
 
       - uses: actions/upload-pages-artifact@v5
         with:
