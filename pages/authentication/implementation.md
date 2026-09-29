@@ -101,6 +101,109 @@ layout: default
 class: sec-authn
 ---
 
+# Enterprise SSO still speaks SAML
+
+<div class="bridge">
+  <div class="bridge__node">
+    <b>PhotoBook</b>
+    <small>your Symfony app</small>
+  </div>
+  <div class="bridge__hop"><span>OIDC</span></div>
+  <div class="bridge__node bridge__node--pivot">
+    <b>CloudPics ID</b>
+    <small>OpenID Provider<br/>+ SAML Service Provider</small>
+  </div>
+  <div class="bridge__hop"><span>SAML</span></div>
+  <div class="bridge__node">
+    <b>Corporate IdP</b>
+    <small>ADFS, Shibboleth, Entra ID</small>
+  </div>
+</div>
+
+<v-clicks>
+
+- 🏢 Your enterprise customers **already have** a SAML IdP, and they are not going to replace it
+- 🔌 Keycloak speaks SAML **natively**: the corporate IdP is added as one more brokered provider
+- 🎭 Toward that IdP, your Provider is the **Service Provider**, the SAML word for a client app
+- 🙈 Your Symfony app **never sees** an assertion: it keeps receiving OIDC tokens
+
+</v-clicks>
+
+<v-click>
+
+<div class="slide-punch">Same authenticator, same tokens, same <code>is_granted</code>.<br/>The Provider does the <b>translation</b>.</div>
+
+</v-click>
+
+<style scoped>
+/* Le pont se lit de gauche à droite : deux protocoles, et au milieu le seul
+   acteur qui connaît les deux. Les flèches portent le nom du protocole, donc la
+   salle voit tout de suite où SAML s'arrête. */
+.bridge {
+  margin-top: 0.7rem;
+  display: grid;
+  grid-template-columns: 1fr auto 1.2fr auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+}
+.bridge__node {
+  padding: 0.6rem 0.9rem;
+  border: 2px solid var(--c-border-strong);
+  border-radius: 0.7rem;
+  text-align: center;
+  line-height: 1.25;
+}
+.bridge__node b {
+  font-family: "Sora", var(--font-emoji), sans-serif;
+  font-size: 1rem;
+}
+.bridge__node small {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.74rem;
+  color: var(--c-muted);
+}
+/* Le pivot est le seul à porter la couleur de section : c'est lui qui fait le pont. */
+.bridge__node--pivot {
+  border-color: var(--sec);
+  background: rgba(var(--a-4-rgb), 0.08);
+}
+/* Le libellé du protocole tient au dessus d'un trait fléché tracé en CSS. */
+.bridge__hop {
+  position: relative;
+  width: 5.5rem;
+  padding-bottom: 0.55rem;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--sec);
+}
+.bridge__hop::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0.4rem;
+  bottom: 0.25rem;
+  border-top: 2px solid var(--c-fg);
+}
+.bridge__hop::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0.25rem;
+  transform: translateY(50%);
+  border: 5px solid transparent;
+  border-right: 0;
+  border-left: 9px solid var(--c-fg);
+}
+</style>
+
+---
+layout: default
+class: sec-authn
+---
+
 # Your API goes back to being a plain resource server
 
 <v-clicks>
