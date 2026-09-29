@@ -140,43 +140,50 @@ class: sec-authn
    acteur qui connaît les deux. Les flèches portent le nom du protocole, donc la
    salle voit tout de suite où SAML s'arrête. */
 .bridge {
-  margin-top: 0.7rem;
+  margin: 0.7rem 0 0.9rem;
   display: grid;
   grid-template-columns: 1fr auto 1.2fr auto 1fr;
   align-items: center;
   gap: 0.5rem;
 }
+/* Mêmes acteurs encadrés que le diagramme de séquence de la section
+   autorisation : cadre à la couleur de section, titre en Sora, rôle en Inter
+   discret. Les deux slides de flux parlent ainsi la même langue visuelle. */
 .bridge__node {
-  padding: 0.6rem 0.9rem;
-  border: 2px solid var(--c-border-strong);
+  padding: 0.5rem 0.9rem;
+  border: 2px solid var(--sec);
   border-radius: 0.7rem;
+  background: rgba(var(--a-4-rgb), 0.06);
   text-align: center;
   line-height: 1.25;
 }
 .bridge__node b {
   font-family: "Sora", var(--font-emoji), sans-serif;
-  font-size: 1rem;
+  font-weight: 700;
+  font-size: 0.95rem;
 }
 .bridge__node small {
   display: block;
-  margin-top: 0.15rem;
-  font-size: 0.74rem;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 0.72rem;
   color: var(--c-muted);
 }
-/* Le pivot est le seul à porter la couleur de section : c'est lui qui fait le pont. */
-.bridge__node--pivot {
-  border-color: var(--sec);
-  background: rgba(var(--a-4-rgb), 0.08);
-}
-/* Le libellé du protocole tient au dessus d'un trait fléché tracé en CSS. */
+/* Le pivot porte le pont : même cadre que les autres, teinte plus dense.
+   Le distinguer par la densité et non par la couleur évite de faire passer
+   les deux extrémités pour des acteurs de second rang. */
+.bridge__node--pivot { background: rgba(var(--a-4-rgb), 0.15); }
+/* Le libellé du protocole reprend la capitale espacée des labels de récit,
+   posée au dessus d'un trait fléché tracé en CSS. */
 .bridge__hop {
   position: relative;
   width: 5.5rem;
   padding-bottom: 0.55rem;
   text-align: center;
-  font-size: 0.78rem;
+  font-family: "Sora", sans-serif;
+  font-size: 0.74rem;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.16em;
   color: var(--sec);
 }
 .bridge__hop::before {
