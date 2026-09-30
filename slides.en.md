@@ -121,10 +121,6 @@ src: ./pages/en/conclusion/resources.md
 ---
 
 ---
-src: ./pages/en/conclusion/florent-talk.md
----
-
----
 src: ./pages/en/conclusion/demo.md
 ---
 
