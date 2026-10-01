@@ -2,15 +2,27 @@
 
 Slides du talk donné à **API Platform Con 2026**, construites avec [Slidev](https://sli.dev/).
 
+## Deux decks, une seule base
+
+Le talk existe en français et en anglais. Les deux partagent le thème et les
+assets, seul le contenu diffère :
+
+| Deck     | Point d'entrée                     | Contenu                   |
+|----------|------------------------------------|---------------------------|
+| Français | [`slides.md`](./slides.md)         | [`pages/fr/`](./pages/fr) |
+| Anglais  | [`slides.en.md`](./slides.en.md)   | [`pages/en/`](./pages/en) |
+
 ## Développement
 
 - `bun install`
-- `bun dev`
+- `bun dev` (français) ou `bun run dev:en` (anglais)
 - Puis <http://localhost:3030>
 
 Vue orateur : <http://localhost:3030/presenter/> · Vue d'ensemble : <http://localhost:3030/overview>
 
-Le contenu vit dans [`pages/`](./pages), assemblé par [`slides.md`](./slides.md).
+`bun run build` construit les deux decks : le français dans `dist/`, l'anglais
+dans `dist/en/`. L'ordre compte, le build français vide `dist`.
+
 Le thème maison est documenté dans [`THEME.md`](./THEME.md).
 
 ## Publication sur GitHub Pages
@@ -22,7 +34,8 @@ Mise en route, une seule fois :
 
 1. Dans le dépôt GitHub : **Settings › Pages › Build and deployment › Source** → choisir
    **GitHub Actions** (et non « Deploy from a branch »).
-2. Pousser sur `main`. Le site sort sur `https://<utilisateur>.github.io/<dépôt>/`.
+2. Pousser sur `main`. Le deck français sort sur `https://<utilisateur>.github.io/<dépôt>/`,
+   l'anglais sur `https://<utilisateur>.github.io/<dépôt>/en/`.
 
 Quelques points à connaître :
 
@@ -37,4 +50,11 @@ Pour reproduire le build de production en local :
 ```shell
 bunx playwright install chromium   # une seule fois
 bun run slidev build --base /<nom-du-depot>/
+bun run slidev build slides.en.md --base /<nom-du-depot>/en/ --out dist/en
 ```
+
+## Soutenir ce travail
+
+Ce deck, la démo qui l'accompagne et mes contributions open source sont
+librement accessibles. Si ça vous est utile, vous pouvez me soutenir sur
+[GitHub Sponsors](https://github.com/sponsors/welcoMattic).
